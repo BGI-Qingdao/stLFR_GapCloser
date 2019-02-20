@@ -47,6 +47,7 @@ struct LibInfoElement
 	
 	// indicate which file is next to read
 	int curr_type; // 1 - 5
+    int with_barcode; // 1 or 0
 	int curr_index; // file index of current type
 	
 	// file handlers to opened files
@@ -330,6 +331,7 @@ public:
 			libInfoArray[i].readsSum=0;
 			libInfoArray[i].pairReadsSum=0;
 			libInfoArray[i].curr_type=1;
+            libInfoArray[i].with_barcode=0;
 			libInfoArray[i].curr_index=0;
 			libInfoArray[i].fp1=NULL;
 			libInfoArray[i].fp2=NULL;
@@ -415,6 +417,8 @@ public:
 				libInfoArray[i].reverse = atoi(tabs[1]);
 			else if(strcmp(tabs[0],"asm_flags")==0)
 				libInfoArray[i].asm_flag = atoi(tabs[1]);
+			else if(strcmp(tabs[0],"with_barcode")==0)
+				libInfoArray[i].with_barcode = atoi(tabs[1]);
 		}
 		
 		qsort(&libInfoArray[0],libsNum,sizeof(LibInfoElement),cmpLib);

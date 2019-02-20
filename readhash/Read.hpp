@@ -115,10 +115,11 @@ protected:
 	
 	Number_t data[ARRAY_SIZE];
 	Number_t id_depth;  // record read ID and depth
-	
+
+    int barcode ;       // barcode in number
 public:
 	Read() : 
-		id_depth(0)
+		id_depth(0) ,barcode(0)
 	{
 		for (Len_t i=0; i<ARRAY_SIZE; i++) {
 			data[i] = 0;
@@ -126,19 +127,30 @@ public:
 	}
 
 	Read(char* sequence, Len_t len) : 
-		id_depth(0)
+		id_depth(0) , barcode(0)
+	{
+		initialize(sequence, len);
+	}
+	Read(char* sequence, Len_t len , int bc) : 
+		id_depth(0) , barcode(bc)
 	{
 		initialize(sequence, len);
 	}
 
 	Read(Number_t* numbers, Len_t len) : 
-		id_depth(0)
+		id_depth(0) , barcode(0)
+	{
+		initialize(numbers, len);
+	}
+
+	Read(Number_t* numbers, Len_t len, int bc ) : 
+		id_depth(0) , barcode(bc)
 	{
 		initialize(numbers, len);
 	}
 	
 	Read(Read& read) :
-		id_depth(read.id_depth)
+		id_depth(read.id_depth) , barcode(read.barcode)
 	{		
 		for (Len_t i=0; i<ARRAY_SIZE; i++) {
 			data[i] = read.data[i];
@@ -152,6 +164,7 @@ public:
 		}
 		
 		id_depth = read.id_depth;
+        barcode  = read.barcode ;
 		
 		return *this;
 	}
@@ -161,19 +174,22 @@ public:
 
 	}
 	
-	void initialize(char* sequence, Len_t len) {
+	void initialize(char* sequence, Len_t len, int bc = 0 ) {
 		
 		Number_t* numbers;
 		Len_t numLen;
 		sequenceToNumbers(sequence, len, numbers, numLen);
 		setReadData(numbers, len);
+        if( bc > 0) 
+            barcode = bc;
 		delete [] numbers;
 	}
 	
-	void initialize(Number_t* numbers, Len_t len) {
+	void initialize(Number_t* numbers, Len_t len , int bc = 0) {
 		
 		setReadData(numbers, len);
-
+        if( bc > 0) 
+            barcode = bc;
 	}
 	
 public:
@@ -430,6 +446,10 @@ public:
 		return id_depth & MASK_REMAIN_DEPTH;
 	}
 	
+    int getBarcode() const {
+        return barcode;
+    }
+
 	int compare(Number_t* rightNumbers, Len_t rightLen) const {
 		
 		Number_t* readData;

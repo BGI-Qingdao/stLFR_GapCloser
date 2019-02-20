@@ -28,7 +28,35 @@
 #include "HashTable.hpp"
 #include "QuickSorterMulti.hpp"
 #include "readtool/LibInfo.hpp"
+#include "TagId.hpp"
+#include <string>
+#include "readtool/stLFRReadHeader.hpp"
 
+static TagId barcode_ider;
+
+int GetBarcodeFromReadName( const char* name)
+{
+    std::string read_name(name);
+    stLFRHeader header;
+    header.Init(name);
+    if( header.type == stLFRHeader::ReadType::Unknow )
+        return 0 ;
+    else if ( header.type
+            == stLFRHeader::ReadType::readName_barcodeStr
+            ||
+            header.type 
+            == stLFRHeader::ReadType::readName_barcodeStr_index
+            )
+    {
+        return barcode_ider.GetId(header.barcode_str);
+    }
+    else if ( header.type == stLFRHeader::ReadType::readName_barcodeStr_index_barcodeNum )
+    {
+        return header.barcode_num ;
+    }
+    else 
+        return 0 ;
+}
 
 
 static const Number_t SEED_NUM = 1073741824;
@@ -602,14 +630,17 @@ private:
 							cout << endl << "Error: can not open " << libInfo.q2_fname[j] << endl;
 							exit(1);
 						}
-						initializeReadsFqPair(_fin1, _fin2);
+						initializeReadsFqPair(_fin1, _fin2
+                                , libInfo.with_barcode == 1 );
 						_fin1.close();
 						_fin1.clear();
 						_fin2.close();
 						_fin2.clear();
 					}
 					else{
-						initializeReadsFqPairGZ(libInfo.q1_fname[j], libInfo.q2_fname[j]);
+						initializeReadsFqPairGZ(libInfo.q1_fname[j]
+                                , libInfo.q2_fname[j]
+                                , libInfo.with_barcode == 1 );
 					}
 				}
 			}
@@ -643,12 +674,14 @@ private:
 							cout << endl << "Error: can not open " << libInfo.s_q_fname[j] << endl;
 							exit(1);
 						}
-						initializeReadsFq(_fin);
+						initializeReadsFq(_fin
+                                , libInfo.with_barcode == 1 );
 						_fin.close();
 						_fin.clear();
 					}
 					else{
-						initializeReadsFqGZ(libInfo.s_q_fname[j]);
+						initializeReadsFqGZ(libInfo.s_q_fname[j]
+                                , libInfo.with_barcode == 1 );
 					}
 				}
 			}
@@ -712,16 +745,17 @@ private:
 		pclose(fp);
 	}
 	
-	void initializeReadsFq(ifstream& fin) {
+	void initializeReadsFq(ifstream& fin, bool with_bc = false) {
 		
 		char name[MAX_STRING_LEN];
+		char tmp3[MAX_STRING_LEN];
 		char sequence[MAX_STRING_LEN];
 		char quality[MAX_STRING_LEN];
 		while(!fin.eof()) {
 			
 			fin.getline(name, MAX_STRING_LEN);
 			fin.getline(sequence, MAX_STRING_LEN);
-			fin.getline(name, MAX_STRING_LEN);
+			fin.getline(tmp3, MAX_STRING_LEN);
 			fin.getline(quality, MAX_STRING_LEN);
 			
 			chomp(name);
@@ -732,11 +766,17 @@ private:
 			if (size == 0)
 				continue;
 			
-			_initializeReads(sequence, size);
+			if (with_bc)
+            {
+                _initializeReads(sequence, size
+                        ,GetBarcodeFromReadName(name));
+            }
+			else
+                _initializeReads(sequence, size);
 		}
 	}
 
-	void initializeReadsFqGZ(string& fin) {
+	void initializeReadsFqGZ(string& fin , bool with_bc = false ) {
 		char *cmd = new char[fin.size()+20];
 		sprintf(cmd, "gzip -dc %s", fin.c_str());
 		FILE *fp = popen(cmd, "r");
@@ -758,6 +798,12 @@ private:
 			size_t size = strlen(sequence);
 			if (size == 0)
 				continue;
+			if (with_bc)
+            {
+                _initializeReads(sequence, size
+                        ,GetBarcodeFromReadName(name));
+            }
+			else
 			
 			_initializeReads(sequence, size);
 		}
@@ -834,7 +880,7 @@ private:
 		pclose(fp2);
 	}
 	
-	void initializeReadsFqPairGZ(string& fin1, string& fin2) {
+	void initializeReadsFqPairGZ(string& fin1, string& fin2 , bool with_bc = false ) {
 
 		char *cmd1 = new char[fin1.size()+20];
 		sprintf(cmd1, "gzip -dc %s", fin1.c_str());
@@ -845,6 +891,7 @@ private:
 		FILE *fp2 = popen(cmd2, "r");
 		
 		char name1[MAX_STRING_LEN];
+		char tmp3[MAX_STRING_LEN];
 		char sequence1[MAX_STRING_LEN];
 		char quality1[MAX_STRING_LEN];
 		
@@ -855,7 +902,7 @@ private:
 		while(fgets(name1, MAX_STRING_LEN, fp1) && fgets(name2, MAX_STRING_LEN, fp2)) {
 
 			fgets(sequence1, MAX_STRING_LEN, fp1);
-			fgets(name1, MAX_STRING_LEN, fp1);
+			fgets(tmp3, MAX_STRING_LEN, fp1);
 			fgets(quality1, MAX_STRING_LEN, fp1);
 			
 			
@@ -867,10 +914,16 @@ private:
 			if (size == 0)
 				continue;
 			
-			_initializeReads(sequence1, size);
+			if (with_bc)
+            {
+                _initializeReads(sequence1, size
+                        ,GetBarcodeFromReadName(name1));
+            }
+            else
+                _initializeReads(sequence1, size);
 
 			fgets(sequence2, MAX_STRING_LEN, fp2);
-			fgets(name2, MAX_STRING_LEN, fp2);
+			fgets(tmp3, MAX_STRING_LEN, fp2);
 			fgets(quality2, MAX_STRING_LEN, fp2);
 			
 			
@@ -881,8 +934,13 @@ private:
 			size = strlen(sequence2);
 			if (size == 0)
 				continue;
-			
-			_initializeReads(sequence2, size);
+			if (with_bc)
+            {
+                _initializeReads(sequence2, size
+                        ,GetBarcodeFromReadName(name2));
+            }
+            else
+                _initializeReads(sequence2, size);
 		}
 
 		delete [] cmd1;
@@ -892,9 +950,10 @@ private:
 		pclose(fp2);
 	}
 
-	void initializeReadsFqPair(ifstream& fin1, ifstream& fin2) {
+	void initializeReadsFqPair(ifstream& fin1, ifstream& fin2, bool with_bc = false) {
 		
 		char name1[MAX_STRING_LEN];
+		char tmp3[MAX_STRING_LEN];
 		char sequence1[MAX_STRING_LEN];
 		char quality1[MAX_STRING_LEN];
 		
@@ -906,7 +965,7 @@ private:
 			
 			fin1.getline(name1, MAX_STRING_LEN);
 			fin1.getline(sequence1, MAX_STRING_LEN);
-			fin1.getline(name1, MAX_STRING_LEN);
+			fin1.getline(tmp3, MAX_STRING_LEN);
 			fin1.getline(quality1, MAX_STRING_LEN);
 			
 			chomp(name1);
@@ -916,12 +975,17 @@ private:
 			size_t size = strlen(sequence1);
 			if (size == 0)
 				continue;
-			
-			_initializeReads(sequence1, size);
+			if (with_bc)
+            {
+                _initializeReads(sequence1, size
+                        ,GetBarcodeFromReadName(name1));
+            }
+			else
+                _initializeReads(sequence1, size);
 			
 			fin2.getline(name2, MAX_STRING_LEN);
 			fin2.getline(sequence2, MAX_STRING_LEN);
-			fin2.getline(name2, MAX_STRING_LEN);
+			fin2.getline(tmp3, MAX_STRING_LEN);
 			fin2.getline(quality2, MAX_STRING_LEN);
 			
 			chomp(name2);
@@ -932,10 +996,15 @@ private:
 			if (size == 0)
 				continue;
 			
-			_initializeReads(sequence2, size);
+			if (with_bc)
+            {
+                _initializeReads(sequence2, size,GetBarcodeFromReadName(name2));
+            }
+			else
+                _initializeReads(sequence2, size);
 		}
 	}
-	void _initializeReads(char* str, size_t size) {
+	void _initializeReads(char* str, size_t size, int barcode_num = 0) {
 		
 		while (size < overlapParam) {
 			str[size] = 'N';
