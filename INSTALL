@@ -1,0 +1,15 @@
+######################################################
+# A directory named bin will be created and a link to 
+# compiled program will be created at bin directory 
+# when using make or make debug command.
+######################################################
+
+# for normal program, type:
+make
+
+# for debug, type:
+make debug
+
+
+# for clean, type:
+make clean
