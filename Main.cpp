@@ -25,7 +25,7 @@
 
 #include "Common.hpp"
 #include "Utils.hpp"
-#include "ContigAssemblerForFill.hpp"
+#include "GapCloser.hpp"
 #include "readhash/Read.hpp"
 
 
@@ -186,8 +186,8 @@ int main(int argc, char *argv[])
 	ReadAccessor readAccessor(*readHash, *pairInfo);
 	ContigTable contigTable(finContig, endNumLen, mismatchLen);
 	
-	ContigAssemblerForFill contigAssemblerForFill(outfile, fout, readAccessor, *pairInfo, contigTable, threadSum, deviation, endNumLen, mismatchLen, maxReadLength, overlapMode, overlapParam);
-	contigAssemblerForFill.assemble();
+	GapCloser gapcloser(outfile, fout, readAccessor, *pairInfo, contigTable, threadSum, deviation, endNumLen, mismatchLen, maxReadLength, overlapMode, overlapParam);
+	gapcloser.assemble();
 	
 	delete pairInfo;
 	delete readHash;
