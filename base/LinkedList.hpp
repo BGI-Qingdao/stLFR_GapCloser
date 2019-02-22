@@ -25,7 +25,6 @@
 #define LINKEDLIST_HPP_
 
 #include <stdexcept>
-using namespace std;
 
 namespace data_structure {
 
@@ -121,13 +120,13 @@ public:
 
 	T const& first() const {
 		if (head == 0)
-			throw domain_error ("list is empty");
+			throw std::domain_error ("list is empty");
 		return head->datum;
 	}
 
 	T const& last() const {
 		if (tail == 0)
-			throw domain_error ("list is empty");
+			throw std::domain_error ("list is empty");
 		return tail->datum;
 	}
 
@@ -157,7 +156,7 @@ public:
 			ptr = ptr->next;
 		}
 		if (ptr == 0)
-			throw invalid_argument ("item not found");
+			throw std::invalid_argument ("item not found");
 		if (ptr == head)
 			head = ptr->next;
 		else
@@ -204,7 +203,7 @@ public:
 	void insertAfter(ListElement<T> const* arg, T const& item) {
 		ListElement<T>* ptr = const_cast<ListElement<T>*> (arg);
 		if (ptr == 0)
-			throw invalid_argument ("invalid position");
+			throw std::invalid_argument ("invalid position");
 		ListElement<T>* const tmp =new ListElement<T> (item, ptr->next);
 		ptr->next = tmp;
 		if (tail == ptr)
@@ -215,7 +214,7 @@ public:
 	void insertBefore(ListElement<T> const* arg, T const& item) {
 		ListElement<T>* ptr = const_cast<ListElement<T>*> (arg);
 		if (ptr == 0)
-			throw invalid_argument ("invalid position");
+			throw std::invalid_argument ("invalid position");
 		ListElement<T>* const tmp = new ListElement<T> (item, ptr);
 		if (head == ptr)
 			head = tmp;
@@ -224,7 +223,7 @@ public:
 			while (prevPtr != 0&& prevPtr->next != ptr)
 				prevPtr = prevPtr->next;
 			if (prevPtr == 0)
-				throw invalid_argument ("invalid position");
+				throw std::invalid_argument ("invalid position");
 			prevPtr->next = tmp;
 		}
 		++count;

@@ -24,17 +24,12 @@
 #ifndef CONTIGFORFILL_HPP_
 #define CONTIGFORFILL_HPP_
 
-//struct EndNum
-//{
-//	Len_t len;
-//	Len_t pos;
-//	
-//	EndNum() : 
-//		len(0), 
-//		pos(0)
-//	{
-//	}
-//};
+#include <string>
+
+#include "HashTable.hpp"
+#include "Common.hpp"
+#include "TightString.hpp"
+#include "base/LinkedList.hpp"
 
 struct ExtendInfo
 {
@@ -85,7 +80,7 @@ struct GapInfo
 class ContigForFill
 {
 protected:
-	string name;
+    std::string name;
 	LinkedList<TightString*> sequences;
 	LinkedList<GapInfo> gaps;
 	
@@ -112,8 +107,8 @@ public:
 		}
 	}
 	
-	void setName(string& _name) { name = _name; }
-	string const& getName() const { return name; }
+	void setName(std::string& _name) { name = _name; }
+    std::string const& getName() const { return name; }
 	
 	Len_t getSeqCount() const { return sequences.getCount(); }
 	Len_t getGapCount() const { return gaps.getCount(); }
@@ -129,6 +124,7 @@ public:
 		sequences.append(seq);
 		seqSum += (*seq).getLength();
 	}
+
 	void appendGap(GapInfo& gap) {
 		gaps.append(gap);
 		gapSum += gap.length;

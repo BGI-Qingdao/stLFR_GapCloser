@@ -90,7 +90,7 @@ public:
 	T& getElement(unsigned int position) const {
 		
 		if (position >= length)
-			throw out_of_range ("invalid position");
+			throw std::out_of_range ("invalid position");
 //			setLength(length+blockLen);
 		
 		unsigned int blockIndex = position / blockLen;

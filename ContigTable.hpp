@@ -25,13 +25,13 @@
 #define CONTIGTABLE_HPP_
 
 #include "ContigForFill.hpp"
-
+#include <fstream>
 /* initialization of contigs and gaps from 'fin' */
 class ContigTable
 {
 protected:
 	
-	ifstream& fin;
+    std::ifstream& fin;
 	
 	ContigForFill* contigs;
 	Len_t contigsSum;
@@ -41,7 +41,7 @@ protected:
 	
 public:
 	
-	ContigTable(ifstream& _fin, Len_t _endNumLen=10, Len_t _mismatchLen=5) : 
+	ContigTable(std::ifstream& _fin, Len_t _endNumLen=10, Len_t _mismatchLen=5) : 
 		fin(_fin), 
 		contigs(NULL),
 		contigsSum(0), 

@@ -26,9 +26,6 @@
 
 #include <sstream>
 #include "readtool/ReadAccessor.hpp"
-//#include <map>
-//
-//using namespace std;
 
 /*
   define operations on contig level, including:

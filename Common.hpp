@@ -24,8 +24,6 @@
 #ifndef COMMON_HPP_
 #define COMMON_HPP_
 
-
-
 #ifndef NULL
 #define NULL    0
 #endif
