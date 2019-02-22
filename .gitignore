@@ -1,1 +1,5 @@
 .ycm_extra_conf.py
+Release/GapCloser
+Release/Main.d
+Release/Main.o
+bin/
