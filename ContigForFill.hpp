@@ -74,6 +74,13 @@ struct GapInfo
         endNumHash = gap.endNumHash;
         quality = gap.quality;
     }
+
+    static int gap_threshold ;
+
+    bool is_gap_big() const 
+    {
+        return length > gap_threshold ;
+    }
 };
 
 /* general contigs and gaps information */

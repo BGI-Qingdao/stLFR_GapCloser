@@ -95,14 +95,22 @@ struct ConsensusMatrix
 struct ReadMatrix
 {
     static int  max_reads_count ;
-
     static int  min_reads_count ;
+
+    static int min_sub_reads_count;
 
     private:
     //  position --> reads
     std::map< int  , PositionInfoKeeper> m_raw_reads;
 
     public: 
+
+    static ReadMatrix Merge( const ReadMatrix & /*left*/ , const ReadMatrix & /*right*/ )
+    {
+        ReadMatrix ret ;
+        //TODO 
+        return ret ;
+    }
 
     void AddKmer(const Number_t & kmer,
             const std::vector<ReadElement> & reads , 
@@ -131,11 +139,44 @@ struct ReadMatrix
         //TODO
         return ret ;
     }
+    ReadMatrix GetSubMatrixByPECheck(const Contig & prev_contig)
+    {
+        ReadMatrix ret ;
+        //TODO
+        return ret ;
+    }
+
+    ReadMatrix GetSubMatrixByBarcodeCheck(
+            const Contig & prev_contig,
+            const Contig & next_contig
+            )
+    {
+        ReadMatrix ret ;
+        //TODO
+        return ret ;
+    }
 
     ReadMatrix GenSubMatrixByGap(const Contig & prev_contig ,
-            const Contig & next_contig , 
+            const Contig & next_contig ,
             const GapInfo & gap )
     {
+
+        if( ReadsNum() < min_sub_reads_count )
+            return *this ;
+        if( gap.is_gap_big() ) {;} else {;}
+        //{
+        auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
+        auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
+        auto sub3 = Merge( sub1 , sub2 );
+        if( sub3.ReadsNum() < min_sub_reads_count )
+            return *this ;
+        else 
+            return sub3 ;
+        //}
+        //else
+        //{
+
+        //}
         return *this ;
     }
 
@@ -294,6 +335,8 @@ struct ReadMatrixFactory
         for( const auto & pair : prev_reads )
         {
             int pos = pair.first ;
+            if( ret.is_reads_too_much() )
+                break ;
             if( ! area.valid_starter( pos , the_k ) )
                 continue ;
             for( const auto & read : pair.second )
@@ -302,6 +345,8 @@ struct ReadMatrixFactory
                 read.getSequence(tStrRead);
                 for( int i = 0 ; i < (int)read.getLen() - the_k ; i++ )
                 {
+                    if( ret.is_reads_too_much() )
+                        break ;
                     if( ! area.valid_starter( pos + i , the_k ) )
                         break  ;
                     Number_t kmer;
