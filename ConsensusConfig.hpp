@@ -38,6 +38,11 @@ struct ConsensusArea
             return pos - consensus_start_pos_in_contig ;
         }
     }
+
+    bool valid_starter( int pos , int kvalue ) const
+    {
+        return pos + kvalue < consensus_end_pos_in_contig ;
+    }
 };
 
 struct ConsensusConfig

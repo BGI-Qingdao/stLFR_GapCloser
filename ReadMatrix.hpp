@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <set>
 
 #include "Common.hpp"
 #include "TightString.hpp"
@@ -23,8 +22,6 @@ struct Kmer2Reads
 
 struct PositionInfoKeeper
 {
-    public:
-
     private:
 
         std::map<Number_t , Kmer2Reads> all_kmer2reads;
@@ -48,7 +45,9 @@ struct PositionInfoKeeper
                 return false ;
             return true ;
         }
-        bool AddKmer(const Number_t & kmer, std::vector<ReadElement> & reads , int relative_num )
+        void AddKmer(const Number_t & kmer,
+                const std::vector<ReadElement> & reads ,
+                int relative_num )
         {
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.the_kmer = kmer ;
@@ -99,8 +98,30 @@ struct ReadMatrix
 
     static int  min_reads_count ;
 
+    private:
     //  position --> reads
     std::map< int  , PositionInfoKeeper> m_raw_reads;
+
+    public: 
+
+    void AddKmer(const Number_t & kmer,
+            const std::vector<ReadElement> & reads , 
+            int relative_num , int pos )
+    {
+        m_raw_reads[pos].AddKmer(kmer,reads,relative_num);
+    }
+    void tryInitPos(int pos)
+    {
+        if( m_raw_reads.find(pos) == m_raw_reads.end())
+            m_raw_reads[pos].Init() ;
+    }
+
+    bool checkKmerInPos(const Number_t & kmer , int pos )
+    {
+        if( m_raw_reads.find(pos) == m_raw_reads.end())
+            return false ;
+        return m_raw_reads[pos].KmerExist(kmer);
+    }
 
     ConsensusArea m_area;
 
@@ -128,25 +149,29 @@ struct ReadMatrix
         return *this ;
     }
 
-    int ReadsNum()
+    int ReadsNum() const 
     {
         int ret = 0 ;
         for( const auto & pair : m_raw_reads)
         {
             ret += pair.second.ReadsNum() ;
         }
+        return ret ;
     }
 
     bool is_reads_too_little() const 
     {
-
+        if ( ReadsNum() < min_reads_count )
+            return true ;
+        return false ;
     }
 
     bool is_reads_too_much() const 
     {
-
+        if ( ReadsNum() > max_reads_count )
+            return true ;
+        return false ;
     }
-
 };
 
 struct ReadMatrixFactory
@@ -154,6 +179,7 @@ struct ReadMatrixFactory
     static int max_error_count ;
     static int min_match_check ;
     static int max_reads_depth ;
+    static int the_k ;
     static ReadAccessor * readAccessor ;
 
     static ReadMatrix GenReadMatrix(const Contig & contig , const ConsensusArea & area )
@@ -161,20 +187,28 @@ struct ReadMatrixFactory
         ReadMatrix ret ;
         ret.m_area = area ;
         int relative_num = 0 ;
-        std::set<Number_t> unsed_kmers ;
-        std::set<ReadElement> new_reads;
+        std::map<int,std::vector<ReadElement>> new_reads;
         while(true)
         {
             relative_num ++ ;
             if( relative_num == 1 )
             {
-                // chop kmer from contig
- //               for( int i = area.
+                UpdateKmerReadsFromContig(contig
+                        ,area
+                        ,ret
+                        ,new_reads
+                        );
             }
             else
             {
-                // chop kmer from new reads
-
+                std::map<int,std::vector<ReadElement>> prev_reads;
+                std::swap(new_reads,prev_reads);
+                UpdateKmerReadsFromReads(prev_reads,
+                        area,
+                        contig ,
+                        relative_num ,
+                        ret ,
+                        new_reads);
             }
 
             if( ret.is_reads_too_much() )
@@ -183,15 +217,13 @@ struct ReadMatrixFactory
                 break ;
         };
 
-
-        //TODO
         return ret ;
     }
 
     static std::vector<ReadElement> find_all_reads_start_with(
             const Number_t & kmer
             , const Contig & contig 
-            , int position 
+            , int position
             )
     {
         std::vector<ReadElement> ret ;
@@ -211,12 +243,13 @@ struct ReadMatrixFactory
             TightString  read_str ;
             readElement.getSequence(read_str) ;
             int match_check_num = 0 ;
-            int unmatch =  CheckUnmatchNum( contig.getTightString(),
-                        contig.getLength() ,
-                        read_str ,
-                        readElement.getLen() ,
-                        position ,
-                        match_check_num);
+            int unmatch =  CheckUnmatchNum( 
+                    contig.getTightString(),
+                    contig.getLength() ,
+                    read_str ,
+                    readElement.getLen() ,
+                    position - 1 , /*1base->0base*/
+                    match_check_num);
 
             if( unmatch > max_error_count )
             {
@@ -243,12 +276,85 @@ struct ReadMatrixFactory
         if( contig_end > ref_len  )
             contig_end = ref_len ;
         checked_num = contig_end - contig_start +1 ;
-        for (Len_t m= 0; m< checked_num ; m++)
+        for (int m= 0; m< checked_num ; m++)
             if ( ref[contig_start + m ] != read[m] )
                 ret ++ ;
         return ret ;
     }
 
+    static void UpdateKmerReadsFromReads(
+            const std::map<int ,std::vector<ReadElement>> & prev_reads ,
+            const ConsensusArea & area ,
+            const Contig & contig ,
+            int index,
+            ReadMatrix & ret,
+            std::map<int ,std::vector<ReadElement>> & new_reads
+            )
+    {
+        for( const auto & pair : prev_reads )
+        {
+            int pos = pair.first ;
+            if( ! area.valid_starter( pos , the_k ) )
+                continue ;
+            for( const auto & read : pair.second )
+            {
+                TightString  tStrRead(read.getLen());
+                read.getSequence(tStrRead);
+                for( int i = 0 ; i < (int)read.getLen() - the_k ; i++ )
+                {
+                    if( ! area.valid_starter( pos + i , the_k ) )
+                        break  ;
+                    Number_t kmer;
+                    tStrRead.readTightStringFragment
+                        (i, i+the_k, kmer);
+                    ret.tryInitPos(pos+i);
+                    if( ret.checkKmerInPos( pos+i , kmer ) )
+                        continue ;
+                    else
+                    {
+                        auto reads = find_all_reads_start_with
+                            (kmer ,contig , pos+ i );
+                        if( reads.empty() )
+                            continue ;
+                        ret.AddKmer(kmer,reads,index,pos+i);
+                        new_reads[i]= reads;
+                    }
+                }
+            }
+        }
+    }
+
+    static void UpdateKmerReadsFromContig(
+            const Contig & contig,
+            const ConsensusArea & area ,
+            ReadMatrix & ret,
+            std::map<int ,std::vector<ReadElement>> & new_reads
+            )
+    {
+
+        const TightString & tStrContig = contig.getTightString() ;
+        int pos_start = area.left_most_pos_in_contig ;
+        int pos_end = (int)contig.getLength() - the_k + 1 ;
+        //int pos_end1 = area.consensus_end_pos_in_contig  - the_k + 1 ;
+        for( int i = pos_start ; i <= pos_end ;i++ ) /* i in 1 base */
+        {
+            Number_t kmer;
+            tStrContig.readTightStringFragment
+                (i-1, i+the_k-1, kmer);
+            ret.tryInitPos(i);
+            if( ret.checkKmerInPos(kmer,i) )
+                continue ;
+            else
+            {
+                auto reads = find_all_reads_start_with
+                    (kmer ,contig , i );
+                if( reads.empty() )
+                    continue ;
+                ret.AddKmer(kmer,reads,1,i);
+                new_reads[i]= reads;
+            }
+        }
+    }
 };
 
 #endif// READMATRIX_HPP__
