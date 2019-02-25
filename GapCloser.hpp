@@ -29,7 +29,6 @@ class GapCloser : public ContigAssembler
         Len_t actualGapCount;
         Len_t finishGapCount;
 
-        Len_t min_reads_num ;
     public:
 
         GapCloser(char* _outfile, ofstream& _fout, ReadAccessor& _readAccessor, PairInfo const& _pairInfo, ContigTable const& _contigTable, Len_t _threadSum, float _deviation=0.5, Len_t _endNumLen=10, Len_t _mismatchLen=5, Len_t _maxReadLength=35, Short_Len_t _overlapMode=fixedOverlapMode, Short_Len_t _overlapParam=25) : 
@@ -683,7 +682,7 @@ class GapCloser : public ContigAssembler
                 if( curr_area == prev_area )
                     break ;
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
-                if( readMatrix.ReadsNum() < min_reads_num  )
+                if( readMatrix.is_reads_too_little()  )
                     break ;
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
