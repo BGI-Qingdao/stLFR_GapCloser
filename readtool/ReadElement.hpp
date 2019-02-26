@@ -24,6 +24,7 @@
 #ifndef READELEMENT_HPP_
 #define READELEMENT_HPP_
 
+#include <set>
 #include "Common.hpp"
 #include "readhash/Read.hpp"
 
@@ -84,6 +85,15 @@ class ReadElement
         Number_t getID() const { return id; }
         Len_t getDepth() const { return depth; }
 
+        std::set<int> getBarodes() const
+        {
+            std::set<int> barcodes ;
+            for( int i = 0 ; i< (int) depth ; i++ )
+            {
+                barcodes.insert(read[serialNums[0]].getBarcode());
+            }
+            return barcodes ;
+        }
         Len_t* getSerialNums() const { return serialNums; }
 
         void getSequence(char* sequence) const {

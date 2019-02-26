@@ -24,19 +24,14 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
-#include <iostream>
-#include <fstream>
 #include <stdexcept>
 #include <pthread.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdlib.h>
-
-using namespace std;
+#include <set>
+#include <algorithm>
 
 #define bitsizeof(T) (sizeof(T)* 8 )
-
-
 
 inline void chomp(char* str) {
 
@@ -47,7 +42,7 @@ inline void chomp(char* str) {
     }
 }
 
-inline void chomp(string& str) {
+inline void chomp(std::string& str) {
 
     int i=str.length()-1;
     while ((i>=0) && ((str[i] == '\r') || (str[i] == '\n')))
@@ -59,6 +54,44 @@ inline void chomp(string& str) {
     }
 }
 
+    template< class T>
+void SetAdd( const std::set<T>  s1 ,
+        const std::set<int> & s2 )
+{
+    for( const auto & i : s2 )
+        s1.insert(i);
+}
+    template< class T>
+std::set<T > SetUnion( const std::set<T> & s1 ,
+        const std::set<int> & s2 )
+{
+    std::set<T> dest1;
+    std::set_union(s1.begin(), s1.end(),
+            s2.begin(), s2.end(),
+            std::inserter(dest1,dest1.begin()));
+    return dest1 ;
+}
 
+    template< class T>
+std::set<T > SetDiff( const std::set<T > & s1 ,
+        const std::set<T> & s2 )
+{
+    std::set<T> dest1;
+    std::set_difference(s1.begin(), s1.end(),
+            s2.begin(), s2.end(),
+            std::inserter(dest1,dest1.begin()));
+    return dest1 ;
+}
+
+    template< class T>
+std::set<T> SetIntersection( const std::set<T> & s1 ,
+        const std::set<T> & s2 )
+{
+    std::set<T> dest1;
+    std::set_intersection(s1.begin(), s1.end(),
+            s2.begin(), s2.end(),
+            std::inserter(dest1,dest1.begin()));
+    return dest1 ;
+}
 
 #endif /*UTILS_HPP_*/

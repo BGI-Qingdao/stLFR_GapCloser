@@ -25,6 +25,7 @@
 #define CONTIG_HPP_
 
 #include <sstream>
+#include <set>
 #include "Common.hpp"
 #include "base/LinkedList.hpp"
 #include "ArrayBlock.hpp"
@@ -58,6 +59,7 @@ class Contig
         // for one position, its quality is 1 if reads used to cover it have paired-end support
         ArrayBlock<Len_t>* quality;
 
+        std::set<int> barcodes ;
         // key: read ID
         // value: list of start positions in contig
         HashTable< Number_t, LinkedList<Len_t> > readPositionsHash;
@@ -137,7 +139,7 @@ class Contig
             blockLenTStr = contig.blockLenTStr;
             contigBlockLen = contig.contigBlockLen;
             ownFlag = contig.ownFlag;
-
+            barcodes = contig.barcodes ;
             const_cast<Contig&>(contig).ownFlag = false;
         }
 
@@ -156,7 +158,7 @@ class Contig
                 blockLenTStr = contig.blockLenTStr;
                 contigBlockLen = contig.contigBlockLen;
                 ownFlag = contig.ownFlag;
-
+                barcodes = contig.barcodes;
                 const_cast<Contig&>(contig).ownFlag = false;
             }
             return *this;
@@ -201,10 +203,9 @@ class Contig
             quality = NULL;
 
             readPositionsHash.purge();
+            barcodes.clear();
             //		readPositionsHash.clear();
         }
-
-
 
         operator Number_t() const { return getLength(); }
 
@@ -428,7 +429,7 @@ class Contig
                         readPositions[i].append(readElement.getID());
 
                         appendContigPos(readElement, i);
-
+                        appendBarcodes(readElement);
                         //set depths
                         Len_t depth = readElement.getDepth();
                         for(Len_t j=0; j<lengthRemain+overlapParam; j++) {
@@ -444,7 +445,7 @@ class Contig
         // description: find read's start positions in contig
         // input:		 id -- read ID
         // output:	 pos -- list of positions
-        void getContigPos(Number_t id, LinkedList<Len_t>& pos) {
+        void getContigPos(Number_t id, LinkedList<Len_t>& pos) const {
 
             if (readPositionsHash.find(id)) {
                 //		if (readPositionsHash.count(id)) {
@@ -462,6 +463,28 @@ class Contig
                     //		if (readPositionsHash.count(readElement.getID())) {
                     pos = readPositionsHash[readElement.getID()];
                 }
+                }
+
+                void appendBarcodes(ReadElement const& readElement)
+                {
+                    SetAdd(barcodes,readElement.getBarodes());
+                }
+
+                void appendBarcodes()
+                {
+                    appendBarcodes(0, getLength());
+                }
+
+                void appendBarcodes( Len_t start, Len_t len)
+                {
+                    ArrayBlock< LinkedList<Number_t> >& readPositions = *(this->readPositions);
+                    Len_t end = start+len;
+                    for (Len_t i=start; i<end; ++i) {
+                        ListElement<Number_t> const* ptr;
+                        for (ptr = readPositions[i].getHead(); ptr != 0; ptr = ptr->getNext()) {
+                            appendBarcodes( readAccessor->getRead(ptr->getDatum()) );
+                        }
+                    }
                 }
 
                 // function: 	 appendContigPos
@@ -543,6 +566,7 @@ class Contig
                     (*quality).append(contigAppend.getQuality(), appendLen, start, startOrigin);
 
                     appendContigPos(startOrigin, appendLen);
+                    appendBarcodes(startOrigin, appendLen);
                 }
 
                 // function: 	 append
@@ -608,6 +632,7 @@ class Contig
                     setQuality(&quality);
                     getReadPositionsHash().initialize();
                     appendContigPos();
+                    barcodes = SetUnion( leftContig.barcodes , rightContig.barcodes);
                 }
 
                 // function: 	 reverse
@@ -647,6 +672,7 @@ class Contig
                     contigReverse.setQuality(&qualityReverse);
                     contigReverse.getReadPositionsHash().initialize();
                     contigReverse.appendContigPos();
+                    contigReverse.barcodes = barcodes ;
                 }
 
                 // function: 	 reverseReadPosition

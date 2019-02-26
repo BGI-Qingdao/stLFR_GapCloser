@@ -132,7 +132,7 @@ class GapCloser : public ContigAssembler
 
 
         /* assembly in one thread */
-        void assembleInThread(Len_t iThread) {
+        void assembleInThread(Len_t ) {
 
             Len_t actualGapSumInThread=0;
             Len_t extendGapSumInThread=0;
@@ -616,7 +616,7 @@ class GapCloser : public ContigAssembler
             ArrayBlock< LinkedList<Number_t> >& readPositions = contig.getReadPositions();
             ArrayBlock<Len_t>& contigDepths = contig.getDepths();
             //clean depth and read positions at 1 read length.
-            for (Len_t i= start; i<end ; i++) {
+            for (int i= start; i< end ; i++) {
 
                 ListElement<Number_t> const* ptr;
                 for (ptr = readPositions[i].getHead()
@@ -626,7 +626,7 @@ class GapCloser : public ContigAssembler
                         = readAccessor.getRead(ptr->getDatum());
                     Len_t depth = readElement.getDepth();
                     Len_t len = readElement.getLen();
-                    len = i+len> end 
+                    len = int(i+len)> end 
                         ? end -i : len;
                     for (Len_t j=0; j<len; j++) {
                         if (contigDepths[i+j] < depth){
@@ -644,7 +644,7 @@ class GapCloser : public ContigAssembler
             // make sure bases within this contig region 
             //  have enough depth (10X) to be considered
             //  as dominated bases
-            for (Len_t i=start; i<end; i++){
+            for (int i=start; i<end; i++){
                 if (contigDepths[i] < 10){
                     contigDepths[i] = 10;
                 }
@@ -724,6 +724,7 @@ class GapCloser : public ContigAssembler
         {
             //TODO 
         }
-
 };
+
+
 #endif /*CONTIGASSEMBLERFORFILL_HPP_*/
