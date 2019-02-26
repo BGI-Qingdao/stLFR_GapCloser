@@ -2,12 +2,13 @@
 #define GAPCLOSER_HPP_
 
 #include <iostream>
+#include <fstream>
 
 #include "Common.hpp"
+#include "ConsensusConfig.hpp"
 #include "ContigForFill.hpp"
 #include "ContigTable.hpp"
 #include "ContigAssembler.hpp"
-#include "ConsensusConfig.hpp"
 #include "ReadMatrix.hpp"
 /*
    Fill gaps in scaffolds in parallel, one thread handling one scaffold.
@@ -16,7 +17,7 @@ class GapCloser : public ContigAssembler
 {
     protected:
 
-        ofstream foutFill;
+        std::ofstream foutFill;
         const ContigTable & contigTable;
         float deviation;
         Len_t endNumLen;
@@ -31,7 +32,7 @@ class GapCloser : public ContigAssembler
 
     public:
 
-        GapCloser(char* _outfile, ofstream& _fout, ReadAccessor& _readAccessor, PairInfo const& _pairInfo, ContigTable const& _contigTable, Len_t _threadSum, float _deviation=0.5, Len_t _endNumLen=10, Len_t _mismatchLen=5, Len_t _maxReadLength=35, Short_Len_t _overlapMode=fixedOverlapMode, Short_Len_t _overlapParam=25) : 
+        GapCloser(char* _outfile, std::ofstream& _fout, ReadAccessor& _readAccessor, PairInfo const& _pairInfo, ContigTable const& _contigTable, Len_t _threadSum, float _deviation=0.5, Len_t _endNumLen=10, Len_t _mismatchLen=5, Len_t _maxReadLength=35, Short_Len_t _overlapMode=fixedOverlapMode, Short_Len_t _overlapParam=25) : 
 
             ContigAssembler(_outfile, _fout, _readAccessor, _pairInfo, _threadSum, _maxReadLength, _overlapMode, _overlapParam), 
             contigTable(_contigTable), 
@@ -52,8 +53,8 @@ class GapCloser : public ContigAssembler
 
         void assemble() {
 
-            cout << ">>>>>>>>>>assembling<<<<<<<<<<" << endl;
-            cout << endl;
+            std::cout << ">>>>>>>>>>assembling<<<<<<<<<<" << std::endl;
+            std::cout << std::endl;
             time_t total_start_time=time(NULL);
 
             char fillName[MAX_STRING_LEN];
@@ -69,15 +70,15 @@ class GapCloser : public ContigAssembler
 
             foutFill.close();
 
-            cout << "---------------------------------" << endl;
-            cout << "actual gap sum: " << actualGapSum << endl;
-            cout << "extend gap sum: " << extendGapSum << endl;
-            cout << "actual gap count: " << actualGapCount << endl;
-            cout << "finish gap count: " << finishGapCount << endl;
+            std::cout << "---------------------------------" << std::endl;
+            std::cout << "actual gap sum: " << actualGapSum << std::endl;
+            std::cout << "extend gap sum: " << extendGapSum << std::endl;
+            std::cout << "actual gap count: " << actualGapCount << std::endl;
+            std::cout << "finish gap count: " << finishGapCount << std::endl;
 
-            cout << "spent total time: " << time(NULL)-total_start_time << "s"<< endl;
-            cout << ">>>>>>>>>>assembling finished<<<<<<<<<<" << endl;
-            cout << endl;
+            std::cout << "spent total time: " << time(NULL)-total_start_time << "s"<< std::endl;
+            std::cout << ">>>>>>>>>>assembling finished<<<<<<<<<<" << std::endl;
+            std::cout << std::endl;
         }
 
 
@@ -154,7 +155,7 @@ class GapCloser : public ContigAssembler
 
                 pthread_mutex_lock(&mutexNumberOfContigs);
                 numberOfContigs++;
-                cout << "constructing " << numberOfContigs << " scaffold" <<endl;
+                std::cout << "constructing " << numberOfContigs << " scaffold" <<std::endl;
                 pthread_mutex_unlock(&mutexNumberOfContigs);
 
 
@@ -328,7 +329,7 @@ class GapCloser : public ContigAssembler
                 delete [] gapsReverse;
 
                 //get sequence
-                string finalSeqReverse;
+                std::string finalSeqReverse;
                 for (j=0; j<gapCount; j++) {
 
                     Contig const& contig = contigsResult[j];
@@ -352,7 +353,7 @@ class GapCloser : public ContigAssembler
 
                     if ((!gap.isFilled) && (gap.length==0)) {
                         if (NNumber > 0){
-                            string NSeq(NNumber, 'N');
+                            std::string NSeq(NNumber, 'N');
                             finalSeqReverse += NSeq;
                             gap.length = NNumber;
                         }
@@ -406,8 +407,8 @@ class GapCloser : public ContigAssembler
 
                 pthread_mutex_lock(&mutexOutput);
                 //output sequence, fasta format
-                fout << contig.getName() << endl;
-                //			fout << finalSeq << endl;
+                fout << contig.getName() << std::endl;
+                //			fout << finalSeq << std::endl;
 
                 //			Len_t j;
                 Len_t finalSeqLen = strlen(finalSeq);
@@ -416,21 +417,21 @@ class GapCloser : public ContigAssembler
                     fout << finalSeq[j];
                     j++;
                     if (j%100==0)
-                        fout << endl;
+                        fout << std::endl;
                 }
                 if (j%100)
-                    fout << endl;
+                    fout << std::endl;
 
                 //output extend info
-                foutFill << contig.getName() << endl;
+                foutFill << contig.getName() << std::endl;
 
                 ptrGap = gapsList.getHead();
                 ListElement<GapResultInfo> const* ptrGapResult;
                 for (ptrGapResult = gapResultsInfo.getHead(); ptrGapResult != 0; ptrGapResult = ptrGapResult->getNext()) {
 
                     gapResultInfo = ptrGapResult->getDatum();
-                    //				foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << endl;
-                    foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << "\t" <<ptrGap->getDatum().length << "\t" << gapResultInfo.end - gapResultInfo.start << endl;
+                    //				foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << std::endl;
+                    foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << "\t" <<ptrGap->getDatum().length << "\t" << gapResultInfo.end - gapResultInfo.start << std::endl;
 
                     ptrGap = ptrGap->getNext();
                 }
@@ -651,8 +652,8 @@ class GapCloser : public ContigAssembler
             }
         }
 
-        ConsensusConfig m_config;
 
+        ConsensusConfig m_config;
         // function:    ConsensusGap
         // description: iterately consensus relatative reads to fill gap.
         //                   1) get reads starting with anchor fetched from the end area of contig.
@@ -687,7 +688,7 @@ class GapCloser : public ContigAssembler
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
                         ,gap);
-                ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix();
+                ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
                 if( consensusResult.is_consensus_done() )
                 {

@@ -1,7 +1,8 @@
 #ifndef CONTIGTOOL_HPP__
-#define CONTIGTOOL_HPP__ 
+#define CONTIGTOOL_HPP__
 
 #include "Contig.hpp"
+#include "Utils.hpp"
 #include "GlobalAccesser.hpp"
 #include "readtool/PairInfo.hpp"
 
@@ -56,9 +57,35 @@ struct  ContigTool
                     , const Contig& next_contig 
                     )
             {
-                return false ;
+                auto rbarcode = readElement.getBarodes() ;
+                if( rbarcode.empty() )
+                    return false ;
+                const auto & prev_barcode = prev_contig.getBarodes();
+                if( prev_barcode.empty() )
+                    return false ;
+                auto with_prev = SetIntersection(rbarcode,prev_barcode);
+                if( with_prev.empty()) 
+                    return false ;
+                const auto &  next_barcode = next_contig.getBarodes() ;
+                if( next_barcode.empty()) 
+                    return false ;
+                auto  with_next = SetIntersection( rbarcode, next_barcode);
+                if( with_next.empty() )
+                    return false ;
+                auto both = SetIntersection( with_prev, with_next );
+                if( both.empty() )
+                    return false ;
+                return true  ;
             }
 
+        static bool 
+            IsEligibleONTCheckRead( ReadElement const& /*readElement*/
+                    , const Contig& /*prev_contig */
+                    , const Contig& /*next_contig */
+                    )
+            {
+                return false;
+            }
         static bool 
             IsEligiblePECheckRead( ReadElement const& readElement
                     , const Contig& contig 

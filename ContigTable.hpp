@@ -286,7 +286,7 @@ class ContigTable
         void initializeContigs(std::ifstream& fin) {
 
             fin.clear();
-            fin.seekg(0, ios_base::beg);
+            fin.seekg(0, std::ios_base::beg);
             Len_t iContig=0;
             std::string str, strName, strSeq;
             while(!fin.eof()) {

@@ -232,7 +232,7 @@ class Contig
         ArrayBlock<Len_t> const& getQuality() const { return *quality; }
         ArrayBlock<Len_t>& getQuality() { return *quality; }
         void setQuality(ArrayBlock<Len_t>* _quality) { quality = _quality; }
-
+        const std::set<int> & getBarodes() const { return barcodes ; }
         HashTable< Number_t, LinkedList<Len_t> >& getReadPositionsHash() { return readPositionsHash; }
         //	map< Number_t, LinkedList<Len_t> >& getReadPositionsHash() { return readPositionsHash; }
 
@@ -246,7 +246,7 @@ class Contig
         void setEndOtherContigPosForward(Number_t _endOtherContigPosForward) { endOtherContigPosForward = _endOtherContigPosForward; }
 
         /* output coverage and quality information */
-        void outputContig(ofstream& fout) {
+        void outputContig(std::ofstream& fout) {
 
             outputContigFastAFormat(fout);
 
@@ -273,7 +273,7 @@ class Contig
                     fout << " ";
                 }
             }
-            fout << endl;
+            fout << std::endl;
 
 
 
@@ -300,43 +300,43 @@ class Contig
                     fout << " ";
                 }
             }
-            fout << endl;
+            fout << std::endl;
 
 
 
             for (pos=0; pos<length; ++pos) {
                 fout << (*depths)[pos] << ',';
             }
-            fout << endl;
+            fout << std::endl;
 
         }
 
-        void outputContigFastAFormat(ofstream& fout, int reverseExtendLen, int forwardExtendLen) {
+        void outputContigFastAFormat(std::ofstream& fout, int reverseExtendLen, int forwardExtendLen) {
 
             char* seq = (*tightString).readTightString();
             fout << ">contigs_" << contigNum << "_length_" << getLength() 
                 << "_reverse_" << reverseExtendLen 
                 << "_forward_" << forwardExtendLen 
-                << endl;
-            fout << seq << endl;
+                << std::endl;
+            fout << seq << std::endl;
             delete [] seq;
         }
 
-        void outputContigFastAFormat(ofstream& fout) {
+        void outputContigFastAFormat(std::ofstream& fout) {
 
             char* seq = (*tightString).readTightString();
             fout << ">contigs_" << contigNum << "_length_" << getLength() 
                 << "_reverse_" << (endOtherContigPosReverse>>33) << "_" << ((endOtherContigPosReverse & 0x00000001FFFFFFFFLLU) >> 2) << "_" << ((endOtherContigPosReverse&2) >> 1) 
                 << "_forward_" << (endOtherContigPosForward>>33) << "_" << ((endOtherContigPosForward & 0x00000001FFFFFFFFLLU) >> 2) << "_" << ((endOtherContigPosForward&2) >> 1) 
-                << endl;
-            fout << seq << endl;
+                << std::endl;
+            fout << seq << std::endl;
             delete [] seq;
         }
 
-        void outputDGFormat(ofstream& fout) {
+        void outputDGFormat(std::ofstream& fout) {
 
             Len_t length = getLength();
-            ostringstream outputReadsID, outputPos;
+            std::ostringstream outputReadsID, outputPos;
             Len_t readsIDSum = 0;
             for (Len_t pos=0; pos<length; ++pos) {
 
@@ -354,9 +354,9 @@ class Contig
                 }
             }
 
-            fout << ">contig" << contigNum << "\t" << length << "\t" << readsIDSum << endl;
-            fout << outputReadsID.str() << endl;
-            fout << outputPos.str() << endl;
+            fout << ">contig" << contigNum << "\t" << length << "\t" << readsIDSum << std::endl;
+            fout << outputReadsID.str() << std::endl;
+            fout << outputPos.str() << std::endl;
         }
 
         // function:	 mapReads

@@ -27,36 +27,46 @@
 #include "Utils.hpp"
 #include "GapCloser.hpp"
 #include "readhash/Read.hpp"
+#include "GlobalAccesser.hpp"
 
+    float    Threshold::NoConflictThreshold ;
+    int      Threshold::max_allowed_conflict ;
+    int      Threshold::max_reads_count ;
+    int      Threshold::min_reads_count ;
+    int      Threshold::min_sub_reads_count;
+    int      Threshold::max_error_count ;
+    int      Threshold::min_match_check ;
+    int      Threshold::max_reads_depth ;
+    int      Threshold::the_k ;
 
 
 void usage(void)
 {
-    cout << "Version:" << endl;
-    cout << "	1.12" << endl;
-    cout << endl;
+    std::cout << "Version:" << std::endl;
+    std::cout << "	1.12" << std::endl;
+    std::cout << std::endl;
 
-    cout << "Contact:" << endl;
-    cout << "	soap@genomics.org.cn" << endl;
-    cout << endl;
+    std::cout << "Contact:" << std::endl;
+    std::cout << "	soap@genomics.org.cn" << std::endl;
+    std::cout << std::endl;
 
-    cout << "Usage:" << endl;
-    cout << "	GapCloser [options]" << endl;
-    cout << "	-a	<string>	input scaffold file name, required." << endl;
-    cout << "	-b	<string>	input library info file name, required." << endl;
-    cout << "	-o	<string>	output file name, required." << endl;
+    std::cout << "Usage:" << std::endl;
+    std::cout << "	GapCloser [options]" << std::endl;
+    std::cout << "	-a	<string>	input scaffold file name, required." << std::endl;
+    std::cout << "	-b	<string>	input library info file name, required." << std::endl;
+    std::cout << "	-o	<string>	output file name, required." << std::endl;
 
 
-    cout << "	-l	<int>		maximum read length (<=155), default=" << maxReadLength << ".\n";
-    /*	cout << "	-m	<int>	overlap mode:" << endl;
-        cout << "		1:	fixed overlap mode" << endl;
-        cout << "		2:	max overlap first mode" << endl;
+    std::cout << "	-l	<int>		maximum read length (<=155), default=" << maxReadLength << ".\n";
+    /*	std::cout << "	-m	<int>	overlap mode:" << std::endl;
+        std::cout << "		1:	fixed overlap mode" << std::endl;
+        std::cout << "		2:	max overlap first mode" << std::endl;
         */
-    cout << "	-p	<int>		overlap param(<=31), default=25.\n";
-    cout << "	-t	<int>		thread number, default=1.\n";
+    std::cout << "	-p	<int>		overlap param(<=31), default=25.\n";
+    std::cout << "	-t	<int>		thread number, default=1.\n";
 
-    cout << "	-h	-?		output help information." << endl;
-    cout << endl;
+    std::cout << "	-h	-?		output help information." << std::endl;
+    std::cout << std::endl;
     exit(1);
 }
 Len_t Read::DATA_MAXLEN = (Read::DATA_ARRAY_SIZE*bitsizeof(Number_t) + Read::BITLEN_DATA_REMAIN) / 2 ;
@@ -100,10 +110,10 @@ int main(int argc, char *argv[])
     }
 
     if (overlapParam < 13) {
-        cout << "[WARNING] Overlap length should be >= 13. Program will use 13 instead of " << overlapParam << ".\n";
+        std::cout << "[WARNING] Overlap length should be >= 13. Program will use 13 instead of " << overlapParam << ".\n";
         overlapParam = 13;
     } else if (overlapParam > 31) {
-        cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << overlapParam << ".\n";
+        std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << overlapParam << ".\n";
         overlapParam = 31;
     }
 
@@ -113,20 +123,20 @@ int main(int argc, char *argv[])
     Number_t hashLen = 3;
 
     //check input files
-    ifstream fin;
-    ifstream finPairEndInfo;
-    ifstream finLibInfo;
+    std::ifstream fin;
+    std::ifstream finPairEndInfo;
+    std::ifstream finLibInfo;
     if(!inLibInfo) {
 
         fin.open(infile);
         if(!fin) {
-            cout << "[Error] Can not open input file." << endl << endl;
+            std::cout << "[Error] Can not open input file." << std::endl << std::endl;
             usage();
         }
 
         finPairEndInfo.open(inPairEndInfo);
         if(!finPairEndInfo) {
-            cout << "[Error] Can not open input pair-end info file." << endl << endl;
+            std::cout << "[Error] Can not open input pair-end info file." << std::endl << std::endl;
             usage();
         }
     }
@@ -134,39 +144,39 @@ int main(int argc, char *argv[])
 
         finLibInfo.open(inLibInfo);
         if(!finLibInfo) {
-            cout << "[Error] Can not open input library info file." << endl << endl;
+            std::cout << "[Error] Can not open input library info file." << std::endl << std::endl;
             usage();
         }
     }
 
-    ofstream fout(outfile);
+    std::ofstream fout(outfile);
     if(!fout) {
-        cout << "[Error] Can not creat output file." << endl << endl;
+        std::cout << "[Error] Can not creat output file." << std::endl << std::endl;
         usage();
     }
 
-    ifstream finContig(infileContig);
+    std::ifstream finContig(infileContig);
     if(!finContig) {
-        cout << "[Error] Can not open input scaffold file." << endl << endl;
+        std::cout << "[Error] Can not open input scaffold file." << std::endl << std::endl;
         usage();
     }
 
     if ((int)maxReadLength > Read::DATA_MAXLEN) {
-        cout << "[WARNING] Maximum supported read length is 155 bp! Program will use 155 instead of "<< maxReadLength << ".\n";
+        std::cout << "[WARNING] Maximum supported read length is 155 bp! Program will use 155 instead of "<< maxReadLength << ".\n";
         maxReadLength = Read::DATA_MAXLEN;
     }
 
     Read::DATA_MAXLEN=Read::DATA_MAXLEN>(int)maxReadLength?(int)maxReadLength:Read::DATA_MAXLEN;	
 
-    cout << "Program: GapCloser" << endl;
-    cout << "Version: 1.12" << endl << endl;
-    cout << "Parameters:" << endl;
-    cout << "    -a (scaffold file): " << infileContig << endl;
-    cout << "    -b (config file):   " << inLibInfo << endl;
-    cout << "    -o (output file):   " << outfile << endl;
-    cout << "    -l (max read len):  " << (int)Read::DATA_MAXLEN << endl;
-    cout << "    -p (overlap para):  " << (int)overlapParam << endl;
-    cout << "    -t (thread num):    " << (int)threadSum << endl << endl;
+    std::cout << "Program: GapCloser" << std::endl;
+    std::cout << "Version: 1.12" << std::endl << std::endl;
+    std::cout << "Parameters:" << std::endl;
+    std::cout << "    -a (scaffold file): " << infileContig << std::endl;
+    std::cout << "    -b (config file):   " << inLibInfo << std::endl;
+    std::cout << "    -o (output file):   " << outfile << std::endl;
+    std::cout << "    -l (max read len):  " << (int)Read::DATA_MAXLEN << std::endl;
+    std::cout << "    -p (overlap para):  " << (int)overlapParam << std::endl;
+    std::cout << "    -t (thread num):    " << (int)threadSum << std::endl << std::endl;
 
 
     PairInfo* pairInfo;

@@ -4,16 +4,17 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <cassert>
 
 #include "Common.hpp"
+#include "ConsensusConfig.hpp"
 #include "TightString.hpp"
 #include "GlobalAccesser.hpp"
+#include "ContigForFill.hpp"
 #include "readtool/ReadElement.hpp"
 #include "readtool/ReadAccessor.hpp"
 #include "Contig.hpp"
 #include "ContigTool.hpp"
-#include "ConsensusConfig.hpp"
-#include "ContigForFill.hpp"
 
 struct Kmer2Reads
 {
@@ -29,7 +30,28 @@ struct PositionInfoKeeper
 
         int reads_num ;
 
+        void AddKmer(const Number_t & kmer,
+                const ReadElement & reads ,
+                int relative_num )
+        {
+            auto & new_one = all_kmer2reads[kmer] ;
+            new_one.relative_num = relative_num ;
+            new_one.reads.push_back(reads) ;
+            reads_num ++ ;
+        }
+
     public :
+
+        std::map<Number_t , Kmer2Reads>::const_iterator begin() const
+        {
+            return all_kmer2reads.begin() ;
+        }
+
+        std::map<Number_t , Kmer2Reads>::const_iterator end()  const
+        {
+            return all_kmer2reads.end() ;
+        }
+
         void Init()
         {
             reads_num = 0 ;
@@ -46,15 +68,7 @@ struct PositionInfoKeeper
                 return false ;
             return true ;
         }
-        void AddKmer(const Number_t & kmer,
-                const ReadElement & reads ,
-                int relative_num )
-        {
-            auto & new_one = all_kmer2reads[kmer] ;
-            new_one.relative_num = relative_num ;
-            new_one.reads.push_back(reads) ;
-            reads_num ++ ;
-        }
+
         void AddKmer(const Number_t & kmer,
                 const std::vector<ReadElement> & reads ,
                 int relative_num )
@@ -96,7 +110,8 @@ struct PositionInfoKeeper
                 const Kmer2Reads & reads = pair.second ;
                 for( const auto & a_read : reads.reads )
                 {
-                    if( ContigTool::IsEligibleBarcodeCheckRead(a_read, prev_contig,next_contig) )
+                    if( ContigTool::IsEligibleBarcodeCheckRead
+                            (a_read, prev_contig,next_contig) )
                     {
                         ret.AddKmer(kmer,a_read, reads.relative_num);
                     }
@@ -108,17 +123,28 @@ struct PositionInfoKeeper
         PositionInfoKeeper GetSubReadsByONT(
                 const Contig & prev_contig ,
                 const Contig & next_contig 
-                ) const 
+                ) const
         {
             PositionInfoKeeper ret;
-            //TODO
+            for( const auto & pair : all_kmer2reads )
+            {
+                const Number_t & kmer = pair.first ;
+                const Kmer2Reads & reads = pair.second ;
+                for( const auto & a_read : reads.reads )
+                {
+                    if( ContigTool::IsEligibleONTCheckRead
+                            (a_read, prev_contig,next_contig) )
+                    {
+                        ret.AddKmer(kmer,a_read, reads.relative_num);
+                    }
+                }
+            }
             return ret ;
         }
 };
 
 struct ConsensusResult
 {
-    static int max_allowed_conflict ;
 
     std::string       consensus_str;
     std::vector<bool> conflict_flags;
@@ -133,32 +159,70 @@ struct ConsensusResult
 
     bool is_consensus_done() const 
     {
-        return ! (conflict_num() > max_allowed_conflict );
+        return ! (conflict_num() > Threshold::max_allowed_conflict );
     }
 };
 
-int ConsensusResult::max_allowed_conflict = 2 ;
 
 struct ConsensusMatrix
 {
-    std::vector<int[4]> depth_matrix;
+    private:
+        std::vector<std::array<int,4>> depth_matrix;
 
-    ConsensusResult GenConsensusResult() const 
-    {
-        ConsensusResult ret ;
+        std::pair<char , bool> consensus_pos(const std::array<int,4> &  a) const
+        {
+            int total_depth = 0 ;
+            int highest_depeth = 0 ;
+            int highest_nucleotide = 0 ;
+            for( int i = 0 ; i < 4; i ++ )
+            {
+                total_depth += a[i] ;
+                if( highest_depeth < a[i] )
+                {
+                    highest_depeth = a[i] ;
+                    highest_nucleotide = i ; 
+                }
+            }
+            char ret =  numberToNucleotide(highest_nucleotide);
+            if( highest_depeth >= (float)total_depth * Threshold::NoConflictThreshold )
+                return std::make_pair( ret , true ) ;
+            else 
+                return std::make_pair( ret , false );
+        }
 
-        return ret ;
-    }
+    public:
+
+        void Init(int length)
+        {
+            depth_matrix.resize(length);
+            for( auto & m : depth_matrix )
+            {
+                m[0] = 0 , m[1] = 0 , m[2] =0 , m[3] = 0 ;
+            }
+        }
+
+        ConsensusResult GenConsensusResult() const
+        {
+            ConsensusResult ret ;
+            for ( const auto & m : depth_matrix )
+            {
+                auto consensus_ret = consensus_pos( m );
+                ret.conflict_flags.push_back(consensus_ret.second);
+                ret.consensus_str.push_back( consensus_ret.first );
+            }
+            return ret ;
+        }
+
+        void UpdateDepth( int pos , int nucleotide , int depth = 1)
+        {
+            assert(pos >= 0 && pos < depth_matrix.size() );
+            assert( nucleotide < 4 );
+            depth_matrix[pos][nucleotide] += depth ;
+        }
 };
 
 struct ReadMatrix
 {
-    public :
-        static int  max_reads_count ;
-        static int  min_reads_count ;
-
-        static int min_sub_reads_count;
-
     private:
         //  position --> reads
         std::map< int  , PositionInfoKeeper> m_raw_reads;
@@ -205,19 +269,21 @@ struct ReadMatrix
             return ret ;
         }
 
+    public:
+
         ReadMatrix GenSubMatrixByGap(const Contig & prev_contig ,
                 const Contig & next_contig ,
                 const GapInfo & gap )
         {
 
-            if( ReadsNum() < min_sub_reads_count )
+            if( ReadsNum() < Threshold::min_sub_reads_count )
                 return *this ;
             if( gap.is_gap_big() ) {;} else {;}
             //{
             auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
             auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
             auto sub3 = Merge( sub1 , sub2 );
-            if( sub3.ReadsNum() < min_sub_reads_count )
+            if( sub3.ReadsNum() < Threshold::min_sub_reads_count )
                 return *this ;
             else 
                 return sub3 ;
@@ -229,12 +295,47 @@ struct ReadMatrix
             return *this ;
         }
 
-    public: 
-
-        ConsensusMatrix GenConsensusMatrix(  )
+        ConsensusMatrix GenConsensusMatrix( const Contig & contig )
         {
             ConsensusMatrix ret ;
-            //TODO
+            ret.Init(m_area.consensus_end_pos_in_contig
+                    -m_area.consensus_start_pos_in_contig
+                    + 1 ) ;
+
+            for( const auto & pair : m_raw_reads)
+            {
+                int pos = pair.first ;
+                // update all reads's depth
+                for( const auto & k_r_pair : pair.second )
+                {
+                    const auto & reads = k_r_pair.second.reads ;
+                    for( const auto & read : reads )
+                    {
+                        TightString read_str ;
+                        read.getSequence(read_str);
+                        for( int i = 0 ; i < (int)read.getLen() ; i++ )
+                        {
+                            int matrix_pos = m_area.pos_translate_contig2martix(pos);
+                            if( matrix_pos < 0 )
+                                continue ;
+                            ret.UpdateDepth(matrix_pos , read_str[i]);
+                        }
+                    }
+                }
+            }
+            int end = m_area.consensus_end_pos_in_contig ;
+            if( end >= (int) contig.getLength() -1 )
+                end = contig.getLength() -1 ;
+            // update the contig's depth
+            for( int i = m_area.consensus_start_pos_in_contig 
+                    ; i <= end ; i ++ )
+            {
+                int matrix_pos = m_area.pos_translate_contig2martix(i);
+                ret.UpdateDepth( matrix_pos 
+                        , contig.getTightString()[i]
+                        , contig.getDepths()[i] 
+                        );
+            }
             return ret ;
         }
 
@@ -260,14 +361,14 @@ struct ReadMatrix
 
         bool is_reads_too_little() const 
         {
-            if ( ReadsNum() < min_reads_count )
+            if ( ReadsNum() < Threshold::min_reads_count )
                 return true ;
             return false ;
         }
 
         bool is_reads_too_much() const 
         {
-            if ( ReadsNum() > max_reads_count )
+            if ( ReadsNum() > Threshold::max_reads_count )
                 return true ;
             return false ;
         }
@@ -301,10 +402,6 @@ struct ReadMatrix
 
 struct ReadMatrixFactory
 {
-    static int max_error_count ;
-    static int min_match_check ;
-    static int max_reads_depth ;
-    static int the_k ;
 
     static ReadMatrix GenReadMatrix(const Contig & contig , const ConsensusArea & area )
     {
@@ -359,21 +456,21 @@ struct ReadMatrixFactory
             int pos = pair.first ;
             if( ret.is_reads_too_much() )
                 break ;
-            if( ! area.valid_starter( pos , the_k ) )
+            if( ! area.valid_starter( pos ,Threshold::the_k ) )
                 continue ;
             for( const auto & read : pair.second )
             {
                 TightString  tStrRead(read.getLen());
                 read.getSequence(tStrRead);
-                for( int i = 0 ; i < (int)read.getLen() - the_k ; i++ )
+                for( int i = 0 ; i < (int)read.getLen() - Threshold::the_k ; i++ )
                 {
                     if( ret.is_reads_too_much() )
                         break ;
-                    if( ! area.valid_starter( pos + i , the_k ) )
+                    if( ! area.valid_starter( pos + i , Threshold::the_k ) )
                         break  ;
                     Number_t kmer;
                     tStrRead.readTightStringFragment
-                        (i, i+the_k, kmer);
+                        (i, i+Threshold::the_k, kmer);
                     ret.tryInitPos(pos+i);
                     if( ret.checkKmerInPos( pos+i , kmer ) )
                         continue ;
@@ -381,8 +478,8 @@ struct ReadMatrixFactory
                     {
                         auto reads = ContigTool::find_all_reads_start_with
                             (kmer ,contig , pos+ i 
-                             ,max_reads_depth
-                             ,max_error_count);
+                             , Threshold::max_reads_depth
+                             , Threshold::max_error_count);
                         if( reads.empty() )
                             continue ;
                         ret.AddKmer(kmer,reads,index,pos+i);
@@ -403,20 +500,23 @@ struct ReadMatrixFactory
 
         const TightString & tStrContig = contig.getTightString() ;
         int pos_start = area.left_most_pos_in_contig ;
-        int pos_end = (int)contig.getLength() - the_k + 1 ;
+        int pos_end = (int)contig.getLength() - Threshold::the_k + 1 ;
         //int pos_end1 = area.consensus_end_pos_in_contig  - the_k + 1 ;
         for( int i = pos_start ; i <= pos_end ;i++ ) /* i in 1 base */
         {
             Number_t kmer;
             tStrContig.readTightStringFragment
-                (i-1, i+the_k-1, kmer);
+                (i-1, i+Threshold::the_k-1, kmer);
             ret.tryInitPos(i);
             if( ret.checkKmerInPos(kmer,i) )
                 continue ;
             else
             {
-                auto reads = find_all_reads_start_with
-                    (kmer ,contig , i );
+                auto reads = ContigTool::find_all_reads_start_with
+                    (kmer ,contig , i 
+                     ,Threshold::max_reads_depth
+                     ,Threshold::max_error_count
+                     );
                 if( reads.empty() )
                     continue ;
                 ret.AddKmer(kmer,reads,1,i);

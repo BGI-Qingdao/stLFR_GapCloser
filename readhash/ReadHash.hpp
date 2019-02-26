@@ -691,7 +691,7 @@ class ReadHash
             else {
 
                 (*finp).clear();
-                (*finp).seekg(0, ios_base::beg);
+                (*finp).seekg(0, std::ios_base::beg);
                 initializeReadsFa(*finp);
             }
         }

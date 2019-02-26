@@ -357,10 +357,10 @@ class HashTable
         //delete an element
         void withdraw(T& key) {
             if (count == 0)
-                throw out_of_range ("hash table is empty");
+                throw std::out_of_range ("hash table is empty");
             Number_t i = findMatch(key);
             if (i == length)
-                throw out_of_range ("object not found");
+                throw std::out_of_range ("object not found");
             for (;;)
             {
                 Number_t j;

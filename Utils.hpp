@@ -55,7 +55,7 @@ inline void chomp(std::string& str) {
 }
 
     template< class T>
-void SetAdd( const std::set<T>  s1 ,
+void SetAdd( std::set<T>  & s1 ,
         const std::set<int> & s2 )
 {
     for( const auto & i : s2 )
