@@ -29,16 +29,18 @@
 #include "readhash/Read.hpp"
 #include "GlobalAccesser.hpp"
 
-    float    Threshold::NoConflictThreshold ;
-    int      Threshold::max_allowed_conflict ;
-    int      Threshold::max_reads_count ;
-    int      Threshold::min_reads_count ;
-    int      Threshold::min_sub_reads_count;
-    int      Threshold::max_error_count ;
-    int      Threshold::min_match_check ;
-    int      Threshold::max_reads_depth ;
-    int      Threshold::the_k ;
-
+// All threshold here
+float    Threshold::NoConflictThreshold ;
+int      Threshold::max_allowed_conflict ;
+int      Threshold::max_reads_count ;
+int      Threshold::min_reads_count ;
+int      Threshold::min_sub_reads_count;
+int      Threshold::max_error_count ;
+int      Threshold::max_reads_depth ;
+int      Threshold::the_k ;
+// global accessor class pointer here;
+ReadAccessor *  GlobalAccesser::the_read_accessor;
+PairInfo *      GlobalAccesser::the_pair_info ;
 
 void usage(void)
 {
@@ -161,12 +163,12 @@ int main(int argc, char *argv[])
         usage();
     }
 
-    if ((int)maxReadLength > Read::DATA_MAXLEN) {
+    if ((int)maxReadLength > (int)Read::DATA_MAXLEN) {
         std::cout << "[WARNING] Maximum supported read length is 155 bp! Program will use 155 instead of "<< maxReadLength << ".\n";
         maxReadLength = Read::DATA_MAXLEN;
     }
 
-    Read::DATA_MAXLEN=Read::DATA_MAXLEN>(int)maxReadLength?(int)maxReadLength:Read::DATA_MAXLEN;	
+    Read::DATA_MAXLEN= (int)Read::DATA_MAXLEN>(int)maxReadLength?(int)maxReadLength:Read::DATA_MAXLEN;	
 
     std::cout << "Program: GapCloser" << std::endl;
     std::cout << "Version: 1.12" << std::endl << std::endl;

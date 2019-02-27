@@ -183,6 +183,8 @@ struct ConsensusMatrix
                     highest_nucleotide = i ; 
                 }
             }
+            if ( total_depth == 0 )
+                return std::make_pair( 'N' , true ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
             if( highest_depeth >= (float)total_depth * Threshold::NoConflictThreshold )
                 return std::make_pair( ret , true ) ;
@@ -207,6 +209,8 @@ struct ConsensusMatrix
             for ( const auto & m : depth_matrix )
             {
                 auto consensus_ret = consensus_pos( m );
+                if( consensus_ret.first == 'N' )
+                    break ;
                 ret.conflict_flags.push_back(consensus_ret.second);
                 ret.consensus_str.push_back( consensus_ret.first );
             }
@@ -215,7 +219,7 @@ struct ConsensusMatrix
 
         void UpdateDepth( int pos , int nucleotide , int depth = 1)
         {
-            assert(pos >= 0 && pos < depth_matrix.size() );
+            assert(pos >= 0 && pos < (int)depth_matrix.size() );
             assert( nucleotide < 4 );
             depth_matrix[pos][nucleotide] += depth ;
         }
@@ -331,9 +335,10 @@ struct ReadMatrix
                     ; i <= end ; i ++ )
             {
                 int matrix_pos = m_area.pos_translate_contig2martix(i);
-                ret.UpdateDepth( matrix_pos 
+                ret.UpdateDepth( matrix_pos
                         , contig.getTightString()[i]
-                        , contig.getDepths()[i] 
+                        /*, contig.getDepths()[i] */ 
+                        /*new logic that contig depth always 1 */
                         );
             }
             return ret ;

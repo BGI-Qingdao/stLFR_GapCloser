@@ -31,14 +31,15 @@ struct Threshold
     //  consensus , otherwhise use the basic matrix .
     static int      min_sub_reads_count;
 
+    // the maximum number of confilicts that a map
+    //  can accept.
     static int      max_error_count ;
 
-    static int      min_match_check ;
-
+    // the maxinum number of depth that a read can be accept.
     static int      max_reads_depth ;
 
+    // the kvalue for kmer-read map.
     static int      the_k ;
-
 };
 
 #endif //GLOBALACCESSER_HPP__

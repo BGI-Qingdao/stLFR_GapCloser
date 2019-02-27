@@ -298,7 +298,7 @@ class GapCloser : public ContigAssembler
                         continue;
                     }
                     else {
-                        Len_t mismatchNum = 0;
+                        //Len_t mismatchNum = 0;
                         while ((int)(contigReverse.getLength() - k) >= (int)endNumLen) {
                             Number_t numReverse;
                             contigReverse.getTightString().readTightStringFragment(k, k+endNumLen, numReverse);
@@ -675,7 +675,7 @@ class GapCloser : public ContigAssembler
                 , GapInfo& gapResult ) {
 
             //TODO 
-            //CleanContigDepth(start , end , contig)
+            //CleanContigBarcode(start , end , contig)
             ConsensusArea prev_area ;
             while (true) 
             {
@@ -693,6 +693,7 @@ class GapCloser : public ContigAssembler
                 if( consensusResult.is_consensus_done() )
                 {
                     updateContig(contig,consensusResult);
+                    updateContigBarcode(contig,consensusResult,readMatrix);
                     updateGap( gapResult , consensusResult ) ;
                     if( checkGapIsFinished( contig, consensusResult ,gap) )
                         break ;
@@ -709,6 +710,10 @@ class GapCloser : public ContigAssembler
             //TODO report ...
         }
 
+        void updateContigBarcode( Contig & contig , const ConsensusResult & consensusResult , const ReadMatrix &readMatrix)
+        {
+
+        }
         void updateGap( GapInfo & contig , const ConsensusResult & consensusResult)
         {
             //TODO 
@@ -723,7 +728,8 @@ class GapCloser : public ContigAssembler
                 , const ConsensusResult & consensusResult 
                 , const GapInfo & gap )
         {
-            //TODO 
+            //TODO
+            return false ;
         }
 };
 
