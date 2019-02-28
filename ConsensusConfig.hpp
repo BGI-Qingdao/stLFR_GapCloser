@@ -47,20 +47,20 @@ struct ConsensusArea
 
 struct ConsensusConfig
 {
-    int extern_len ;
-    int extra_len;
-    int consensus_len ;
+    static int extend_len ;
+    static int extra_len;
+    static int consensus_len ;
 
-    ConsensusArea  GetConsensusArea( int contiglen )
+    static ConsensusArea  GetConsensusArea( int contiglen )
     {
         ConsensusArea ret ;
         int in_contig = consensus_len - extra_len ;
 
         ret.contig_len = contiglen ;
         ret.left_most_pos_in_contig = contiglen - ( extra_len + in_contig ) + 1 ;
-        ret.right_most_pos_in_contig = contiglen + extern_len + extra_len ;
+        ret.right_most_pos_in_contig = contiglen + extend_len + extra_len ;
         ret.consensus_start_pos_in_contig = contiglen - in_contig + 1 ;
-        ret.consensus_end_pos_in_contig = contiglen + extern_len ;
+        ret.consensus_end_pos_in_contig = contiglen + extend_len ;
 
         return ret ;
     }

@@ -248,7 +248,7 @@ class GapCloser : public ContigAssembler
                        */
                     if (!gapReverse.isFilled) {
 
-                        Len_t sameFlag = 1;	
+                        //Len_t sameFlag = 1;	
                         for (Len_t j=0; j<mismatchLen; j++) {
 
                             if ((int)(contigReverse.getLength() - j) >= (int)endNumLen) {
@@ -258,22 +258,21 @@ class GapCloser : public ContigAssembler
 
                                 if (!gapReverse.endNumHash.find(numReverse)) {
                                     gapReverse.endNumHash[numReverse] = j;
-
-                                    sameFlag = 0;	
+                                    ; //sameFlag = 0;	
                                 }
                                 else {
                                     gapReverse.endNumHash[numReverse] = (Len_t)-1;	
-                                    sameKmer++;
+                                    //sameKmer++;
                                 }
                             }
                         }
 
-                        if (contigReverse.getLength() < endNumLen) {
-                            sameFlag = 0;
-                        }
-                        if (sameFlag == 1) {
-                            sameEnd++;
-                        }
+                        //if (contigReverse.getLength() < endNumLen) {
+                        //    sameFlag = 0;
+                        //}
+                        //if (sameFlag == 1) {
+                        //    sameEnd++;
+                        //}
                     }
 
                     gapsReverse[gapCount-j-1] = gapReverse;
@@ -328,7 +327,7 @@ class GapCloser : public ContigAssembler
                             }
                             else {
                                 gapReverse.endNumHash[numReverse] = (Len_t)-1;
-                                sameKmer++;
+                                //sameKmer++;
                             }
 
                             k++;
@@ -371,10 +370,10 @@ class GapCloser : public ContigAssembler
                     }
 
                     if ((!gap.isFilled) && (gap.length==0)) {
-                        if (NNumber > 0){
-                            std::string NSeq(NNumber, 'N');
+                        if (Threshold::NNumber > 0){
+                            std::string NSeq(Threshold::NNumber, 'N');
                             finalSeqReverse += NSeq;
-                            gap.length = NNumber;
+                            gap.length = Threshold::NNumber;
                         }
                     }
                 }
@@ -643,7 +642,6 @@ class GapCloser : public ContigAssembler
             }
         }
 
-        ConsensusConfig m_config;
         // function:    ConsensusGap
         // description: iterately consensus relatative reads to fill gap.
         //                   1) get reads starting with anchor fetched from the end area of contig.
@@ -667,7 +665,7 @@ class GapCloser : public ContigAssembler
 
             int originalLen = contig.getLength();
             // step 0 , clean the barcodes in consensus area.
-            ConsensusArea the_area = m_config.GetConsensusArea(originalLen);
+            ConsensusArea the_area = ConsensusConfig::GetConsensusArea(originalLen);
             BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
             barcode_info.Erase(the_area.left_most_pos_in_contig - 1 );
 
@@ -676,7 +674,7 @@ class GapCloser : public ContigAssembler
             int prev_contig_len = contig.getLength() ;
             while (true) 
             {
-                ConsensusArea curr_area = m_config.GetConsensusArea(contig.getLength());
+                ConsensusArea curr_area = ConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                     break ;
                 // step 1.1 gather reads .

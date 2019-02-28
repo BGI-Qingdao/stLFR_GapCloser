@@ -164,7 +164,7 @@ class ContigTable
 
                     if (gap.length > 0) {
 
-                        Len_t sameFlag = 1;	
+                        //Len_t sameFlag = 1;	
 
                         HashTable< Number_t, Len_t > endNumHash;
                         for (Len_t j=0; j<mismatchLen; j++) {
@@ -182,22 +182,22 @@ class ContigTable
                                 if (!endNumHash.find(num)) {
                                     endNumHash[num] = j;
 
-                                    sameFlag = 0;	
+                                    ;// sameFlag = 0;	
                                 }
                                 //
                                 else{
                                     endNumHash[num] = (Len_t)-1;	
-                                    sameKmer++;
+                                    //sameKmer++;
                                 }
                                 //
                             }
                         }
-                        if (contigLength - i < endNumLen){
-                            sameFlag = 0;
-                        }
-                        if (sameFlag == 1){
-                            sameEnd++;
-                        }
+                        //if (contigLength - i < endNumLen){
+                        //    sameFlag = 0;
+                        //}
+                        //if (sameFlag == 1){
+                        //    sameEnd++;
+                        //}
 
                         gap.endNumHash = endNumHash;
                         contigs[iContig].appendGap(gap);
@@ -272,7 +272,7 @@ class ContigTable
                             }
                             else{
                                 gapInfo.endNumHash[num] = (Len_t)-1;
-                                sameKmer++;
+                                //sameKmer++;
                             }
 
                             i++;
