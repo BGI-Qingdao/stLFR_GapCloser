@@ -27,14 +27,13 @@
 #include <string>
 #include <fstream>
 #include "Utils.hpp"
+#include "GlobalAccesser.hpp"
 #include "Read.hpp"
 #include "HashTable.hpp"
 #include "QuickSorterMulti.hpp"
 #include "readtool/LibInfo.hpp"
-#include "TagId.hpp"
 #include "readtool/stLFRReadHeader.hpp"
 
-static TagId barcode_ider;
 
 int GetBarcodeFromReadName( const char* name)
 {
@@ -50,7 +49,7 @@ int GetBarcodeFromReadName( const char* name)
             == stLFRHeader::ReadType::readName_barcodeStr_index
             )
     {
-        return barcode_ider.GetId(header.barcode_str);
+        return GlobalAccesser::barcode_ider.GetId(header.barcode_str);
     }
     else if ( header.type == stLFRHeader::ReadType::readName_barcodeStr_index_barcodeNum )
     {

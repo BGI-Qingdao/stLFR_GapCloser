@@ -178,7 +178,6 @@ class ReadElement
 
 };
 
-Read* ReadElement::read=NULL;
 
 
 

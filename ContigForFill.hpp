@@ -27,6 +27,7 @@
 #include <string>
 
 #include "Common.hpp"
+#include "GlobalAccesser.hpp"
 #include "HashTable.hpp"
 #include "TightString.hpp"
 #include "base/LinkedList.hpp"
@@ -56,13 +57,17 @@ struct GapInfo
     // key: kmers coming from next contig's beginning
     // value: positions of kmers
     HashTable< Number_t, Len_t > endNumHash;
-
+    /* delete quality code */
+    /*
     int quality;
-
+    */
     GapInfo() : 
         length(0), 
-        isFilled(false), 
-        quality(0)
+        isFilled(false) 
+        /* delete quality code */
+        /*
+        ,quality(0)
+        */
     {
     }
 
@@ -72,14 +77,15 @@ struct GapInfo
         extendInfo = gap.extendInfo;
         isFilled = gap.isFilled;
         endNumHash = gap.endNumHash;
+        /* delete quality code */
+        /*
         quality = gap.quality;
+        */
     }
-
-    static int gap_threshold ;
 
     bool is_gap_big() const 
     {
-        return length > gap_threshold ;
+        return length > Threshold::max_small_gap;
     }
 };
 

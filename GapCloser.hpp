@@ -32,9 +32,22 @@ class GapCloser : public ContigAssembler
 
     public:
 
-        GapCloser(char* _outfile, std::ofstream& _fout, ReadAccessor& _readAccessor, PairInfo const& _pairInfo, ContigTable const& _contigTable, Len_t _threadSum, float _deviation=0.5, Len_t _endNumLen=10, Len_t _mismatchLen=5, Len_t _maxReadLength=35, Short_Len_t _overlapMode=fixedOverlapMode, Short_Len_t _overlapParam=25) : 
+        GapCloser(char* _outfile, std::ofstream& _fout
+                , ReadAccessor& _readAccessor
+                , PairInfo const& _pairInfo
+                , ContigTable const& _contigTable
+                , Len_t _threadSum
+                , float _deviation=0.5
+                , Len_t _endNumLen=10
+                , Len_t _mismatchLen=5 
+            /*  , Len_t _maxReadLength=100 */
+            /*  , Short_Len_t _overlapMode=fixedOverlapMode */
+                , Short_Len_t _overlapParam=25) : 
 
-            ContigAssembler(_outfile, _fout, _readAccessor, _pairInfo, _threadSum, _maxReadLength, _overlapMode, _overlapParam), 
+            ContigAssembler(_outfile, _fout, _readAccessor
+                    , _pairInfo, _threadSum/*, _maxReadLength */
+                   /* , _overlapMode */
+                    , _overlapParam),
             contigTable(_contigTable), 
             deviation(_deviation), 
             endNumLen(_endNumLen), 
@@ -46,7 +59,7 @@ class GapCloser : public ContigAssembler
             actualGapCount(0), 
             finishGapCount(0)
             {
-                reExtendLength = _overlapParam;
+                /* reExtendLength = _overlapParam;*/
             }
 
     public:
@@ -61,8 +74,6 @@ class GapCloser : public ContigAssembler
             strcpy(fillName, outfile);
             strcat(fillName,".fill");
             foutFill.open(fillName);
-
-            Contig::readAccessor = &readAccessor;
 
             createThread();
             //TODO
@@ -119,14 +130,20 @@ class GapCloser : public ContigAssembler
             Len_t start;
             Len_t end;
             Len_t flag;
-            Len_t quality;
+            /* delete quality code */
+            /*
+               Len_t quality;
+               */
             ExtendInfo extendInfo;
 
             GapResultInfo() : 
                 start(0), 
                 end(0), 
-                flag(0), 
-                quality(0)
+                flag(0) 
+                /* delete quality code */
+                /*
+                   ,quality(0)
+                   */
             {
             }
         };
@@ -225,8 +242,10 @@ class GapCloser : public ContigAssembler
                     gapReverse.extendInfo.leftLen = gap.extendInfo.rightLen;
                     gapReverse.extendInfo.rightLen = gap.extendInfo.leftLen;
                     gapReverse.isFilled = gap.isFilled;
-                    gapReverse.quality = gap.quality;
-
+                    /* delete quality code */
+                    /*
+                       gapReverse.quality = gap.quality;
+                       */
                     if (!gapReverse.isFilled) {
 
                         Len_t sameFlag = 1;	
@@ -390,8 +409,10 @@ class GapCloser : public ContigAssembler
                     gapResultInfo.extendInfo.leftLen = gap.extendInfo.rightLen;
                     gapResultInfo.extendInfo.rightLen = gap.extendInfo.leftLen;
                     gapResultInfo.flag = gap.isFilled;
-                    gapResultInfo.quality = gap.quality;
-
+                    /* delete quality code */
+                    /*
+                       gapResultInfo.quality = gap.quality;
+                       */
                     gapResultsInfo.prepend(gapResultInfo);
 
                     extendGapSumInThread += gap.extendInfo.leftLen+gap.extendInfo.rightLen;
@@ -431,7 +452,12 @@ class GapCloser : public ContigAssembler
 
                     gapResultInfo = ptrGapResult->getDatum();
                     //				foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << std::endl;
-                    foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << "\t" <<ptrGap->getDatum().length << "\t" << gapResultInfo.end - gapResultInfo.start << std::endl;
+                    foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" 
+                        /* delete quality code */
+                        /*
+                           <<gapResultInfo.quality
+                           */
+                        << "\t" <<ptrGap->getDatum().length << "\t" << gapResultInfo.end - gapResultInfo.start << std::endl;
 
                     ptrGap = ptrGap->getNext();
                 }
@@ -582,11 +608,13 @@ class GapCloser : public ContigAssembler
                         Contig contigResult(contig,gapContig);
                         contigsResult[i] = contigResult;
 
-                        gapResult.quality = gap.quality;
-                        for (Len_t j=0; j<gapContig.getLength(); j++) {
-                            gapResult.quality += gapContig.getQuality()[j];
-                        }
-
+                        /* delete quality code */
+                        /*
+                           gapResult.quality = gap.quality;
+                           for (Len_t j=0; j<gapContig.getLength(); j++) {
+                           gapResult.quality += gapContig.getQuality()[j];
+                           }
+                           */
                         gapResult.extendInfo.leftLen = gapContig.getLength();
                         gapResult.extendInfo.rightLen = gap.extendInfo.rightLen;
                         gapsResult[i] = gapResult;
@@ -600,7 +628,10 @@ class GapCloser : public ContigAssembler
                     gapResult.length = gap.length;
                     gapResult.extendInfo = gap.extendInfo;
                     gapResult.isFilled = gap.isFilled;
-                    gapResult.quality = gap.quality;
+                    /* delete quality code */
+                    /*
+                       gapResult.quality = gap.quality;
+                       */
                     gapsResult[i] = gapResult;
                 }
             }
@@ -611,47 +642,6 @@ class GapCloser : public ContigAssembler
                 contigsResult[i] = contigs[i];
             }
         }
-
-        void CleanContigDepth(int start , int end , Contig & contig)
-        {
-            ArrayBlock< LinkedList<Number_t> >& readPositions = contig.getReadPositions();
-            ArrayBlock<Len_t>& contigDepths = contig.getDepths();
-            //clean depth and read positions at 1 read length.
-            for (int i= start; i< end ; i++) {
-
-                ListElement<Number_t> const* ptr;
-                for (ptr = readPositions[i].getHead()
-                        ; ptr != 0; ptr = ptr->getNext()) {
-
-                    ReadElement const& readElement
-                        = readAccessor.getRead(ptr->getDatum());
-                    Len_t depth = readElement.getDepth();
-                    Len_t len = readElement.getLen();
-                    len = int(i+len)> end 
-                        ? end -i : len;
-                    for (Len_t j=0; j<len; j++) {
-                        if (contigDepths[i+j] < depth){
-                            contigDepths[i+j] = 0;
-                        }
-                        else{
-                            contigDepths[i+j] -= depth;
-                        }
-                    }
-                }
-                //clear mapped reads with start position i
-                readPositions[i].purge();	
-            }
-
-            // make sure bases within this contig region 
-            //  have enough depth (10X) to be considered
-            //  as dominated bases
-            for (int i=start; i<end; i++){
-                if (contigDepths[i] < 10){
-                    contigDepths[i] = 10;
-                }
-            }
-        }
-
 
         ConsensusConfig m_config;
         // function:    ConsensusGap
@@ -676,42 +666,70 @@ class GapCloser : public ContigAssembler
         {
 
             int originalLen = contig.getLength();
-            //TODO 
-            //CleanContigBarcode(start , end , contig)
+            // step 0 , clean the barcodes in consensus area.
+            ConsensusArea the_area = m_config.GetConsensusArea(originalLen);
+            BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
+            barcode_info.Erase(the_area.left_most_pos_in_contig - 1 );
+
+            // step 1 , loop area consensus .
             ConsensusArea prev_area ;
+            int prev_contig_len = contig.getLength() ;
             while (true) 
             {
                 ConsensusArea curr_area = m_config.GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                     break ;
+                // step 1.1 gather reads .
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
                 if( readMatrix.is_reads_too_little()  )
                     break ;
+                // step 1.2 abstract sub reads .
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
                         ,gap);
+                // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
+
                 if( consensusResult.is_consensus_done() )
                 {
-                    updateContig(contig , 
-                            readMatrix,
-                            consensusResult);
-                    if( checkGapIsFinished( contig, consensusResult ,gap) )
+                    // step 1.5 update contig
+                    updateContig(contig , readMatrix,consensusResult);
+                    // step 1.6 check gap fill
+                    bool gapFill ; int prev_contig_pos ; int next_contig_pos ;
+                    std::tie( gapFill , prev_contig_pos , next_contig_pos ) 
+                        = ContigTool::IsGapFinish( contig , nextContig ,gap ,prev_contig_len);
+                    if( gapFill )
                     {
-                        int extend_len = contig.getLength() - originalLen ;
-                        gapContig.append(contig,originalLen , extend_len );
-                        gapResult.length = extend_len ;
+                        // step 1.7 deal output for fill
+                        if (prev_contig_pos > originalLen )
+                        {
+                            int extend_len = prev_contig_pos - originalLen ;
+                            gapContig.append(contig,originalLen , extend_len );
+                            gapResult.length = - next_contig_pos ;
+                            if (((int)prev_contig_pos +gapResult.length) < 0)
+                                gapResult.length = -prev_contig_pos;
+
+                        }
+                        else
+                        {
+                            gapResult.length = prev_contig_pos -originalLen - next_contig_pos;
+                            if( originalLen + gapResult.length  < 0 )
+                                gapResult.length = -originalLen ;
+                        }
                         gapResult.isFilled = true ;
                         break ;
                     }
-                    else 
-                        continue ;
                 }
                 else
                     break;
+
+                prev_contig_len = contig.getLength() ;
+                prev_area = curr_area ;
             }
-            if( ! gapResult.isFilled &&  (int) contig.getLength() > originalLen )
+            // step 3 , deal output for not fill
+            if( (! gapResult.isFilled)
+                    &&  (int) contig.getLength() > originalLen )
             {
                 int extend_len = contig.getLength() - originalLen ;
                 gapContig.append(contig,originalLen , extend_len );
@@ -793,15 +811,6 @@ class GapCloser : public ContigAssembler
                 }
             }
         }
-
-        bool checkGapIsFinished(const Contig & contig 
-                , const ConsensusResult & consensusResult 
-                , const GapInfo & gap )
-        {
-            //TODO
-            return false ;
-        }
 };
-
 
 #endif /*CONTIGASSEMBLERFORFILL_HPP_*/

@@ -37,9 +37,7 @@ static const unsigned int MAX_STRING_LEN = 2048;
 static const unsigned int DATA_LEN = 32;
 static const unsigned int LEN_TO_BITLEN = 2;
 
-int Debug = 0;
 Len_t maxReadLength=100;
-
 int NNumber = 1;
 
 int sameKmer = 0;	

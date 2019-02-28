@@ -1,6 +1,8 @@
 #ifndef GLOBALACCESSER_HPP__
 #define GLOBALACCESSER_HPP__
 
+#include "TagId.hpp"
+
 class ReadAccessor ;
 class PairInfo ;
 
@@ -8,6 +10,7 @@ struct GlobalAccesser
 {
     static ReadAccessor * the_read_accessor;
     static PairInfo * the_pair_info ;
+    static TagId barcode_ider;
 };
 
 struct Threshold
@@ -16,7 +19,7 @@ struct Threshold
     //  hold to be a major nucletide.
     static float    NoConflictThreshold ;
 
-    // the maximum number of confilicts that a consensus
+    // the maximum number of confilicts that a consensus.
     //  can accept.
     static int      max_allowed_conflict ;
 
@@ -31,7 +34,7 @@ struct Threshold
     //  consensus , otherwhise use the basic matrix .
     static int      min_sub_reads_count;
 
-    // the maximum number of confilicts that a map
+    // the maximum number of confilicts that a map.
     //  can accept.
     static int      max_error_count ;
 
@@ -42,12 +45,16 @@ struct Threshold
     static int      the_k ;
 
     // the minimum depth of a nucleotide that 
-    //  make it a NOT to be a low depth nucleotide
+    //  make it a NOT to be a low depth nucleotide.
     static int      min_nucleotide_depth;
 
     // the maximun number of low depth nucleotide 
-    //   that a consensus can accept
-    static int      max_low_depth;
+    //   that a consensus can accept.
+    static int      max_accept_low_depth;
+
+    // the maximum bp of a gap that can define as
+    //   a small gap.
+    static int      max_small_gap;
 
 };
 

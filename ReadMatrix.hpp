@@ -189,7 +189,7 @@ struct ConsensusResult
     bool is_consensus_done() const 
     {
         return  (conflict_num() <= Threshold::max_allowed_conflict )
-            && ( low_depth() <= Threshold::max_low_depth)
+            && ( low_depth() <= Threshold::max_accept_low_depth)
             ;
     }
 };

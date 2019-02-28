@@ -27,10 +27,74 @@
 #include <sstream>
 #include <set>
 #include "Common.hpp"
+#include "GlobalAccesser.hpp"
 #include "base/LinkedList.hpp"
 #include "ArrayBlock.hpp"
 #include "readtool/ReadAccessor.hpp"
 #include "TightString.hpp"
+
+struct BarcodeInfo
+{
+    std::set<int> barcodes;
+    // the first position that one barcode mapped.
+    //  this is used to mask some area's barcodes.
+    //  Key : barcode id
+    //  Value : position in 0 base ;
+    std::map<int , int >  m_data ;
+
+    void UpdateBarcode(const ReadElement & read , int position )
+    {
+        auto bs = read.getBarodes() ;
+        for( int i : bs )
+        {
+            UpdateBarcode(i , position );
+        }
+    }
+
+    void UpdateBarcode(int barcode , int position)
+    {
+        if ( m_data.find( barcode ) == m_data.end() )
+        {
+            m_data[barcode] = position ;
+        }
+        else
+        {
+            if( m_data.at(barcode) > position )
+                m_data[barcode] = position ;
+        }
+        barcodes.insert(barcode);
+    }
+    /*
+     * Erase all barcode that at [start , contig_end )
+     */
+    void Erase( int start )
+    {
+        for(const auto & pair : m_data )
+        {
+            if( pair.second >= start )
+                barcodes.erase(pair.first);
+        }
+        auto itr = m_data.begin();
+        while (itr != m_data.end()) 
+        {
+            if (barcodes.find(itr->first) == barcodes.end() )
+            {
+                auto toErase = itr;
+                ++itr;
+                m_data.erase(toErase);
+            } else {
+                ++itr;
+            }
+        }
+    }
+    void purge()
+    {
+        barcodes.clear() ;
+        m_data.clear();
+    }
+};
+
+
 /*
    define operations on contig level, including:
    1) map reads to contig.
@@ -42,7 +106,6 @@
 class Contig
 {	
     public:
-        static ReadAccessor* readAccessor;
         static const Len_t maxReadsCount = 10000;
 
     protected:
@@ -53,13 +116,21 @@ class Contig
         // content: list of read IDs  started in the opsition
         ArrayBlock< LinkedList<Number_t> >* readPositions;
 
+        /* delete depth code */
+        /*
         // coverage depth
         ArrayBlock<Len_t>* depths;
+        */
 
+        /* delete quality code */
+        /*
         // for one position, its quality is 1 if reads used to cover it have paired-end support
         ArrayBlock<Len_t>* quality;
+        */
 
-        std::set<int> barcodes ;
+        // the barcodes that mapped into this contig.
+        //std::set<int> barcodes ;
+        BarcodeInfo barcode_info ;
         // key: read ID
         // value: list of start positions in contig
         HashTable< Number_t, LinkedList<Len_t> > readPositionsHash;
@@ -83,8 +154,14 @@ class Contig
         Contig(Len_t length = 0, Len_t _contigNum = 0, Len_t _blockLenTStr = 250, Len_t _contigBlockLen = 1000) : 
             tightString(NULL), 
             readPositions(NULL), 
-            depths(NULL), 
-            quality(NULL), 
+            /* delete depth code */
+            /*
+               depths(NULL), 
+               */
+            /* delete quality code */
+            /*
+               quality(NULL), 
+               */
             contigNum(_contigNum), 
             endOtherContigPosReverse(0), 
             endOtherContigPosForward(0), 
@@ -98,8 +175,14 @@ class Contig
         Contig(TightString const& tStr, Len_t _contigNum = 0, Len_t _blockLenTStr = 250, Len_t _contigBlockLen = 1000) : 
             tightString(NULL), 
             readPositions(NULL), 
-            depths(NULL), 
-            quality(NULL), 
+            /* delete depth code */
+            /*
+               depths(NULL), 
+               */
+            /* delete quality code */
+            /*
+               quality(NULL), 
+               */
             contigNum(_contigNum), 
             endOtherContigPosReverse(0), 
             endOtherContigPosForward(0), 
@@ -114,8 +197,14 @@ class Contig
         Contig(Contig const& leftContig, Contig const& rightContig, Len_t _contigNum = 0, Len_t _blockLenTStr = 250, Len_t _contigBlockLen = 1000) : 
             tightString(NULL), 
             readPositions(NULL), 
-            depths(NULL), 
-            quality(NULL), 
+            /* delete depth code */
+            /*
+               depths(NULL), 
+               */
+            /* delete quality code */
+            /*
+               quality(NULL), 
+               */
             contigNum(_contigNum), 
             endOtherContigPosReverse(0), 
             endOtherContigPosForward(0), 
@@ -130,8 +219,14 @@ class Contig
 
             tightString = contig.tightString;
             readPositions = contig.readPositions;
-            depths = contig.depths;
-            quality = contig.quality;
+            /* delete depth code */
+            /*
+               depths = contig.depths;
+               */
+            /* delete quality code */
+            /*
+               quality = contig.quality;
+               */
             readPositionsHash = contig.readPositionsHash;
             contigNum = contig.contigNum;
             endOtherContigPosReverse = contig.endOtherContigPosReverse;
@@ -139,7 +234,7 @@ class Contig
             blockLenTStr = contig.blockLenTStr;
             contigBlockLen = contig.contigBlockLen;
             ownFlag = contig.ownFlag;
-            barcodes = contig.barcodes ;
+            barcode_info = contig.barcode_info ;
             const_cast<Contig&>(contig).ownFlag = false;
         }
 
@@ -149,8 +244,14 @@ class Contig
                 purge();
                 tightString = contig.tightString;
                 readPositions = contig.readPositions;
-                depths = contig.depths;
-                quality = contig.quality;
+                /* delete depth code */
+                /*
+                   depths = contig.depths;
+                   */
+                /* delete quality code */
+                /*
+                   quality = contig.quality;
+                   */
                 readPositionsHash = contig.readPositionsHash;
                 contigNum = contig.contigNum;
                 endOtherContigPosReverse = contig.endOtherContigPosReverse;
@@ -158,7 +259,7 @@ class Contig
                 blockLenTStr = contig.blockLenTStr;
                 contigBlockLen = contig.contigBlockLen;
                 ownFlag = contig.ownFlag;
-                barcodes = contig.barcodes;
+                barcode_info = contig.barcode_info;
                 const_cast<Contig&>(contig).ownFlag = false;
             }
             return *this;
@@ -182,10 +283,16 @@ class Contig
             }
 
             readPositions = new ArrayBlock< LinkedList<Number_t> >(contigBlockLen, blockLen);
-            depths = new ArrayBlock<Len_t>(contigBlockLen, blockLen);
-            (*depths).clear(0, blockLen);
-            quality = new ArrayBlock<Len_t>(contigBlockLen, blockLen);
-            (*quality).clear(0, blockLen);
+            /* delete depth code */
+            /*
+               depths = new ArrayBlock<Len_t>(contigBlockLen, blockLen);
+               (*depths).clear(0, blockLen);
+               */
+            /* delete quality code */
+            /*
+               quality = new ArrayBlock<Len_t>(contigBlockLen, blockLen);
+               (*quality).clear(0, blockLen);
+               */
         }
 
         void purge() {
@@ -193,17 +300,28 @@ class Contig
             if (ownFlag) {
                 if (tightString) delete tightString;
                 if (readPositions) delete readPositions;
-                if (depths) delete depths;
-                if (quality) delete quality;
+                /* delete depth code */
+                /*
+                   if (depths) delete depths;
+                   */
+                /* delete quality code */
+                /*
+                   if (quality) delete quality;
+                   */
             }
 
             tightString = NULL;
             readPositions = NULL;
-            depths = NULL;
-            quality = NULL;
-
+            /* delete depth code */
+            /*
+               depths = NULL;
+               */
+            /* delete quality code */
+            /*
+               quality = NULL;
+               */
             readPositionsHash.purge();
-            barcodes.clear();
+            barcode_info.purge();
             //		readPositionsHash.clear();
         }
 
@@ -225,14 +343,23 @@ class Contig
             reverseReadPosition(*readPositions, readPositionsReverse, 0, getLength());
         }
 
-        ArrayBlock<Len_t> const& getDepths() const { return *depths; }
-        ArrayBlock<Len_t>& getDepths() { return *depths; }
-        void setDepths(ArrayBlock<Len_t>* _depths) { depths = _depths; }
+        /* delete depth code */
+        /*
+           ArrayBlock<Len_t> const& getDepths() const { return *depths; }
+           ArrayBlock<Len_t>& getDepths() { return *depths; }
+           void setDepths(ArrayBlock<Len_t>* _depths) { depths = _depths; }
+           */
+        /* delete quality code */
+        /*
+           ArrayBlock<Len_t> const& getQuality() const { return *quality; }
+           ArrayBlock<Len_t>& getQuality() { return *quality; }
+           void setQuality(ArrayBlock<Len_t>* _quality) { quality = _quality; }
+           */
+        const std::set<int> & getBarodes() const { return barcode_info.barcodes ; }
+        BarcodeInfo & getBarodeInfo() { return barcode_info ; }
 
-        ArrayBlock<Len_t> const& getQuality() const { return *quality; }
-        ArrayBlock<Len_t>& getQuality() { return *quality; }
-        void setQuality(ArrayBlock<Len_t>* _quality) { quality = _quality; }
-        const std::set<int> & getBarodes() const { return barcodes ; }
+        const BarcodeInfo & getBarodeInfo() const { return barcode_info ; }
+
         HashTable< Number_t, LinkedList<Len_t> >& getReadPositionsHash() { return readPositionsHash; }
         //	map< Number_t, LinkedList<Len_t> >& getReadPositionsHash() { return readPositionsHash; }
 
@@ -261,7 +388,8 @@ class Contig
                     ListElement<Number_t> const* ptr;
                     for (ptr = (*readPositions)[pos].getHead(); ptr != 0; ptr = ptr->getNext()) {
 
-                        ReadElement const& readElement = (*readAccessor).getRead(ptr->getDatum());
+                        ReadElement const& readElement =
+                            GlobalAccesser::the_read_accessor->getRead(ptr->getDatum());
                         Len_t depth = readElement.getDepth();
                         for (Len_t j=0; j<depth; j++) {
                             Number_t iRead = readElement.getSerialNums()[j];
@@ -288,7 +416,8 @@ class Contig
                     ListElement<Number_t> const* ptr;
                     for (ptr = readPositionsReverse[pos].getHead(); ptr != 0; ptr = ptr->getNext()) {
 
-                        ReadElement const& readElement = (*readAccessor).getRead(ptr->getDatum());
+                        ReadElement const& readElement =
+                            GlobalAccesser::the_read_accessor->getRead(ptr->getDatum());
                         Len_t depth = readElement.getDepth();
                         for (Len_t j=0; j<depth; j++) {
                             Number_t iRead = readElement.getSerialNums()[j];
@@ -304,9 +433,12 @@ class Contig
 
 
 
-            for (pos=0; pos<length; ++pos) {
-                fout << (*depths)[pos] << ',';
-            }
+            /* delete depth code */
+            /*
+               for (pos=0; pos<length; ++pos) {
+               fout << (*depths)[pos] << ',';
+               }
+               */
             fout << std::endl;
 
         }
@@ -343,7 +475,8 @@ class Contig
                 ListElement<Number_t> const* ptr;
                 for (ptr = (*readPositions)[pos].getHead(); ptr != 0; ptr = ptr->getNext()) {
 
-                    ReadElement const& readElement = (*readAccessor).getRead(ptr->getDatum());
+                    ReadElement const& readElement =
+                            GlobalAccesser::the_read_accessor->getRead(ptr->getDatum());
                     Len_t depth = readElement.getDepth();
                     for (Len_t j=0; j<depth; j++) {
                         Number_t iRead = readElement.getSerialNums()[j];
@@ -371,7 +504,10 @@ class Contig
             if (len<overlapParam) return;
             TightString& tStrContig = *(this->tightString);
             ArrayBlock< LinkedList<Number_t> >& readPositions = *(this->readPositions);
-            ArrayBlock<Len_t>& depths = *(this->depths);
+            /* delete depth code */
+            /*
+               ArrayBlock<Len_t>& depths = *(this->depths);
+               */
             if (start < 0)
                 start = 0;
             if ( (len == 0) || (len > getLength()-start) )
@@ -384,7 +520,8 @@ class Contig
                 tStrContig.readTightStringFragment(i, i+overlapParam, tStrOverlap);
 
                 LinkedList<ReadElement> reads;
-                (*readAccessor).getReadsBeginWith(tStrOverlap,reads,false,ReadAccessor::inAll);
+                GlobalAccesser::the_read_accessor->getReadsBeginWith
+                    (tStrOverlap,reads,false,ReadAccessor::inAll);
 
                 if (reads.getCount() > maxReadsCount)
                     continue;
@@ -429,12 +566,15 @@ class Contig
                         readPositions[i].append(readElement.getID());
 
                         appendContigPos(readElement, i);
-                        appendBarcodes(readElement);
+                        appendBarcodes(readElement,i);
+                        /* delete depth code */
+                        /*
                         //set depths
                         Len_t depth = readElement.getDepth();
                         for(Len_t j=0; j<lengthRemain+overlapParam; j++) {
-                            depths[i+j] += depth;
+                        depths[i+j] += depth;
                         }
+                        */
                     }
                 }
 
@@ -465,9 +605,10 @@ class Contig
                 }
                 }
 
-                void appendBarcodes(ReadElement const& readElement)
+                void appendBarcodes(ReadElement const& readElement, int pos )
                 {
-                    SetAdd(barcodes,readElement.getBarodes());
+                    barcode_info.UpdateBarcode(readElement , pos );
+                    //SetAdd(barcodes,readElement.getBarodes());
                 }
 
                 void appendBarcodes()
@@ -482,7 +623,9 @@ class Contig
                     for (Len_t i=start; i<end; ++i) {
                         ListElement<Number_t> const* ptr;
                         for (ptr = readPositions[i].getHead(); ptr != 0; ptr = ptr->getNext()) {
-                            appendBarcodes( readAccessor->getRead(ptr->getDatum()) );
+                            appendBarcodes(
+                                    GlobalAccesser::the_read_accessor->getRead(ptr->getDatum()) 
+                                    , i );
                         }
                     }
                 }
@@ -557,14 +700,27 @@ class Contig
 
                         //			(*readPositions).increase(newLength);
                         (*readPositions).setLength(newLength);
-                        (*depths).increase(newLength);
-                        (*quality).increase(newLength);
+                        /* delete depth code */
+                        /*
+                           (*depths).increase(newLength);
+                           */
+
+                        /* delete quality code */
+                        /*
+                           (*quality).increase(newLength);
+                           */
                     }
 
                     (*readPositions).append(contigAppend.getReadPositions(), appendLen, start, startOrigin);
-                    (*depths).append(contigAppend.getDepths(), appendLen, start, startOrigin);
-                    (*quality).append(contigAppend.getQuality(), appendLen, start, startOrigin);
+                    /* delete depth code */
+                    /*
+                       (*depths).append(contigAppend.getDepths(), appendLen, start, startOrigin);
+                       */
 
+                    /* delete quality code */
+                    /*
+                       (*quality).append(contigAppend.getQuality(), appendLen, start, startOrigin);
+                       */
                     appendContigPos(startOrigin, appendLen);
                     appendBarcodes(startOrigin, appendLen);
                 }
@@ -583,8 +739,14 @@ class Contig
 
                         //			(*readPositions).increase(newLength);
                         (*readPositions).setLength(newLength);
-                        (*depths).increase(newLength);
-                        (*quality).increase(newLength);
+                        /* delete depth code */
+                        /*
+                           (*depths).increase(newLength);
+                           */
+                        /* delete quality code */
+                        /*
+                           (*quality).increase(newLength);
+                           */
                     }
                     else {
 
@@ -617,22 +779,34 @@ class Contig
                     ArrayBlock< LinkedList<Number_t> >& readPositions = *new ArrayBlock< LinkedList<Number_t> >(contigBlockLen, combineBlockLen);
                     readPositions.combine(leftContig.getReadPositions(), leftLength, rightContig.getReadPositions(), rightLength);
 
-                    ArrayBlock<Len_t>& depths = *new ArrayBlock<Len_t>(contigBlockLen, combineBlockLen);
-                    depths.clear(0, combineBlockLen);
-                    depths.combine(leftContig.getDepths(), leftLength, rightContig.getDepths(), rightLength);
+                    /* delete depth code */
+                    /*
+                       ArrayBlock<Len_t>& depths = *new ArrayBlock<Len_t>(contigBlockLen, combineBlockLen);
+                       depths.clear(0, combineBlockLen);
+                       depths.combine(leftContig.getDepths(), leftLength, rightContig.getDepths(), rightLength);
+                       */
 
-                    ArrayBlock<Len_t>& quality = *new ArrayBlock<Len_t>(contigBlockLen, combineBlockLen);
-                    quality.clear(0, combineBlockLen);
-                    quality.combine(leftContig.getQuality(), leftLength, rightContig.getQuality(), rightLength);
-
+                    /* delete quality code */
+                    /*
+                       ArrayBlock<Len_t>& quality = *new ArrayBlock<Len_t>(contigBlockLen, combineBlockLen);
+                       quality.clear(0, combineBlockLen);
+                       quality.combine(leftContig.getQuality(), leftLength, rightContig.getQuality(), rightLength);
+                       */
                     purge();
                     setTightString(&tStrContig);
                     setReadPositions(&readPositions);
-                    setDepths(&depths);
-                    setQuality(&quality);
+                    /* delete depth code */
+                    /*
+                       setDepths(&depths);
+                       */
+                    /* delete quality code */
+                    /*
+                       setQuality(&quality);
+                       */
                     getReadPositionsHash().initialize();
                     appendContigPos();
-                    barcodes = SetUnion( leftContig.barcodes , rightContig.barcodes);
+                    barcode_info.purge();
+                    appendBarcodes() ;
                 }
 
                 // function: 	 reverse
@@ -659,20 +833,32 @@ class Contig
 
                     ArrayBlock<Len_t>& depthsReverse = *new ArrayBlock<Len_t>(contigBlockLen, reverseBlockLen);
                     depthsReverse.clear(0, reverseBlockLen);
-                    (*depths).reverse(depthsReverse, start, end);
-
+                    /* delete depth code */
+                    /*
+                       (*depths).reverse(depthsReverse, start, end);
+                       */
                     ArrayBlock<Len_t>& qualityReverse = *new ArrayBlock<Len_t>(contigBlockLen, reverseBlockLen);
                     qualityReverse.clear(0, reverseBlockLen);
-                    (*quality).reverse(qualityReverse, start, end);
-
+                    /* delete quality code */
+                    /*
+                       (*quality).reverse(qualityReverse, start, end);
+                       */
                     contigReverse.purge();
                     contigReverse.setTightString(&tStrContigReverse);
                     contigReverse.setReadPositions(&readPositionsReverse);
-                    contigReverse.setDepths(&depthsReverse);
-                    contigReverse.setQuality(&qualityReverse);
+                    /* delete depth code */
+                    /*
+                       contigReverse.setDepths(&depthsReverse);
+                       */
+                    /* delete quality code */
+                    /*
+                       contigReverse.setQuality(&qualityReverse);
+                       */
                     contigReverse.getReadPositionsHash().initialize();
                     contigReverse.appendContigPos();
-                    contigReverse.barcodes = barcodes ;
+                    contigReverse.barcode_info.purge();
+                    contigReverse.appendBarcodes() ;
+
                 }
 
                 // function: 	 reverseReadPosition
@@ -693,7 +879,8 @@ class Contig
                         ListElement<Number_t> const* ptr;
                         for (ptr = readPositions[i].getHead(); ptr != 0; ptr = ptr->getNext()) {
 
-                            ReadElement const& readElement = (*readAccessor).getRead(ptr->getDatum());
+                            ReadElement const& readElement =
+                                GlobalAccesser::the_read_accessor->getRead(ptr->getDatum());
                             int pos = end-i-readElement.getLen();
                             if (pos >= 0) {
                                 readPositionsReverse[pos].append(readElement.getID());
@@ -707,6 +894,5 @@ class Contig
 
             };
 
-            ReadAccessor* Contig::readAccessor = NULL;
 
 #endif /*CONTIG_HPP_*/

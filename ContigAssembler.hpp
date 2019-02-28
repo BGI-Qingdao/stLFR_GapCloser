@@ -38,7 +38,6 @@ class ContigAssembler
     protected:
         char* outfile;
         std::ofstream& fout;
-        //	ofstream foutDG;
         std::ofstream foutContig;
         ReadAccessor& readAccessor;
         PairInfo const& pairInfo;
@@ -47,19 +46,26 @@ class ContigAssembler
         pthread_t* threadsID;
 
         Len_t numberOfContigs;
-        Len_t maxReadLength;
-        Len_t reExtendLength;
-
-        Short_Len_t overlapMode;
         Short_Len_t overlapParam;
 
         pthread_mutex_t mutexNumberOfContigs;
         pthread_mutex_t mutexOutput;
         pthread_mutex_t mutexContigsPos;
 
+        //	ofstream foutDG;
+        /*
+        Len_t maxReadLength;
+        Len_t reExtendLength;
+        */
+        /*Short_Len_t overlapMode;*/
+
     public:
 
-        ContigAssembler(char* _outfile , std::ofstream& _fout, ReadAccessor& _readAccessor, PairInfo const& _pairInfo, Len_t _threadSum, Len_t _maxReadLength=35, Short_Len_t _overlapMode=fixedOverlapMode, Short_Len_t _overlapParam=25) : 
+        ContigAssembler(char* _outfile , std::ofstream& _fout
+                , ReadAccessor& _readAccessor, PairInfo const& _pairInfo
+                , Len_t _threadSum /*, Len_t _maxReadLength=35*/
+               /* , Short_Len_t _overlapMode=fixedOverlapMode */
+                , Short_Len_t _overlapParam=25) : 
             outfile(_outfile), 
             fout(_fout), 
             readAccessor(_readAccessor), 
@@ -67,9 +73,10 @@ class ContigAssembler
             threadSum(_threadSum), 
             threadsID(new pthread_t[_threadSum]), 
             numberOfContigs(0), 
-            maxReadLength(_maxReadLength), 
-            reExtendLength(_maxReadLength), 
-            overlapMode(_overlapMode), 
+            /*
+            maxReadLength(_maxReadLength),
+            reExtendLength(_maxReadLength),*/
+            /*overlapMode(_overlapMode), */
             overlapParam(_overlapParam)
     {
         pthread_mutex_init(&mutexNumberOfContigs, NULL);

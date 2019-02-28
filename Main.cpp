@@ -29,21 +29,39 @@
 #include "readhash/Read.hpp"
 #include "GlobalAccesser.hpp"
 
-// All threshold here
-float    Threshold::NoConflictThreshold ;
-int      Threshold::max_allowed_conflict ;
-int      Threshold::max_reads_count ;
-int      Threshold::min_reads_count ;
-int      Threshold::min_sub_reads_count;
-int      Threshold::max_error_count ;
-int      Threshold::max_reads_depth ;
-int      Threshold::the_k ;
-int      Threshold::max_low_depth ;
-int      Threshold::min_nucleotide_depth ;
+/*****************************************
+ *
+ *  All threshold here
+ *
+ * ***************************************/
+
+// The K Value 
+int      Threshold::the_k = 27 ;
+
+// For map read to contig 
+int      Threshold::max_error_count = 2 ;
+int      Threshold::max_reads_depth = 1000 ;
+
+// For reads set
+int      Threshold::max_reads_count = 10000 ;
+int      Threshold::min_reads_count = 1 ;
+
+// For sub read set 
+int      Threshold::max_small_gap = 100 ;
+int      Threshold::min_sub_reads_count = 10 ;
+
+// For consensus
+float    Threshold::NoConflictThreshold = 0.8f ;
+int      Threshold::max_allowed_conflict = 2 ;
+int      Threshold::min_nucleotide_depth = 2 ;
+int      Threshold::max_accept_low_depth = 2 ;
 
 // global accessor class pointer here;
-ReadAccessor *  GlobalAccesser::the_read_accessor;
-PairInfo *      GlobalAccesser::the_pair_info ;
+ReadAccessor *  GlobalAccesser::the_read_accessor = NULL;
+PairInfo *      GlobalAccesser::the_pair_info = NULL;
+TagId           GlobalAccesser::barcode_ider ;
+
+Read          * ReadElement::read=NULL; // the ReadAccesser will assign this 
 
 void usage(void)
 {
@@ -57,23 +75,29 @@ void usage(void)
 
     std::cout << "Usage:" << std::endl;
     std::cout << "	GapCloser [options]" << std::endl;
+    std::cout << "Basic options :\n";
     std::cout << "	-a	<string>	input scaffold file name, required." << std::endl;
     std::cout << "	-b	<string>	input library info file name, required." << std::endl;
     std::cout << "	-o	<string>	output file name, required." << std::endl;
-
-
     std::cout << "	-l	<int>		maximum read length (<=155), default=" << maxReadLength << ".\n";
-    /*	std::cout << "	-m	<int>	overlap mode:" << std::endl;
-        std::cout << "		1:	fixed overlap mode" << std::endl;
-        std::cout << "		2:	max overlap first mode" << std::endl;
-        */
-    std::cout << "	-p	<int>		overlap param(<=31), default=25.\n";
+    std::cout << "	-p	<int>		overlap param(<=31) [the kvalue], default=25.\n";
+
+    std::cout << "Performance options :\n";
     std::cout << "	-t	<int>		thread number, default=1.\n";
+    std::cout << "	-c	<float>		hash load fractor, default=0.75.\n";
+
+
+    std::cout << " ---------- new parameters below : ---------\n";
+    std::cout << "	-1	<int>		maximum read length (<=155), default=" << maxReadLength << ".\n";
+
+
+    std::cout << " ---------- new parameters end     ---------\n";
 
     std::cout << "	-h	-?		output help information." << std::endl;
     std::cout << std::endl;
     exit(1);
 }
+
 Len_t Read::DATA_MAXLEN = (Read::DATA_ARRAY_SIZE*bitsizeof(Number_t) + Read::BITLEN_DATA_REMAIN) / 2 ;
 
 int main(int argc, char *argv[])
@@ -87,7 +111,7 @@ int main(int argc, char *argv[])
     float deviation=0.5;
     Len_t endNumLen=10;
     Len_t mismatchLen=5;
-    Short_Len_t overlapMode=ContigAssembler::fixedOverlapMode;
+    /*Short_Len_t overlapMode=ContigAssembler::fixedOverlapMode;*/
     Short_Len_t overlapParam=25;
     float loadFactor = 0.75;
     Len_t threadSum=1;
@@ -95,19 +119,20 @@ int main(int argc, char *argv[])
     int c;
     while((c=getopt(argc, argv, "i:o:e:b:a:l:m:p:c:t:N:")) !=-1) {
         switch(c) {
-            case 'i': infile=optarg; break;
-            case 'o': outfile=optarg; break;
-            case 'e': inPairEndInfo=optarg; break;
-            case 'b': inLibInfo=optarg; break;
-
             case 'a': infileContig=optarg; break;
-
+            case 'b': inLibInfo=optarg; break;
+            case 'o': outfile=optarg; break;
             case 'l': maxReadLength=atoi(optarg); break;
-            case 'm': overlapMode=atoi(optarg); break;
             case 'p': overlapParam=atoi(optarg); break;
-            case 'c': loadFactor=atof(optarg); break;
             case 't': threadSum=atoi(optarg); break;
+            case 'c': loadFactor=atof(optarg); break;
             case 'N': NNumber = atoi(optarg); break;
+
+            case 'e': inPairEndInfo=optarg; break; /* why */
+            case 'i': infile=optarg; break; /* why */
+
+            /*case 'm': overlapMode=atoi(optarg); break;*/
+
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -182,6 +207,7 @@ int main(int argc, char *argv[])
     std::cout << "    -l (max read len):  " << (int)Read::DATA_MAXLEN << std::endl;
     std::cout << "    -p (overlap para):  " << (int)overlapParam << std::endl;
     std::cout << "    -t (thread num):    " << (int)threadSum << std::endl << std::endl;
+    std::cout << "    -c (map loadFactor):" << (int)loadFactor<< std::endl << std::endl;
 
 
     PairInfo* pairInfo;
@@ -201,7 +227,12 @@ int main(int argc, char *argv[])
     ReadAccessor readAccessor(*readHash, *pairInfo);
     ContigTable contigTable(finContig, endNumLen, mismatchLen);
 
-    GapCloser gapcloser(outfile, fout, readAccessor, *pairInfo, contigTable, threadSum, deviation, endNumLen, mismatchLen, maxReadLength, overlapMode, overlapParam);
+    GapCloser gapcloser(outfile, fout, readAccessor,
+            *pairInfo, contigTable, threadSum,
+            deviation, endNumLen, mismatchLen
+           /* , maxReadLength */
+           /* , overlapMode */
+            , overlapParam);
     gapcloser.assemble();
 
     delete pairInfo;

@@ -1,8 +1,10 @@
 #ifndef CONTIGTOOL_HPP__
 #define CONTIGTOOL_HPP__
 
+#include <tuple>
 #include "Contig.hpp"
 #include "Utils.hpp"
+#include "ContigForFill.hpp"
 #include "GlobalAccesser.hpp"
 #include "readtool/PairInfo.hpp"
 
@@ -40,19 +42,84 @@ struct  ContigTool
                 , int position /* in 1 base */
                 )
         {
-                TightString  read_str ;
-                readElement.getSequence(read_str) ;
-                int match_check_num = 0 ;
-                int unmatch =  CheckUnmatchNum( 
-                        contig.getTightString(),
-                        contig.getLength() ,
-                        read_str ,
-                        readElement.getLen() ,
-                        position - 1 , /*1base->0base*/
-                        match_check_num);
+            TightString  read_str ;
+            readElement.getSequence(read_str) ;
+            int match_check_num = 0 ;
+            int unmatch = CheckUnmatchNum( 
+                    contig.getTightString(),
+                    contig.getLength() ,
+                    read_str ,
+                    readElement.getLen() ,
+                    position - 1 , /*1base->0base*/
+                    match_check_num);
 
-                return  unmatch <= Threshold::max_error_count ;
+            return  unmatch <= Threshold::max_error_count ;
         };
+
+        static std::tuple<bool,int,int>
+            IsGapFinish(const Contig & contig
+                , const Contig & nextContig
+                , const GapInfo & gap
+                , int contigLenPrevious
+                )
+        {
+            int contigLen = contig.getLength() ;
+            int nextCtgLen = nextContig.getLength() ;
+            int endNumLen = Threshold::the_k ;
+            const TightString & tStrContig = contig.getTightString();
+
+            for (int pos=contigLenPrevious-endNumLen;
+                    pos<(contigLen-endNumLen); pos++)
+            {
+                Number_t endNum;
+                tStrContig.readTightStringFragment
+                    (pos, pos+endNumLen, endNum);
+                int endNumPosInNextCtg = 0;	
+                if (gap.endNumHash.find(endNum)
+                    && ((gap.endNumHash[endNum])!=(Len_t)-1) )
+                {   //seed was found in next contig	
+                    endNumPosInNextCtg = gap.endNumHash[endNum] ;
+                    Len_t ctg1InFrontofCtg2 = 
+                        (pos >= endNumPosInNextCtg)?1:0;
+                    Len_t ctg1CompareLen = 
+                        (ctg1InFrontofCtg2==1)?
+                        (contigLen - pos + endNumPosInNextCtg):contigLen;
+                    Len_t ctg2CompareLen = 
+                        (ctg1InFrontofCtg2==1)?
+                        nextCtgLen:(nextCtgLen-(endNumPosInNextCtg-pos));
+                    Len_t compareLen = 
+                        ctg1CompareLen < ctg2CompareLen ? 
+                        ctg1CompareLen : ctg2CompareLen;
+                    TightString const& nexttStrContig = 
+                        nextContig.getTightString();
+                    Len_t errorSum = 0;
+                    Len_t posInCtg1 = (pos>=endNumPosInNextCtg)
+                        ?(pos-endNumPosInNextCtg):0;
+                    Len_t posInCtg2 = (pos>=endNumPosInNextCtg)?
+                        0:(endNumPosInNextCtg-pos);
+
+                    // calculate mismatch number
+                    for (int i=0; i<(int)compareLen; ++i) {
+                        if (tStrContig[posInCtg1] 
+                                != nexttStrContig[posInCtg2]){
+                            errorSum++;
+                            if ((int)errorSum > Threshold::max_error_count)
+                            {
+                                break;
+                            }
+                        }
+                        posInCtg1++;
+                        posInCtg2++;
+                    }
+
+                    if ((int)errorSum > Threshold::max_error_count) 
+                        continue;
+                    return std::make_tuple( true, pos, endNumPosInNextCtg);
+                }
+            }
+            return std::make_tuple(false,-1,-1);
+        }
+
 
         static bool 
             IsEligibleBarcodeCheckRead( ReadElement const& readElement
@@ -139,12 +206,16 @@ struct  ContigTool
             auto & readPositions = contig.getReadPositions() ;
             readPositions[offset].append(readElement.getID());
             contig.appendContigPos(readElement, offset);
-            contig.appendBarcodes(readElement);
+            contig.appendBarcodes(readElement,offset);
         }
 
     private :
 
-        static void getContigPos(LinkedList<Number_t>& ids, std::vector<int>& contigPos, const Contig& contig) {
+        static void getContigPos(
+                LinkedList<Number_t>& ids
+                , std::vector<int>& contigPos
+                , const Contig& contig)  
+        {
             ListElement<Number_t> const* ptrId;
             for (ptrId = ids.getHead(); ptrId != 0; ptrId = ptrId->getNext()) {
                 Number_t id = ptrId->getDatum();
