@@ -14,8 +14,6 @@ struct  ContigTool
                 const Number_t & kmer
                 , const Contig & contig 
                 , int position
-                , int max_reads_depth 
-                , int max_error_count
                 )
         {
             std::vector<ReadElement> ret ;
@@ -27,10 +25,21 @@ struct  ContigTool
             for (ptrRead = reads.getHead(); ptrRead != 0; ptrRead = ptrRead->getNext()) 
             {
                 ReadElement const& readElement = ptrRead->getDatum();
-                if ((int)readElement.getDepth() >= max_reads_depth ) 
-                {
+                if ((int)readElement.getDepth()
+                        > Threshold::max_reads_depth ) 
                     continue ;
-                }
+                if( ! IsReadMatchContig( readElement , contig , position) )
+                    continue ;
+                ret.push_back( readElement ) ;
+            }
+            return ret ;
+        }
+
+        static bool IsReadMatchContig( const ReadElement & readElement 
+                , const Contig & contig 
+                , int position /* in 1 base */
+                )
+        {
                 TightString  read_str ;
                 readElement.getSequence(read_str) ;
                 int match_check_num = 0 ;
@@ -42,14 +51,8 @@ struct  ContigTool
                         position - 1 , /*1base->0base*/
                         match_check_num);
 
-                if( unmatch > max_error_count )
-                {
-                    continue ;
-                }
-                ret.push_back( readElement ) ;
-            }
-            return ret ;
-        }
+                return  unmatch <= Threshold::max_error_count ;
+        };
 
         static bool 
             IsEligibleBarcodeCheckRead( ReadElement const& readElement
@@ -125,6 +128,20 @@ struct  ContigTool
                 }
                 return PECount > 0 ;
             }
+
+        static void AddReadIntoContig(
+                Contig & contig  ,
+                const ReadElement & readElement ,
+                int offset /* 0base*/
+                )
+        {
+
+            auto & readPositions = contig.getReadPositions() ;
+            readPositions[offset].append(readElement.getID());
+            contig.appendContigPos(readElement, offset);
+            contig.appendBarcodes(readElement);
+        }
+
     private :
 
         static void getContigPos(LinkedList<Number_t>& ids, std::vector<int>& contigPos, const Contig& contig) {

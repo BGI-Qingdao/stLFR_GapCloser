@@ -668,12 +668,14 @@ class GapCloser : public ContigAssembler
         //output:         gapContig -- extend sequence in gap
         //                   gapResult -- filled gap result
         void ConsensusGap(Contig& contig
-                , Len_t realContigLen
+                , Len_t /*realContigLen*/
                 , const Contig & nextContig
                 , const GapInfo & gap
                 , Contig& gapContig
-                , GapInfo& gapResult ) {
+                , GapInfo& gapResult ) 
+        {
 
+            int originalLen = contig.getLength();
             //TODO 
             //CleanContigBarcode(start , end , contig)
             ConsensusArea prev_area ;
@@ -692,36 +694,104 @@ class GapCloser : public ContigAssembler
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
                 if( consensusResult.is_consensus_done() )
                 {
-                    updateContig(contig,consensusResult);
-                    updateContigBarcode(contig,consensusResult,readMatrix);
-                    updateGap( gapResult , consensusResult ) ;
+                    updateContig(contig , 
+                            readMatrix,
+                            consensusResult);
                     if( checkGapIsFinished( contig, consensusResult ,gap) )
+                    {
+                        int extend_len = contig.getLength() - originalLen ;
+                        gapContig.append(contig,originalLen , extend_len );
+                        gapResult.length = extend_len ;
+                        gapResult.isFilled = true ;
                         break ;
+                    }
                     else 
                         continue ;
                 }
                 else
                     break;
             }
-            //TODO
-            //contigResult = contig ;
-            //
-
-            //TODO report ...
+            if( ! gapResult.isFilled &&  (int) contig.getLength() > originalLen )
+            {
+                int extend_len = contig.getLength() - originalLen ;
+                gapContig.append(contig,originalLen , extend_len );
+                gapResult.length = extend_len ;
+                gapResult.isFilled = false ;
+            }
         }
 
-        void updateContigBarcode( Contig & contig , const ConsensusResult & consensusResult , const ReadMatrix &readMatrix)
+        void updateContig( Contig & contig
+                , const ReadMatrix &readMatrix
+                ,const ConsensusResult & consensusResult 
+                )
         {
+            const auto & the_area = readMatrix.Area() ;
+            int contigRemainLen = contig.getLength()
+                - the_area.consensus_start_pos_in_contig + 1;
 
-        }
-        void updateGap( GapInfo & contig , const ConsensusResult & consensusResult)
-        {
-            //TODO 
+            int extend_len = consensusResult.getLength() - contigRemainLen ;
+
+            TightString & contig_seq = contig.getTightString();
+            TightString consensus_seq = consensusResult.getTightString() ;
+            // step 1 , Update sequence first 
+            for( int i = 0 ; i < contigRemainLen ; i ++ )
+            { // 1.1 check for replace
+                if ( contig_seq[the_area.consensus_start_pos_in_contig+i] 
+                        != consensus_seq[i] )
+                {
+                    contig_seq.writeNucleotideAtPosition(
+                            consensus_seq[i]
+                            ,the_area.consensus_start_pos_in_contig+i
+                            );
+                }
+            }
+
+            if( extend_len > 0 )
+            { // 1.2 extend contig
+
+                TightString extend_seq = 
+                    consensusResult.getTightString(
+                            contigRemainLen-1
+                            ,extend_len ) ;
+                contig.append( extend_seq , extend_len ); 
+            }
+
+            // Step 2 , Update reads && barcodes
+            if ( extend_len > 0 )
+            {
+                for( int i = 0 ; i < extend_len ; i++ )
+                {   // for each point 
+                    int contig_pos = 
+                        the_area.left_most_pos_in_contig + i ;
+                    if( readMatrix.HasReads(contig_pos) )
+                    {
+                        auto & keeper = 
+                            readMatrix.GetInfoKeeper(contig_pos);
+                        UpdateAInfoKeeper2Contig(contig
+                                ,keeper,contig_pos);
+                    }
+                }
+            }
         }
 
-        void updateContig( Contig & contig , const ConsensusResult & consensusResult)
+        void UpdateAInfoKeeper2Contig( Contig & contig ,
+                const PositionInfoKeeper & keeper
+                , int contig_pos /*1base*/
+                )
         {
-            //TODO 
+            for( const auto & pair : keeper )
+            {
+                const  auto & reads = pair.second.reads ;
+                for( const auto & read : reads )
+                {   // for each read
+                    if( ContigTool::IsReadMatchContig
+                            ( read , contig ,contig_pos ) )
+                    {
+                        ContigTool::AddReadIntoContig(
+                                contig,read,contig_pos - 1 );
+                    }
+                }
+            }
         }
 
         bool checkGapIsFinished(const Contig & contig 

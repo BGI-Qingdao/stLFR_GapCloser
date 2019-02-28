@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <cassert>
+#include <tuple>
 
 #include "Common.hpp"
 #include "ConsensusConfig.hpp"
@@ -145,9 +146,28 @@ struct PositionInfoKeeper
 
 struct ConsensusResult
 {
-
     std::string       consensus_str;
     std::vector<bool> conflict_flags;
+    std::vector<bool> depth_flags;
+
+    TightString getTightString() const 
+    {
+        TightString ret(consensus_str.c_str() , 
+                consensus_str.length());
+        return ret ;
+    }
+
+    TightString getTightString(int pos , int len ) const 
+    {
+        TightString ret(consensus_str.c_str() + pos  , 
+                len);
+        return ret ;
+    }
+
+    int getLength() const {
+        return consensus_str.length() ;
+    }
+
     int conflict_num() const {
         int i = 0 ;
         for( bool x : conflict_flags )
@@ -157,9 +177,20 @@ struct ConsensusResult
         return i ;
     }
 
+    int low_depth() const {
+        int i = 0 ;
+        for( bool x : depth_flags )
+            if( !x )
+                i++ ;
+
+        return i ;
+    }
+
     bool is_consensus_done() const 
     {
-        return ! (conflict_num() > Threshold::max_allowed_conflict );
+        return  (conflict_num() <= Threshold::max_allowed_conflict )
+            && ( low_depth() <= Threshold::max_low_depth)
+            ;
     }
 };
 
@@ -169,7 +200,7 @@ struct ConsensusMatrix
     private:
         std::vector<std::array<int,4>> depth_matrix;
 
-        std::pair<char , bool> consensus_pos(const std::array<int,4> &  a) const
+        std::tuple<char , bool , bool > consensus_pos(const std::array<int,4> &  a) const
         {
             int total_depth = 0 ;
             int highest_depeth = 0 ;
@@ -183,13 +214,14 @@ struct ConsensusMatrix
                     highest_nucleotide = i ; 
                 }
             }
+            bool is_low_depth = (total_depth < Threshold::min_nucleotide_depth );
             if ( total_depth == 0 )
-                return std::make_pair( 'N' , true ) ;
+                return std::make_tuple( 'N' , true , ! is_low_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
             if( highest_depeth >= (float)total_depth * Threshold::NoConflictThreshold )
-                return std::make_pair( ret , true ) ;
+                return std::make_tuple( ret , true , ! is_low_depth ) ;
             else 
-                return std::make_pair( ret , false );
+                return std::make_tuple( ret , false , ! is_low_depth ) ;
         }
 
     public:
@@ -208,11 +240,16 @@ struct ConsensusMatrix
             ConsensusResult ret ;
             for ( const auto & m : depth_matrix )
             {
-                auto consensus_ret = consensus_pos( m );
-                if( consensus_ret.first == 'N' )
+                char nucleotide ;
+                bool not_confilict ;
+                bool not_low_depth ;
+                std::tie( nucleotide,not_confilict,not_low_depth) 
+                    = consensus_pos( m );
+                if( nucleotide == 'N' )
                     break ;
-                ret.conflict_flags.push_back(consensus_ret.second);
-                ret.consensus_str.push_back( consensus_ret.first );
+                ret.conflict_flags.push_back(not_confilict);
+                ret.depth_flags.push_back(not_low_depth);
+                ret.consensus_str.push_back(nucleotide);
             }
             return ret ;
         }
@@ -274,6 +311,22 @@ struct ReadMatrix
         }
 
     public:
+
+        const ConsensusArea & Area() const {
+            return m_area ;
+        }
+
+        bool HasReads( int pos ) const {
+            return m_raw_reads.find(pos) != m_raw_reads.end() ;
+        }
+
+        const PositionInfoKeeper & GetInfoKeeper(int pos ) const
+        {
+            static PositionInfoKeeper tmp ;
+            if( ! HasReads( pos ) )
+                return tmp ;
+            return m_raw_reads.at(pos);
+        }
 
         ReadMatrix GenSubMatrixByGap(const Contig & prev_contig ,
                 const Contig & next_contig ,
@@ -482,9 +535,7 @@ struct ReadMatrixFactory
                     else
                     {
                         auto reads = ContigTool::find_all_reads_start_with
-                            (kmer ,contig , pos+ i 
-                             , Threshold::max_reads_depth
-                             , Threshold::max_error_count);
+                            (kmer ,contig , pos+ i );
                         if( reads.empty() )
                             continue ;
                         ret.AddKmer(kmer,reads,index,pos+i);
@@ -518,10 +569,7 @@ struct ReadMatrixFactory
             else
             {
                 auto reads = ContigTool::find_all_reads_start_with
-                    (kmer ,contig , i 
-                     ,Threshold::max_reads_depth
-                     ,Threshold::max_error_count
-                     );
+                    (kmer ,contig , i);
                 if( reads.empty() )
                     continue ;
                 ret.AddKmer(kmer,reads,1,i);

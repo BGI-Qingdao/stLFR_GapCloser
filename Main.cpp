@@ -38,6 +38,9 @@ int      Threshold::min_sub_reads_count;
 int      Threshold::max_error_count ;
 int      Threshold::max_reads_depth ;
 int      Threshold::the_k ;
+int      Threshold::max_low_depth ;
+int      Threshold::min_nucleotide_depth ;
+
 // global accessor class pointer here;
 ReadAccessor *  GlobalAccesser::the_read_accessor;
 PairInfo *      GlobalAccesser::the_pair_info ;

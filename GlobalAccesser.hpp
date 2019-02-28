@@ -40,6 +40,15 @@ struct Threshold
 
     // the kvalue for kmer-read map.
     static int      the_k ;
+
+    // the minimum depth of a nucleotide that 
+    //  make it a NOT to be a low depth nucleotide
+    static int      min_nucleotide_depth;
+
+    // the maximun number of low depth nucleotide 
+    //   that a consensus can accept
+    static int      max_low_depth;
+
 };
 
 #endif //GLOBALACCESSER_HPP__
