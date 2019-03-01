@@ -371,5 +371,11 @@ int main(int argc, char *argv[])
     fout.close();
     finContig.close();
 
+    std::cerr<<" consensus result freq         :\n"<<GlobalAccesser::consensus_result_freq.ToString() ;
+    std::cerr<<" consensus failed reason  freq :\n"<<GlobalAccesser::consensus_failed_reason.ToString() ;
+    std::cerr<<" size of reads set freq        :\n"<<GlobalAccesser::reads_set_freq.ToString() ;
+    std::cerr<<" conflict freq                 :\n"<<GlobalAccesser::conflict_freq.ToString() ;
+    std::cerr<<" too low depth freq            :\n"<<GlobalAccesser::too_low_freq.ToString() ;
+
     return 0;
 }
