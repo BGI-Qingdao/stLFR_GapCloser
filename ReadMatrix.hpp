@@ -188,8 +188,13 @@ struct ConsensusResult
 
     bool is_consensus_done() const 
     {
-        return  (conflict_num() <= Threshold::max_allowed_conflict )
-            && ( low_depth() <= Threshold::max_accept_low_depth)
+        int cn = conflict_num() ;
+        int ln = low_depth() ;
+        GlobalAccesser::conflict_freq.Touch(cn);
+        GlobalAccesser::too_low_freq.Touch(ln);
+
+        return  (cn <= Threshold::max_allowed_conflict )
+            && ( ln <= Threshold::max_accept_low_depth)
             ;
     }
 };

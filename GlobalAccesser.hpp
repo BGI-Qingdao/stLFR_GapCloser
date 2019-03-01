@@ -1,8 +1,9 @@
 #ifndef GLOBALACCESSER_HPP__
 #define GLOBALACCESSER_HPP__
 
+#include <string>
 #include "TagId.hpp"
-
+#include "freq.h"
 class ReadAccessor ;
 class PairInfo ;
 
@@ -11,6 +12,11 @@ struct GlobalAccesser
     static ReadAccessor * the_read_accessor;
     static PairInfo * the_pair_info ;
     static TagId barcode_ider;
+    static BGIQD::FREQ::Freq<int> consensus_result_freq ;
+    static BGIQD::FREQ::Freq<std::string> consensus_failed_reason ;
+    static BGIQD::FREQ::Freq<int> conflict_freq;
+    static BGIQD::FREQ::Freq<int> too_low_freq;
+    static BGIQD::FREQ::Freq<int> reads_set_freq;
 };
 
 struct Threshold

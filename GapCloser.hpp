@@ -676,11 +676,18 @@ class GapCloser : public ContigAssembler
             {
                 ConsensusArea curr_area = ConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
+                {
+                    GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");
                     break ;
+                }
                 // step 1.1 gather reads .
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
+                GlobalAccesser::reads_set_freq.Touch(readMatrix.ReadsNum());
                 if( readMatrix.is_reads_too_little()  )
+                {
+                    GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
                     break ;
+                }
                 // step 1.2 abstract sub reads .
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
@@ -691,6 +698,7 @@ class GapCloser : public ContigAssembler
 
                 if( consensusResult.is_consensus_done() )
                 {
+                    GlobalAccesser::consensus_result_freq.Touch(1);
                     // step 1.5 update contig
                     updateContig(contig , readMatrix,consensusResult);
                     // step 1.6 check gap fill
@@ -720,7 +728,11 @@ class GapCloser : public ContigAssembler
                     }
                 }
                 else
+                {
+                    GlobalAccesser::consensus_failed_reason.Touch("consensus_failed");
+                    GlobalAccesser::consensus_result_freq.Touch(0);
                     break;
+                }
 
                 prev_contig_len = contig.getLength() ;
                 prev_area = curr_area ;

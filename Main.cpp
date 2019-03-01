@@ -72,6 +72,12 @@ ReadAccessor *  GlobalAccesser::the_read_accessor = NULL;
 PairInfo *      GlobalAccesser::the_pair_info = NULL;
 TagId           GlobalAccesser::barcode_ider ;
 
+BGIQD::FREQ::Freq<int> GlobalAccesser::consensus_result_freq ;
+BGIQD::FREQ::Freq<std::string> GlobalAccesser::consensus_failed_reason ;
+BGIQD::FREQ::Freq<int> GlobalAccesser::conflict_freq;
+BGIQD::FREQ::Freq<int> GlobalAccesser::too_low_freq;
+BGIQD::FREQ::Freq<int> GlobalAccesser::reads_set_freq;
+
 // the ReadAccesser will assign this
 Read          * ReadElement::read=NULL;  
 
@@ -344,12 +350,12 @@ int main(int argc, char *argv[])
     GlobalAccesser::the_read_accessor = &readAccessor ;
     ContigTable contigTable(finContig, endNumLen, mismatchLen);
 
-    GapCloser gapcloser(outfile, fout, readAccessor,
+    GapCloser gapcloser( outfile, fout, readAccessor,
             *pairInfo, contigTable, threadSum,
             deviation, endNumLen, mismatchLen
            /* , maxReadLength */
            /* , overlapMode */
-            , overlapParam);
+            , overlapParam );
     gapcloser.assemble();
 
     delete pairInfo;
@@ -364,7 +370,6 @@ int main(int argc, char *argv[])
     }
     fout.close();
     finContig.close();
-
 
     return 0;
 }
