@@ -399,9 +399,6 @@ class GapCloser : public ContigAssembler
                     GapInfo const& gap = gapsResult[j];
 
                     pos += contig.getLength();
-                    //				if (gap.length<0) {
-                    //					pos += gap.length;
-                    //				}
 
                     gapResultInfo.end = finalSeqReverse.size() - (pos-gap.extendInfo.leftLen);
                     gapResultInfo.start = gapResultInfo.end - (gap.extendInfo.leftLen+gap.length+gap.extendInfo.rightLen);
@@ -451,12 +448,18 @@ class GapCloser : public ContigAssembler
 
                     gapResultInfo = ptrGapResult->getDatum();
                     //				foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << std::endl;
-                    foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" 
-                        /* delete quality code */
-                        /*
-                           <<gapResultInfo.quality
-                           */
-                        << "\t" <<ptrGap->getDatum().length << "\t" << gapResultInfo.end - gapResultInfo.start << std::endl;
+                    foutFill << gapResultInfo.start 
+                     << "\t" << gapResultInfo.end
+                     << "\t" << gapResultInfo.extendInfo.leftLen
+                     << "\t" <<gapResultInfo.extendInfo.rightLen
+                     << "\t" <<gapResultInfo.flag << "\t" 
+                     /* delete quality code */
+                     /*
+                        <<gapResultInfo.quality
+                    */
+                    << "\t" <<ptrGap->getDatum().length 
+                    << "\t" << gapResultInfo.end - gapResultInfo.start 
+                    << std::endl;
 
                     ptrGap = ptrGap->getNext();
                 }
