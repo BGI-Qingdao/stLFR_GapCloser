@@ -336,8 +336,9 @@ int main(int argc, char *argv[])
         readHash = new ReadHash(NULL, &libInfo, overlapParam, 0, hashLen, loadFactor);
         pairInfo = new PairInfo(NULL, &libInfo);
     }
-
+    GlobalAccesser::the_pair_info = pairInfo ;
     ReadAccessor readAccessor(*readHash, *pairInfo);
+    GlobalAccesser::the_read_accessor = &readAccessor ;
     ContigTable contigTable(finContig, endNumLen, mismatchLen);
 
     GapCloser gapcloser(outfile, fout, readAccessor,
