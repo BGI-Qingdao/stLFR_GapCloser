@@ -215,6 +215,8 @@ struct ConsensusMatrix
                 }
             }
             bool is_low_depth = (total_depth < Threshold::min_nucleotide_depth );
+            if( total_depth == highest_depeth ) 
+                is_low_depth = false ;
             if ( total_depth == 0 )
                 return std::make_tuple( 'N' , true , ! is_low_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
@@ -372,7 +374,7 @@ struct ReadMatrix
                         read.getSequence(read_str);
                         for( int i = 0 ; i < (int)read.getLen() ; i++ )
                         {
-                            int matrix_pos = m_area.pos_translate_contig2martix(pos);
+                            int matrix_pos = m_area.pos_translate_contig2martix(pos+i);
                             if( matrix_pos < 0 )
                                 continue ;
                             ret.UpdateDepth(matrix_pos , read_str[i]);

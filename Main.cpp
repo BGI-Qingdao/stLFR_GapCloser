@@ -169,7 +169,10 @@ int main(int argc, char *argv[])
     Len_t threadSum=1;
 
     int c;
-    while((c=getopt(argc, argv, "i:o:e:b:a:l:m:p:c:t:N:")) !=-1) {
+    while((c=getopt(argc, argv, 
+                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:"))
+            !=-1) 
+    {
         switch(c) {
             case 'a': infileContig=optarg; break;
             case 'b': inLibInfo=optarg; break;
@@ -200,7 +203,7 @@ int main(int argc, char *argv[])
             case 'A': Threshold::min_sub_reads_count = atoi(optarg); break;
             case 'B': Threshold::middle_sub_reads_count = atoi(optarg); break;
 
-            case 'C': Threshold::NoConflictThreshold = atoi(optarg); break;
+            case 'C': Threshold::NoConflictThreshold = atof(optarg); break;
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
             case 'E': Threshold::min_nucleotide_depth = atoi(optarg); break;
             case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
