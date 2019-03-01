@@ -368,7 +368,7 @@ struct ReadMatrix
                     const auto & reads = k_r_pair.second.reads ;
                     for( const auto & read : reads )
                     {
-                        TightString read_str ;
+                        TightString read_str(read.getLen()) ;
                         read.getSequence(read_str);
                         for( int i = 0 ; i < (int)read.getLen() ; i++ )
                         {
@@ -380,6 +380,7 @@ struct ReadMatrix
                     }
                 }
             }
+
             int end = m_area.consensus_end_pos_in_contig ;
             if( end >= (int) contig.getLength() -1 )
                 end = contig.getLength() -1 ;

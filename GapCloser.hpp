@@ -66,7 +66,7 @@ class GapCloser : public ContigAssembler
 
         void assemble() {
 
-            std::cout << ">>>>>>>>>>assembling<<<<<<<<<<" << std::endl;
+            std::cout << ">>>>>>>>>> gap closing <<<<<<<<<<" << std::endl;
             std::cout << std::endl;
             time_t total_start_time=time(NULL);
 

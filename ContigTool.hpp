@@ -42,7 +42,7 @@ struct  ContigTool
                 , int position /* in 1 base */
                 )
         {
-            TightString  read_str ;
+            TightString  read_str(readElement.getLen());
             readElement.getSequence(read_str) ;
             int match_check_num = 0 ;
             int unmatch = CheckUnmatchNum( 
