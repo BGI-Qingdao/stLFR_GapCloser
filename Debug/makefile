@@ -43,7 +43,7 @@ all: GapCloser
 GapCloser: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cygwin C++ Linker'
-	g++  -o "GapCloser"  -pg -g $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -std=c++11 -o "GapCloser"  -pg -g $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
