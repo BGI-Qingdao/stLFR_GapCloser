@@ -1,6 +1,8 @@
 #ifndef CONSENSUSCONFIG_HPP__
 #define CONSENSUSCONFIG_HPP__
 
+#include <cassert>
+
 struct ConsensusArea
 {
     int left_most_pos_in_contig ;
@@ -29,7 +31,7 @@ struct ConsensusArea
     int pos_translate_contig2martix(int pos) const
     {
         if( pos < consensus_start_pos_in_contig 
-        || pos > consensus_end_pos_in_contig )
+                || pos > consensus_end_pos_in_contig )
         {
             return -1 ;
         }
@@ -53,6 +55,11 @@ struct ConsensusConfig
 
     static ConsensusArea  GetConsensusArea( int contiglen )
     {
+        assert( contiglen > 0 );
+        assert( extend_len > 0 );
+        assert( extra_len > 0 );
+        assert( consensus_len > 0 );
+
         ConsensusArea ret ;
         int in_contig = consensus_len - extra_len ;
 
@@ -61,6 +68,12 @@ struct ConsensusConfig
         ret.right_most_pos_in_contig = contiglen + extend_len + extra_len ;
         ret.consensus_start_pos_in_contig = contiglen - in_contig + 1 ;
         ret.consensus_end_pos_in_contig = contiglen + extend_len ;
+
+        if ( ret.left_most_pos_in_contig <= 0 )
+            ret.left_most_pos_in_contig = 1;
+        if ( ret.consensus_start_pos_in_contig <= 0 )
+            ret.consensus_start_pos_in_contig = 1 ;
+
 
         return ret ;
     }

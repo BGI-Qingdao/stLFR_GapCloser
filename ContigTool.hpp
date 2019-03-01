@@ -233,7 +233,7 @@ struct  ContigTool
                 , int ref_len 
                 , const TightString & read
                 , int read_len 
-                , int read2ref_1th_pos
+                , int read2ref_1th_pos /* 0 base */
                 , int & checked_num 
                 )
         {

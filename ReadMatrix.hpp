@@ -467,6 +467,7 @@ struct ReadMatrixFactory
         ReadMatrix ret ;
         ret.AddArea( area) ;
         int relative_num = 0 ;
+        // 1 base position --> read set
         std::map<int,std::vector<ReadElement>> new_reads;
         while(true)
         {
@@ -540,7 +541,7 @@ struct ReadMatrixFactory
                         if( reads.empty() )
                             continue ;
                         ret.AddKmer(kmer,reads,index,pos+i);
-                        new_reads[i]= reads;
+                        new_reads[pos + i]= reads;
                     }
                 }
             }
