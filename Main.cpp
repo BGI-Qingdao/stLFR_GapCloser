@@ -169,8 +169,6 @@ int main(int argc, char *argv[])
     float deviation=0.5;
     Len_t endNumLen=10;
     Len_t mismatchLen=5;
-    /*Short_Len_t overlapMode=ContigAssembler::fixedOverlapMode;*/
-    Short_Len_t overlapParam=25;
     float loadFactor = 0.75;
     Len_t threadSum=1;
 
@@ -184,7 +182,7 @@ int main(int argc, char *argv[])
             case 'b': inLibInfo=optarg; break;
             case 'o': outfile=optarg; break;
             case 'l': Threshold::maxReadLength=atoi(optarg); break;
-            case 'p': overlapParam=atoi(optarg); break;
+            case 'p': Threshold::the_k=atoi(optarg); break;
             case 't': threadSum=atoi(optarg); break;
             case 'c': loadFactor=atof(optarg); break;
             case 'N': Threshold::NNumber = atoi(optarg); break;
@@ -219,16 +217,16 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (overlapParam < 13) {
-        std::cout << "[WARNING] Overlap length should be >= 13. Program will use 13 instead of " << overlapParam << ".\n";
-        overlapParam = 13;
-    } else if (overlapParam > 31) {
-        std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << overlapParam << ".\n";
-        overlapParam = 31;
+    if (Threshold::the_k< 13) {
+        std::cout << "[WARNING] Overlap length should be >= 13. Program will use 13 instead of " << Threshold::the_k << ".\n";
+        Threshold::the_k = 13;
+    } else if (Threshold::the_k  > 31) {
+        std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << Threshold::the_k << ".\n";
+        Threshold::the_k = 31;
     }
 
 
-    endNumLen = overlapParam;
+    endNumLen = Threshold::the_k;
 
     Number_t hashLen = 3;
 
@@ -285,7 +283,7 @@ int main(int argc, char *argv[])
     std::cout << "    -b (config file):   " << inLibInfo << std::endl;
     std::cout << "    -o (output file):   " << outfile << std::endl;
     std::cout << "    -l (max read len):  " << (int)Read::DATA_MAXLEN << std::endl;
-    std::cout << "    -p (overlap para):  " << (int)overlapParam << std::endl;
+    std::cout << "    -p (overlap para):  " << (int)Threshold::the_k<< std::endl;
     std::cout << "    -t (thread num):    " << (int)threadSum << std::endl << std::endl;
     std::cout << "    -c (map loadFactor):" << (int)loadFactor<< std::endl << std::endl;
 
@@ -337,12 +335,12 @@ int main(int argc, char *argv[])
     if(!inLibInfo) {
 
         pairInfo = new PairInfo(&finPairEndInfo);
-        readHash = new ReadHash(&fin, NULL, overlapParam, pairInfo->getReadsSum(), hashLen, loadFactor);
+        readHash = new ReadHash(&fin, NULL, Threshold::the_k , pairInfo->getReadsSum(), hashLen, loadFactor);
     }
     else {
 
         LibInfo libInfo(&finLibInfo);
-        readHash = new ReadHash(NULL, &libInfo, overlapParam, 0, hashLen, loadFactor);
+        readHash = new ReadHash(NULL, &libInfo, Threshold::the_k , 0, hashLen, loadFactor);
         pairInfo = new PairInfo(NULL, &libInfo);
     }
     GlobalAccesser::the_pair_info = pairInfo ;
@@ -355,7 +353,7 @@ int main(int argc, char *argv[])
             deviation, endNumLen, mismatchLen
            /* , maxReadLength */
            /* , overlapMode */
-            , overlapParam );
+            , Threshold::the_k );
     gapcloser.assemble();
 
     delete pairInfo;
