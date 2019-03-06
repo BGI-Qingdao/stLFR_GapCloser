@@ -43,6 +43,53 @@ struct PositionInfoKeeper
 
     public :
 
+        static PositionInfoKeeper Merge( const PositionInfoKeeper & left 
+                , const PositionInfoKeeper & right )
+        {
+            PositionInfoKeeper ret ;
+            ret.Init()  ;
+            // add left only
+            for( const auto & pair1 : left.all_kmer2reads )
+            {
+                if( right.all_kmer2reads.find(pair1.first) == right.all_kmer2reads.end() )
+                {
+                    if( ! pair1.second.reads.empty() )
+                    {
+                        ret.AddKmer( pair1.first, pair1.second.reads, pair1.second.relative_num );
+                    }
+                }
+            }
+            // add right only
+            for( const auto & pair2 : right.all_kmer2reads )
+            {
+                if( left.all_kmer2reads.find(pair2.first) == left.all_kmer2reads.end() )
+                {
+                    if( ! pair2.second.reads.empty() )
+                    {
+                        ret.AddKmer( pair2.first, pair2.second.reads, pair2.second.relative_num );
+                    }
+                }
+            }
+            // merge right && right part 
+            for( const auto & pair1 : left.all_kmer2reads )
+            {
+                if( right.all_kmer2reads.find(pair1.first) != right.all_kmer2reads.end() )
+                {
+                    std::set<ReadElement> all ;
+                    for( const auto & i : pair1.second.reads )
+                        all.insert(i);
+                    for( const auto & j : right.all_kmer2reads.at(pair1.first).reads )
+                        all.insert(j);
+                    std::vector<ReadElement> items ;
+                    for( const auto & m : all )
+                        items.push_back(m);
+                    if( ! items.empty() )
+                        ret.AddKmer( pair1.first, items , pair1.second.relative_num );
+                }
+            }
+            return ret ;
+        }
+
         std::map<Number_t , Kmer2Reads>::const_iterator begin() const
         {
             return all_kmer2reads.begin() ;
@@ -89,7 +136,6 @@ struct PositionInfoKeeper
                 const Kmer2Reads & reads = pair.second ;
                 for( const auto & a_read : reads.reads )
                 {
-
                     if( ContigTool::IsEligiblePECheckRead(a_read, prev_contig,pos) )
                     {
                         ret.AddKmer(kmer,a_read, reads.relative_num);
@@ -278,10 +324,39 @@ struct ReadMatrix
         ConsensusArea m_area;
 
 
-        static ReadMatrix Merge( const ReadMatrix & /*left*/ , const ReadMatrix & /*right*/ )
+        static ReadMatrix Merge( const ReadMatrix & left , const ReadMatrix & right )
         {
             ReadMatrix ret ;
-            //TODO 
+            // add left only
+            for( const auto & pair1 : left.m_raw_reads )
+            {
+                if( right.m_raw_reads.find(pair1.first) == right.m_raw_reads.end() )
+                {
+                    if( pair1.second.ReadsNum() > 0 )
+                        ret.m_raw_reads[pair1.first] = pair1.second ;
+                }
+            }
+            // add right only
+            for( const auto & pair2 : left.m_raw_reads )
+            {
+                if( right.m_raw_reads.find(pair2.first) == right.m_raw_reads.end() )
+                {
+                    if( pair2.second.ReadsNum() > 0 )
+                        ret.m_raw_reads[pair2.first] = pair2.second ;
+                }
+            }
+            // merge left & right both part
+            for( const auto & pair2 : left.m_raw_reads )
+            {
+                if( right.m_raw_reads.find(pair2.first) != right.m_raw_reads.end() )
+                {
+                    ret.m_raw_reads[pair2.first] =
+                        PositionInfoKeeper::Merge(
+                                pair2.second
+                                ,right.m_raw_reads.at(pair2.first)
+                                );
+                }
+            }
             return ret ;
         }
 
@@ -340,23 +415,30 @@ struct ReadMatrix
                 const GapInfo & gap )
         {
 
-            if( ReadsNum() < Threshold::min_sub_reads_count )
+            if( gap.is_small_gap() )
+            {
+                if( ReadsNum() <=Threshold::min_sub_reads_count )
+                    return *this ;
+                auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
+                if( sub1.ReadsNum() >= Threshold::min_sub_reads_count )
+                {
+                    return sub1;
+                }
                 return *this ;
-            if( gap.is_gap_big() ) {;} else {;}
-            //{
-            auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
-            auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
-            auto sub3 = Merge( sub1 , sub2 );
-            if( sub3.ReadsNum() < Threshold::min_sub_reads_count )
-                return *this ;
-            else 
-                return sub3 ;
-            //}
-            //else
-            //{
-
-            //}
-            return *this ;
+            }
+            else
+            {
+                if( ReadsNum() <=Threshold::middle_sub_reads_count )
+                    return *this ;
+                auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
+                auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
+                auto sub3 = Merge( sub1 , sub2 );
+                if( sub3.ReadsNum() >= Threshold::middle_sub_reads_count )
+                    return sub3 ;
+                else
+                    return *this ;
+            }
+            //return *this ;
         }
 
         ConsensusMatrix GenConsensusMatrix( const Contig & contig )
@@ -366,7 +448,7 @@ struct ReadMatrix
                     -m_area.consensus_start_pos_in_contig
                     + 1 ) ;
 
-            for( const auto & pair : m_raw_reads)
+            for( const auto & pair : m_raw_reads )
             {
                 int pos = pair.first ;
                 // update all reads's depth

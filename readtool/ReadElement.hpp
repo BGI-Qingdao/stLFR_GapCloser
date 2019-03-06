@@ -25,6 +25,7 @@
 #define READELEMENT_HPP_
 
 #include <set>
+#include <cassert>
 #include "Common.hpp"
 #include "readhash/Read.hpp"
 
@@ -51,6 +52,16 @@ class ReadElement
             forwardFlag(_forwardFlag)
     {
     }
+
+        bool operator < ( const ReadElement & other ) const
+        {
+            return serialNums < other.serialNums ;
+        }
+
+        bool operator == ( const ReadElement & other ) const
+        {
+            return serialNums == other.serialNums ;
+        }
 
         static void staticInitialize(Read* _read) {
             read = _read;

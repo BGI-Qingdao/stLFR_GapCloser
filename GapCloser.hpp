@@ -76,8 +76,6 @@ class GapCloser : public ContigAssembler
             foutFill.open(fillName);
 
             createThread();
-            //TODO
-            //		assembleInThread(0);
 
             foutFill.close();
 

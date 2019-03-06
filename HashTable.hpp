@@ -261,7 +261,7 @@ class HashTable
 
         }
 
-        void insert(T& key, U& value) {
+        void insert(T& key, U& v) {
             if (count > max)
                 increaseLength();
             //			throw out_of_range ("hash table is full");
@@ -272,12 +272,12 @@ class HashTable
                 if (!isFlag(OCCUPIY, probe)) {
                     setFlag(OCCUPIY, probe);
                     keys[probe] = key;
-                    values[probe] = value;
+                    values[probe] = v;
                     ++count;
                     break;
                 }
                 else if (key == keys[probe]) {
-                    values[probe] = value;
+                    values[probe] = v;
                     break;
                 }
                 else {
