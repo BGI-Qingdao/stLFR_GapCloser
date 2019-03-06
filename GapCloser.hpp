@@ -683,8 +683,8 @@ class GapCloser : public ContigAssembler
                 }
                 // step 1.1 gather reads .
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
-                GlobalAccesser::reads_set_freq.Touch(readMatrix.ReadsNum());
-                if( readMatrix.is_reads_too_little()  )
+                GlobalAccesser::basic_reads_set_freq.Touch(readMatrix.ReadsNum());
+                if( readMatrix.is_reads_too_little() )
                 {
                     GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
                     break ;
@@ -693,6 +693,7 @@ class GapCloser : public ContigAssembler
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
                         ,gap);
+                GlobalAccesser::used_reads_set_freq.Touch(readMatrix.ReadsNum());
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
@@ -704,7 +705,7 @@ class GapCloser : public ContigAssembler
                     updateContig(contig , readMatrix,consensusResult);
                     // step 1.6 check gap fill
                     bool gapFill ; int prev_contig_pos ; int next_contig_pos ;
-                    std::tie( gapFill , prev_contig_pos , next_contig_pos ) 
+                    std::tie( gapFill , prev_contig_pos , next_contig_pos )
                         = ContigTool::IsGapFinish( contig , nextContig ,gap ,prev_contig_len);
                     if( gapFill )
                     {

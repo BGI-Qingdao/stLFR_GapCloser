@@ -8,6 +8,7 @@
 #include <tuple>
 
 #include "Common.hpp"
+#include "Misc.h"
 #include "ConsensusConfig.hpp"
 #include "TightString.hpp"
 #include "GlobalAccesser.hpp"
@@ -323,7 +324,6 @@ struct ReadMatrix
 
         ConsensusArea m_area;
 
-
         static ReadMatrix Merge( const ReadMatrix & left , const ReadMatrix & right )
         {
             ReadMatrix ret ;
@@ -417,26 +417,55 @@ struct ReadMatrix
 
             if( gap.is_small_gap() )
             {
-                if( ReadsNum() <=Threshold::min_sub_reads_count )
-                    return *this ;
+                GlobalAccesser::gap_type.Touch("small_gap");
+                int total = ReadsNum() ;
+                Sub1ReadNum tmp ;
+                tmp.total_num = total ;
+                //if( ReadsNum() <=Threshold::min_sub_reads_count )
+                //{
+                //    return *this ;
+                //}
                 auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
-                if( sub1.ReadsNum() >= Threshold::min_sub_reads_count )
+                int s1 = sub1.ReadsNum() ;
+                tmp.sub1_num = s1 ;
+                if( s1 >= Threshold::min_sub_reads_count )
                 {
+                    tmp.used_num = s1 ;
+                    GlobalAccesser::sub1_read_num.Touch(tmp);
                     return sub1;
                 }
+                tmp.used_num = total ;
+                GlobalAccesser::sub1_read_num.Touch(tmp);
                 return *this ;
             }
             else
             {
-                if( ReadsNum() <=Threshold::middle_sub_reads_count )
-                    return *this ;
+                GlobalAccesser::gap_type.Touch("big_gap");
+                //if( ReadsNum() <=Threshold::middle_sub_reads_count )
+                //    return *this ;
+                int total = ReadsNum() ;
+                Sub1_3ReadNum tmp ;
+                tmp.total_num = total ;
+
                 auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
                 auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
                 auto sub3 = Merge( sub1 , sub2 );
-                if( sub3.ReadsNum() >= Threshold::middle_sub_reads_count )
+                tmp.sub1_num = sub1.ReadsNum() ;
+                tmp.sub3_num = sub2.ReadsNum() ;
+                int s13 = sub3.ReadsNum() ;
+                tmp.sub1_3_num = s13 ;
+                if( s13>= Threshold::middle_sub_reads_count )
+                {
+                    tmp.used_num = s13;
+                    GlobalAccesser::sub1_3_read_num.Touch(tmp);
                     return sub3 ;
+                }
                 else
+                {
+                    tmp.used_num = total;
+                    GlobalAccesser::sub1_3_read_num.Touch(tmp);
                     return *this ;
+                }
             }
             //return *this ;
         }

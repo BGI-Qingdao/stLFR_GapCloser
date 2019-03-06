@@ -4,6 +4,8 @@
 #include <string>
 #include "TagId.hpp"
 #include "freq.h"
+#include "Misc.h"
+
 class ReadAccessor ;
 class PairInfo ;
 
@@ -16,7 +18,11 @@ struct GlobalAccesser
     static BGIQD::FREQ::Freq<std::string> consensus_failed_reason ;
     static BGIQD::FREQ::Freq<int> conflict_freq;
     static BGIQD::FREQ::Freq<int> too_low_freq;
-    static BGIQD::FREQ::Freq<int> reads_set_freq;
+    static BGIQD::FREQ::Freq<int> basic_reads_set_freq;
+    static BGIQD::FREQ::Freq<int> used_reads_set_freq;
+    static BGIQD::FREQ::Freq<std::string> gap_type;
+    static BGIQD::FREQ::Freq<Sub1ReadNum> sub1_read_num ;
+    static BGIQD::FREQ::Freq<Sub1_3ReadNum> sub1_3_read_num ;
 };
 
 struct Threshold

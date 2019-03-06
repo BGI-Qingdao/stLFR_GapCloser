@@ -76,7 +76,11 @@ BGIQD::FREQ::Freq<int> GlobalAccesser::consensus_result_freq ;
 BGIQD::FREQ::Freq<std::string> GlobalAccesser::consensus_failed_reason ;
 BGIQD::FREQ::Freq<int> GlobalAccesser::conflict_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::too_low_freq;
-BGIQD::FREQ::Freq<int> GlobalAccesser::reads_set_freq;
+BGIQD::FREQ::Freq<int> GlobalAccesser::basic_reads_set_freq;
+BGIQD::FREQ::Freq<int> GlobalAccesser::used_reads_set_freq;
+BGIQD::FREQ::Freq<std::string> GlobalAccesser::gap_type;
+BGIQD::FREQ::Freq<Sub1ReadNum> GlobalAccesser::sub1_read_num;
+BGIQD::FREQ::Freq<Sub1_3ReadNum> GlobalAccesser::sub1_3_read_num;
 
 // the ReadAccesser will assign this
 Read          * ReadElement::read=NULL;  
@@ -371,9 +375,13 @@ int main(int argc, char *argv[])
 
     std::cerr<<" consensus result freq         :\n"<<GlobalAccesser::consensus_result_freq.ToString() ;
     std::cerr<<" consensus failed reason  freq :\n"<<GlobalAccesser::consensus_failed_reason.ToString() ;
-    std::cerr<<" size of reads set freq        :\n"<<GlobalAccesser::reads_set_freq.ToString() ;
+    std::cerr<<" size of base reads set freq        :\n"<<GlobalAccesser::basic_reads_set_freq.ToString() ;
+    std::cerr<<" size of used reads set freq        :\n"<<GlobalAccesser::used_reads_set_freq.ToString() ;
     std::cerr<<" conflict freq                 :\n"<<GlobalAccesser::conflict_freq.ToString() ;
     std::cerr<<" too low depth freq            :\n"<<GlobalAccesser::too_low_freq.ToString() ;
+    std::cerr<<" gap type freq                 :\n"<<GlobalAccesser::gap_type.ToString() ;
+    std::cerr<<" detail of small gap  reads set freq        :\n"<<GlobalAccesser::sub1_read_num.ToString() ;
+    std::cerr<<" detail of big gap  reads set freq        :\n"<<GlobalAccesser::sub1_3_read_num.ToString() ;
 
     return 0;
 }
