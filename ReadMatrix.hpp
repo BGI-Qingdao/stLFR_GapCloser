@@ -432,6 +432,7 @@ struct ReadMatrix
                 {
                     tmp.used_num = s1 ;
                     GlobalAccesser::sub1_read_num.Touch(tmp);
+                    sub1.m_area = m_area ;
                     return sub1;
                 }
                 tmp.used_num = total ;
@@ -457,6 +458,7 @@ struct ReadMatrix
                 if( s13>= Threshold::middle_sub_reads_count )
                 {
                     tmp.used_num = s13;
+                    sub3.m_area = m_area ;
                     GlobalAccesser::sub1_3_read_num.Touch(tmp);
                     return sub3 ;
                 }
