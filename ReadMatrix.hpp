@@ -131,6 +131,7 @@ struct PositionInfoKeeper
         PositionInfoKeeper GetSubReadsByPE( int pos , const Contig & prev_contig ) const
         {
             PositionInfoKeeper ret;
+            ret.Init();
             for( const auto & pair : all_kmer2reads )
             {
                 const Number_t & kmer = pair.first ;
@@ -152,6 +153,7 @@ struct PositionInfoKeeper
                 ) const
         {
             PositionInfoKeeper ret;
+            ret.Init();
             for( const auto & pair : all_kmer2reads )
             {
                 const Number_t & kmer = pair.first ;
@@ -174,6 +176,7 @@ struct PositionInfoKeeper
                 ) const
         {
             PositionInfoKeeper ret;
+            ret.Init();
             for( const auto & pair : all_kmer2reads )
             {
                 const Number_t & kmer = pair.first ;
