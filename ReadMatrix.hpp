@@ -340,9 +340,9 @@ struct ReadMatrix
                 }
             }
             // add right only
-            for( const auto & pair2 : left.m_raw_reads )
+            for( const auto & pair2 : right.m_raw_reads )
             {
-                if( right.m_raw_reads.find(pair2.first) == right.m_raw_reads.end() )
+                if( left.m_raw_reads.find(pair2.first) == left.m_raw_reads.end() )
                 {
                     if( pair2.second.ReadsNum() > 0 )
                         ret.m_raw_reads[pair2.first] = pair2.second ;
@@ -550,7 +550,7 @@ struct ReadMatrix
 
         bool is_reads_too_much() const 
         {
-            if ( ReadsNum() > Threshold::max_reads_count )
+            if ( ReadsNum() >= Threshold::max_reads_count )
                 return true ;
             return false ;
         }
@@ -685,6 +685,8 @@ struct ReadMatrixFactory
         //int pos_end1 = area.consensus_end_pos_in_contig  - the_k + 1 ;
         for( int i = pos_start ; i <= pos_end ;i++ ) /* i in 1 base */
         {
+            if ( ret.is_reads_too_much() )
+                break ;
             Number_t kmer;
             tStrContig.readTightStringFragment
                 (i-1, i+Threshold::the_k-1, kmer);
