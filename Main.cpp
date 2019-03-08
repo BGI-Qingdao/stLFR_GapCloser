@@ -46,7 +46,7 @@ int      Threshold::max_reads_depth = 1000 ;
 // For consensus area 
 int      ConsensusConfig::extend_len = 10 ;
 int      ConsensusConfig::extra_len = 10 ;
-int      ConsensusConfig::consensus_len = Threshold::the_k * 10 + ConsensusConfig::extend_len ;
+int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len ;
 
 // For reads set
 int      Threshold::max_reads_count = 10000 ;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     }
     if( ! consensus_len_setted_flag )
     {
-        ConsensusConfig::consensus_len = Threshold::the_k * 10 + ConsensusConfig::extend_len;
+        ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len;
     }
 
     endNumLen = Threshold::the_k;
