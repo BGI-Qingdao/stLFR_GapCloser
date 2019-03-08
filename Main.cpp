@@ -45,8 +45,8 @@ int      Threshold::max_reads_depth = 1000 ;
 
 // For consensus area 
 int      ConsensusConfig::extend_len = 10 ;
-int      ConsensusConfig::extra_len = 50 ;
-int      ConsensusConfig::consensus_len = 100 ;
+int      ConsensusConfig::extra_len = 10 ;
+int      ConsensusConfig::consensus_len = Threshold::the_k * 10 + ConsensusConfig::extend_len ;
 
 // For reads set
 int      Threshold::max_reads_count = 10000 ;
@@ -119,7 +119,7 @@ void usage(void)
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-3	<int>		consensus length, default=" 
+    std::cout << "	-3	<int>		consensus length, default= [ the kvalue ] + 10 + [consensus extend length] ="
         << ConsensusConfig::consensus_len<< ".\n";
     std::cout << "	-4	<int>		consensus extra length, default=" 
         << ConsensusConfig::extra_len<< ".\n";
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     Len_t mismatchLen=5;
     float loadFactor = 0.75;
     Len_t threadSum=1;
-
+    bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
                     "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:"))
@@ -199,7 +199,11 @@ int main(int argc, char *argv[])
             case '1': Threshold::max_reads_depth= atoi(optarg); break;
             case '2': Threshold::max_error_count= atoi(optarg); break;
 
-            case '3': ConsensusConfig::consensus_len= atoi(optarg); break;
+            case '3': {
+                          ConsensusConfig::consensus_len= atoi(optarg); 
+                          consensus_len_setted_flag = true ;
+                          break;
+                      }
             case '4': ConsensusConfig::extra_len = atoi(optarg); break;
             case '5': ConsensusConfig::extend_len = atoi(optarg); break;
 
@@ -228,7 +232,10 @@ int main(int argc, char *argv[])
         std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << Threshold::the_k << ".\n";
         Threshold::the_k = 31;
     }
-
+    if( ! consensus_len_setted_flag )
+    {
+        ConsensusConfig::consensus_len = Threshold::the_k * 10 + ConsensusConfig::extend_len;
+    }
 
     endNumLen = Threshold::the_k;
 
