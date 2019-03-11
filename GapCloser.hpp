@@ -664,7 +664,14 @@ class GapCloser : public ContigAssembler
                 , GapInfo& gapResult ) 
         {
 
+
             int originalLen = contig.getLength();
+            int end_pos  = originalLen ;
+            if( gap.is_small_gap() )
+                end_pos += ((float)gap.length) * 1.5 ;
+            else
+                end_pos += ((float)gap.length) * 2 ;
+
             // step 0 , clean the barcodes in consensus area.
             ConsensusArea the_area = ConsensusConfig::GetConsensusArea(originalLen);
             BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
@@ -681,6 +688,8 @@ class GapCloser : public ContigAssembler
                     GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");
                     break ;
                 }
+                if( (int)contig.getLength() >= end_pos )
+                    break ;
                 // step 1.1 gather reads .
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
                 GlobalAccesser::basic_reads_set_freq.Touch(readMatrix.ReadsNum());

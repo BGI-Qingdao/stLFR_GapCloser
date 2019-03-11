@@ -49,7 +49,7 @@ int      ConsensusConfig::extra_len = 10 ;
 int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len ;
 
 // For reads set
-int      Threshold::max_reads_count = 10000 ;
+int      Threshold::max_reads_count = 300 ;
 int      Threshold::min_reads_count = 1 ;
 
 // For sub read set
@@ -83,7 +83,7 @@ BGIQD::FREQ::Freq<Sub1ReadNum> GlobalAccesser::sub1_read_num;
 BGIQD::FREQ::Freq<Sub1_3ReadNum> GlobalAccesser::sub1_3_read_num;
 
 // the ReadAccesser will assign this
-Read          * ReadElement::read=NULL;  
+Read          * ReadElement::read=NULL;
 
 void usage(void)
 {
