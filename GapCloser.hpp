@@ -754,7 +754,13 @@ class GapCloser : public ContigAssembler
             {
                 int extend_len = contig.getLength() - originalLen ;
                 gapContig.append(contig,originalLen , extend_len );
-                gapResult.length = extend_len ;
+                if( extend_len < gap.length )
+                {
+                    gapResult.length = gap.length - extend_len ;
+                }
+                else
+                    gapResult.length = 0;
+
                 gapResult.isFilled = false ;
             }
         }
