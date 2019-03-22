@@ -749,19 +749,30 @@ class GapCloser : public ContigAssembler
                 prev_area = curr_area ;
             }
             // step 3 , deal output for not fill
-            if( (! gapResult.isFilled)
-                    &&  (int) contig.getLength() > originalLen )
+            if( (! gapResult.isFilled) )
             {
-                int extend_len = contig.getLength() - originalLen ;
-                gapContig.append(contig,originalLen , extend_len );
-                if( extend_len < gap.length )
+                if( (int) contig.getLength() > originalLen )
                 {
-                    gapResult.length = gap.length - extend_len ;
+                    int extend_len = contig.getLength() - originalLen ;
+                    gapContig.append(contig,originalLen , extend_len );
+                    if( extend_len < gap.length )
+                    {
+                        gapResult.length = gap.length - extend_len ;
+                    }
+                    else
+                        gapResult.length = 0;
+
+                    gapResult.isFilled = false ;
+                }
+                else if ( (int) contig.getLength() ==  originalLen )
+                {
+                    gapResult.length = gap.length ;
                 }
                 else
-                    gapResult.length = 0;
-
-                gapResult.isFilled = false ;
+                {
+                    assert(0);
+                    gapResult.length = gap.length ;
+                }
             }
         }
 
