@@ -458,7 +458,7 @@ struct ReadMatrix
                 tmp.sub3_num = sub2.ReadsNum() ;
                 int s13 = sub3.ReadsNum() ;
                 tmp.sub1_3_num = s13 ;
-                if( s13>= Threshold::middle_sub_reads_count )
+                if( s13>= Threshold::min_sub_reads_count )
                 {
                     tmp.used_num = s13;
                     sub3.m_area = m_area ;

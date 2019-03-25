@@ -88,16 +88,16 @@ struct GapInfo
         return length <= Threshold::max_small_gap;
     }
 
-    bool is_middle_gap() const 
-    {
-        return length > Threshold::max_small_gap 
-            && length <= Threshold::max_middle_gap ;
-    }
+    //bool is_middle_gap() const 
+    //{
+    //    return length > Threshold::max_small_gap 
+    //        && length <= Threshold::max_middle_gap ;
+    //}
 
-    bool is_big_gap() const 
-    {
-        return length > Threshold::max_middle_gap ;
-    }
+    //bool is_big_gap() const 
+    //{
+    //    return length > Threshold::max_middle_gap ;
+    //}
 };
 
 /* general contigs and gaps information */

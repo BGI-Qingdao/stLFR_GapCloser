@@ -403,10 +403,6 @@ class GapCloser : public ContigAssembler
                     gapResultInfo.extendInfo.leftLen = gap.extendInfo.rightLen;
                     gapResultInfo.extendInfo.rightLen = gap.extendInfo.leftLen;
                     gapResultInfo.flag = gap.isFilled;
-                    /* delete quality code */
-                    /*
-                       gapResultInfo.quality = gap.quality;
-                       */
                     gapResultsInfo.prepend(gapResultInfo);
 
                     extendGapSumInThread += gap.extendInfo.leftLen+gap.extendInfo.rightLen;
@@ -445,19 +441,14 @@ class GapCloser : public ContigAssembler
                 for (ptrGapResult = gapResultsInfo.getHead(); ptrGapResult != 0; ptrGapResult = ptrGapResult->getNext()) {
 
                     gapResultInfo = ptrGapResult->getDatum();
-                    //				foutFill << gapResultInfo.start << "\t" << gapResultInfo.end << "\t" << gapResultInfo.extendInfo.leftLen << "\t" <<gapResultInfo.extendInfo.rightLen << "\t" <<gapResultInfo.flag << "\t" <<gapResultInfo.quality << std::endl;
                     foutFill << gapResultInfo.start 
                      << "\t" << gapResultInfo.end
                      << "\t" << gapResultInfo.extendInfo.leftLen
                      << "\t" <<gapResultInfo.extendInfo.rightLen
                      << "\t" <<gapResultInfo.flag << "\t" 
-                     /* delete quality code */
-                     /*
-                        <<gapResultInfo.quality
-                    */
-                    << "\t" <<ptrGap->getDatum().length 
-                    << "\t" << gapResultInfo.end - gapResultInfo.start 
-                    << std::endl;
+                     << "\t" <<ptrGap->getDatum().length 
+                     << "\t" << (int)gapResultInfo.end - (int)gapResultInfo.start
+                     << std::endl;
 
                     ptrGap = ptrGap->getNext();
                 }
@@ -608,13 +599,6 @@ class GapCloser : public ContigAssembler
                         Contig contigResult(contig,gapContig);
                         contigsResult[i] = contigResult;
 
-                        /* delete quality code */
-                        /*
-                           gapResult.quality = gap.quality;
-                           for (Len_t j=0; j<gapContig.getLength(); j++) {
-                           gapResult.quality += gapContig.getQuality()[j];
-                           }
-                           */
                         gapResult.extendInfo.leftLen = gapContig.getLength();
                         gapResult.extendInfo.rightLen = gap.extendInfo.rightLen;
                         gapsResult[i] = gapResult;
@@ -628,10 +612,6 @@ class GapCloser : public ContigAssembler
                     gapResult.length = gap.length;
                     gapResult.extendInfo = gap.extendInfo;
                     gapResult.isFilled = gap.isFilled;
-                    /* delete quality code */
-                    /*
-                       gapResult.quality = gap.quality;
-                       */
                     gapsResult[i] = gapResult;
                 }
             }

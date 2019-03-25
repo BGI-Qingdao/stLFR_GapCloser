@@ -54,9 +54,9 @@ int      Threshold::min_reads_count = 1 ;
 
 // For sub read set
 int      Threshold::max_small_gap = 10 ;
-int      Threshold::max_middle_gap = 1000 ;
+//int      Threshold::max_middle_gap = 1000 ;
 int      Threshold::min_sub_reads_count = 10 ;
-int      Threshold::middle_sub_reads_count = 10 ;
+//int      Threshold::middle_sub_reads_count = 10 ;
 
 // For consensus
 float    Threshold::NoConflictThreshold = 0.8f ;
@@ -135,12 +135,12 @@ void usage(void)
     std::cout << "abstract sub reads set options:\n";
     std::cout << "	-8	<int>		small gap threshold , default=" 
         << Threshold::max_small_gap<< ".\n";
-    std::cout << "	-9	<int>		middle gap threshold , default=" 
-        << Threshold::max_middle_gap<< ".\n";
+    //std::cout << "	-9	<int>		middle gap threshold , default=" 
+    //    << Threshold::max_middle_gap<< ".\n";
     std::cout << "	-A	<int>		min subset reads count threshold , default=" 
         << Threshold::min_sub_reads_count<< ".\n";
-    std::cout << "	-B	<int>		middle subset reads count threshold , default=" 
-        << Threshold::middle_sub_reads_count<< ".\n";
+    //std::cout << "	-B	<int>		middle subset reads count threshold , default=" 
+    //    << Threshold::middle_sub_reads_count<< ".\n";
 
     std::cout << "consensus options:\n";
     std::cout << "	-C	<float>		non-conflict threshold , default=" 
@@ -211,9 +211,9 @@ int main(int argc, char *argv[])
             case '7': Threshold::max_reads_count = atoi(optarg); break;
 
             case '8': Threshold::max_small_gap = atoi(optarg); break;
-            case '9': Threshold::max_middle_gap = atoi(optarg); break;
+            //case '9': Threshold::max_middle_gap = atoi(optarg); break;
             case 'A': Threshold::min_sub_reads_count = atoi(optarg); break;
-            case 'B': Threshold::middle_sub_reads_count = atoi(optarg); break;
+            //case 'B': Threshold::middle_sub_reads_count = atoi(optarg); break;
 
             case 'C': Threshold::NoConflictThreshold = atof(optarg); break;
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
@@ -322,12 +322,12 @@ int main(int argc, char *argv[])
     std::cout << "abstract sub reads set options:\n";
     std::cout << "	-8	<int>		small gap threshold ,  =" 
         << Threshold::max_small_gap<< ".\n";
-    std::cout << "	-9	<int>		middle gap threshold ,  =" 
-        << Threshold::max_middle_gap<< ".\n";
+    //std::cout << "	-9	<int>		middle gap threshold ,  =" 
+    //    << Threshold::max_middle_gap<< ".\n";
     std::cout << "	-A	<int>		min subset reads count threshold ,  =" 
         << Threshold::min_sub_reads_count<< ".\n";
-    std::cout << "	-B	<int>		middle subset reads count threshold ,  =" 
-        << Threshold::middle_sub_reads_count<< ".\n";
+    //std::cout << "	-B	<int>		middle subset reads count threshold ,  =" 
+    //    << Threshold::middle_sub_reads_count<< ".\n";
 
     std::cout << "consensus options:\n";
     std::cout << "	-C	<float>		non-conflict threshold ,  =" 
