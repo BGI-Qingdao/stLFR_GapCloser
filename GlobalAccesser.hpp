@@ -11,7 +11,7 @@ class PairInfo ;
 
 struct GlobalAccesser
 {
-    static ReadAccessor * the_read_accessor;
+    static ReadAccessor * the_read_accessor ;
     static PairInfo * the_pair_info ;
     static TagId barcode_ider;
     static BGIQD::FREQ::Freq<int> consensus_result_freq ;
@@ -20,9 +20,9 @@ struct GlobalAccesser
     static BGIQD::FREQ::Freq<int> too_low_freq;
     static BGIQD::FREQ::Freq<int> basic_reads_set_freq;
     static BGIQD::FREQ::Freq<int> used_reads_set_freq;
-    static BGIQD::FREQ::Freq<std::string> gap_type;
-    static BGIQD::FREQ::Freq<Sub1ReadNum> sub1_read_num ;
-    static BGIQD::FREQ::Freq<Sub1_3ReadNum> sub1_3_read_num ;
+
+    static BGIQD::FREQ::Freq<std::string> sub_type;
+    static BGIQD::FREQ::Freq<SubReadsLog> sub_read_num ;
 };
 
 struct Threshold

@@ -82,11 +82,11 @@ BGIQD::FREQ::Freq<int> GlobalAccesser::conflict_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::too_low_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::basic_reads_set_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::used_reads_set_freq;
-BGIQD::FREQ::Freq<std::string> GlobalAccesser::gap_type;
-BGIQD::FREQ::Freq<Sub1ReadNum> GlobalAccesser::sub1_read_num;
-BGIQD::FREQ::Freq<Sub1_3ReadNum> GlobalAccesser::sub1_3_read_num;
 
-// the ReadAccesser will assign this
+BGIQD::FREQ::Freq<std::string> GlobalAccesser::sub_type;
+BGIQD::FREQ::Freq<SubReadsLog> GlobalAccesser::sub_read_num ;
+
+//the ReadAccesser will assign this
 Read          * ReadElement::read=NULL;
 
 void usage(void)
@@ -350,12 +350,10 @@ int main(int argc, char *argv[])
     PairInfo* pairInfo;
     ReadHash* readHash;
     if(!inLibInfo) {
-
         pairInfo = new PairInfo(&finPairEndInfo);
         readHash = new ReadHash(&fin, NULL, Threshold::the_k , pairInfo->getReadsSum(), hashLen, loadFactor);
     }
     else {
-
         LibInfo libInfo(&finLibInfo);
         readHash = new ReadHash(NULL, &libInfo, Threshold::the_k , 0, hashLen, loadFactor);
         pairInfo = new PairInfo(NULL, &libInfo);
@@ -392,9 +390,8 @@ int main(int argc, char *argv[])
     std::cerr<<" size of used reads set freq        :\n"<<GlobalAccesser::used_reads_set_freq.ToString() ;
     std::cerr<<" conflict freq                 :\n"<<GlobalAccesser::conflict_freq.ToString() ;
     std::cerr<<" too low depth freq            :\n"<<GlobalAccesser::too_low_freq.ToString() ;
-    std::cerr<<" gap type freq                 :\n"<<GlobalAccesser::gap_type.ToString() ;
-    std::cerr<<" detail of small gap  reads set freq        :\n"<<GlobalAccesser::sub1_read_num.ToString() ;
-    std::cerr<<" detail of big gap  reads set freq        :\n"<<GlobalAccesser::sub1_3_read_num.ToString() ;
+    std::cerr<<" sub read set type freq        :\n"<<GlobalAccesser::sub_type.ToString() ;
+    std::cerr<<" detail of read set freq        :\n"<<GlobalAccesser::sub_read_num.ToString() ;
 
     return 0;
 }

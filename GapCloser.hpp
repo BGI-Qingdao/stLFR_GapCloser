@@ -691,7 +691,7 @@ class GapCloser : public ContigAssembler
                 }
                 // step 1.2 abstract sub reads .
                 SubReadSetType sub_type = SubReadSetType::Unknow ;
-                readMatrix = readMatrix.GenSubMatrixByGap(contig
+                readMatrix = readMatrix.GenSubMatrix(contig
                         ,nextContig
                         ,sub_type);
 

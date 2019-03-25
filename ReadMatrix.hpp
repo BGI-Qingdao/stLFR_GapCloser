@@ -428,26 +428,40 @@ struct ReadMatrix
         }
 
 
-        ReadMatrix GenSubMatrixByGap(const Contig & prev_contig ,
+        ReadMatrix GenSubMatrix(const Contig & prev_contig ,
                 const Contig & next_contig ,
                 /*const GapInfo & gap ,*/
                 SubReadSetType & ret_type )
         {
+            SubReadsLog tmp ;
+            tmp.basic_num = ReadsNum() ;
             // try PE first 
             auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
             int s1 = sub1.ReadsNum() ;
+            tmp.pe_num = s1 ;
             if( s1 >= Threshold::min_pe_sub_reads_count )
             {
+                tmp.used_num = s1 ;
+                tmp.type = "PE" ;
+                GlobalAccesser::sub_read_num.Touch(tmp);
+                GlobalAccesser::sub_type.Touch("PE");
                 sub1.m_area = m_area ;
                 ret_type = SubReadSetType::PE ;
                 return sub1 ;
             }
             // add Barcode and try again
             auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
+            int s2 = sub2.ReadsNum() ;
             auto sub3 = Merge( sub1 , sub2 );
             int s13 = sub3.ReadsNum() ;
+            tmp.barcode_num = s2 ;
+            tmp.pe_barcode_num = s13 ;
             if( s13>= Threshold::min_pe_barcode_sub_reads_count )
             {
+                tmp.used_num = s13 ;
+                tmp.type = "PE_BARCODE" ;
+                GlobalAccesser::sub_read_num.Touch(tmp);
+                GlobalAccesser::sub_type.Touch("PE_BARCODE");
                 ret_type = SubReadSetType::PE_Barcode ;
                 sub3.m_area = m_area ;
                 return sub3;
@@ -455,13 +469,21 @@ struct ReadMatrix
             // return null or basic
             if( Threshold::use_subset_only )
             {
+                tmp.used_num = 0 ;
+                tmp.type = "NULL" ;
+                GlobalAccesser::sub_read_num.Touch(tmp);
+                GlobalAccesser::sub_type.Touch("NULL");
                 ReadMatrix tmp ;
                 ret_type = SubReadSetType::Empty ;
                 tmp.m_area = m_area ;
                 return tmp;
             }
-            else 
+            else
             {
+                tmp.used_num = tmp.basic_num  ;
+                tmp.type = "BASIC" ;
+                GlobalAccesser::sub_read_num.Touch(tmp);
+                GlobalAccesser::sub_type.Touch("BASIC");
                 ret_type = SubReadSetType::Basic ;
                 return *this ;
             }

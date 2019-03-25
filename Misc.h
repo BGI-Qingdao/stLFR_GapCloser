@@ -43,4 +43,39 @@ struct Sub1_3ReadNum
     }
 };
 
+struct SubReadsLog
+{
+    std::string type ;
+    // PE or PE_BARCODE or BASIC or NULL
+    int basic_num ;
+    int pe_num ;
+    int barcode_num ;
+    int pe_barcode_num ;
+    int used_num ;
+
+    friend std::ostream& operator<<(std::ostream& out, const SubReadsLog & me)
+    {
+        out<<me.type<<'\t'<<me.basic_num<<'\t'<<me.pe_num;
+        if( me.type != "PE" )
+            out<<'\t'<<me.barcode_num<<'\t'<<me.pe_barcode_num;
+        else
+            out<<'\t'<<"NA"<<'\t'<<"NA";
+        out<<'\t'<<me.used_num;
+        return out;
+    }
+    bool operator < (const SubReadsLog & other ) const
+    {
+        return std::make_tuple( type ,
+                basic_num ,
+                barcode_num , 
+                pe_barcode_num ,
+                used_num  )
+        <  std::make_tuple( other.type,
+                other.basic_num ,
+                other.barcode_num ,
+                other.pe_barcode_num , 
+                other.used_num  ) ;
+    }
+};
+
 #endif // MISC_H__
