@@ -693,6 +693,11 @@ class GapCloser : public ContigAssembler
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
                         ,gap);
+                if( readMatrix.is_reads_too_little() )
+                {
+                    GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
+                    break ;
+                }
                 GlobalAccesser::used_reads_set_freq.Touch(readMatrix.ReadsNum());
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);

@@ -424,14 +424,13 @@ struct ReadMatrix
                 int total = ReadsNum() ;
                 Sub1ReadNum tmp ;
                 tmp.total_num = total ;
-                //if( ReadsNum() <=Threshold::min_sub_reads_count )
-                //{
-                //    return *this ;
-                //}
                 auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
                 int s1 = sub1.ReadsNum() ;
                 tmp.sub1_num = s1 ;
-                if( s1 >= Threshold::min_sub_reads_count )
+                if( s1 >= Threshold::min_sub_reads_count 
+                ||
+                  Threshold::use_subset_only 
+                        )
                 {
                     tmp.used_num = s1 ;
                     GlobalAccesser::sub1_read_num.Touch(tmp);
@@ -445,8 +444,6 @@ struct ReadMatrix
             else
             {
                 GlobalAccesser::gap_type.Touch("big_gap");
-                //if( ReadsNum() <=Threshold::middle_sub_reads_count )
-                //    return *this ;
                 int total = ReadsNum() ;
                 Sub1_3ReadNum tmp ;
                 tmp.total_num = total ;
@@ -458,7 +455,10 @@ struct ReadMatrix
                 tmp.sub3_num = sub2.ReadsNum() ;
                 int s13 = sub3.ReadsNum() ;
                 tmp.sub1_3_num = s13 ;
-                if( s13>= Threshold::min_sub_reads_count )
+                if( s13>= Threshold::min_sub_reads_count 
+                ||
+                  Threshold::use_subset_only
+                  )
                 {
                     tmp.used_num = s13;
                     sub3.m_area = m_area ;
