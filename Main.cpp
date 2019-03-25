@@ -67,6 +67,8 @@ int      Threshold::max_accept_low_depth = 2 ;
 // For gap fill
 int      Threshold::NNumber = 1;
 int      Threshold::maxReadLength = 150;
+int      Threshold::filter_too_small_gap = 1;
+
 // global accessor class pointer here;
 ReadAccessor *  GlobalAccesser::the_read_accessor = NULL;
 PairInfo *      GlobalAccesser::the_pair_info = NULL;
@@ -132,7 +134,7 @@ void usage(void)
     std::cout << "	-7	<int>		max reads count , default=" 
         << Threshold::max_reads_count<< ".\n";
 
-    std::cout << "abstract sub reads set options:\n";
+    std::cout << "extract sub reads set options:\n";
     std::cout << "	-8	<int>		small gap threshold , default=" 
         << Threshold::max_small_gap<< ".\n";
     //std::cout << "	-9	<int>		middle gap threshold , default=" 
@@ -145,12 +147,16 @@ void usage(void)
     std::cout << "consensus options:\n";
     std::cout << "	-C	<float>		non-conflict threshold , default=" 
         << Threshold::NoConflictThreshold<< ".\n";
-    std::cout << "	-D	<int>		max conflict can accepted , default=" 
+    std::cout << "	-D	<int>		max number of conflict can accepted , default=" 
         << Threshold::max_allowed_conflict<< ".\n";
     std::cout << "	-E	<int>		min depth threshold, default=" 
         << Threshold::min_nucleotide_depth<< ".\n";
-    std::cout << "	-F	<int>		max low depth nucleotide, default=" 
+    std::cout << "	-F	<int>		max number of low depth nucleotide, default=" 
         << Threshold::max_accept_low_depth<< ".\n";
+
+    std::cout << "other:\n";
+    std::cout << "	-J	<int>		do not fill small gap ( smaller than extend_len )  default=" 
+        << Threshold::filter_too_small_gap<< ".\n";
 
     std::cout << " ---------- new parameters end     ---------\n";
 
@@ -219,6 +225,7 @@ int main(int argc, char *argv[])
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
             case 'E': Threshold::min_nucleotide_depth = atoi(optarg); break;
             case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
+            case 'J': Threshold::filter_too_small_gap= atoi(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -338,7 +345,9 @@ int main(int argc, char *argv[])
         << Threshold::min_nucleotide_depth<< ".\n";
     std::cout << "	-F	<int>		max low depth nucleotide,  =" 
         << Threshold::max_accept_low_depth<< ".\n";
-
+    std::cout << "other:\n";
+    std::cout << "	-J	<int>		do not fill small gap ( smaller than extend_len )  =" 
+        << Threshold::filter_too_small_gap<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     PairInfo* pairInfo;

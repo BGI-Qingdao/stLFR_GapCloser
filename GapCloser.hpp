@@ -496,6 +496,17 @@ class GapCloser : public ContigAssembler
 
                     Contig contigFill;
 
+                    if( Threshold::filter_too_small_gap && gap.length < ConsensusConfig::extend_len )
+                    {
+                        contigsResult[i] = contig;
+
+                        GapInfo gapResult;
+                        gapResult.length = gap.length;
+                        gapResult.extendInfo = gap.extendInfo;
+                        gapResult.isFilled = gap.isFilled;
+                        gapsResult[i] = gapResult;
+                        continue ;
+                    }
 
                     if ( (contig.getLength() < mapReadsRange) && i>0 ) {  // append previous contig at the beginning of current contig
 
