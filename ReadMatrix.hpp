@@ -438,6 +438,7 @@ struct ReadMatrix
             int s1 = sub1.ReadsNum() ;
             if( s1 >= Threshold::min_pe_sub_reads_count )
             {
+                sub1.m_area = m_area ;
                 ret_type = SubReadSetType::PE ;
                 return sub1 ;
             }
@@ -448,6 +449,7 @@ struct ReadMatrix
             if( s13>= Threshold::min_pe_barcode_sub_reads_count )
             {
                 ret_type = SubReadSetType::PE_Barcode ;
+                sub3.m_area = m_area ;
                 return sub3;
             }
             // return null or basic
@@ -455,6 +457,7 @@ struct ReadMatrix
             {
                 ReadMatrix tmp ;
                 ret_type = SubReadSetType::Empty ;
+                tmp.m_area = m_area ;
                 return tmp;
             }
             else 
