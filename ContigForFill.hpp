@@ -57,17 +57,9 @@ struct GapInfo
     // key: kmers coming from next contig's beginning
     // value: positions of kmers
     HashTable< Number_t, Len_t > endNumHash;
-    /* delete quality code */
-    /*
-    int quality;
-    */
     GapInfo() : 
         length(0), 
         isFilled(false) 
-        /* delete quality code */
-        /*
-        ,quality(0)
-        */
     {
     }
 
@@ -77,27 +69,8 @@ struct GapInfo
         extendInfo = gap.extendInfo;
         isFilled = gap.isFilled;
         endNumHash = gap.endNumHash;
-        /* delete quality code */
-        /*
-        quality = gap.quality;
-        */
     }
 
-    bool is_small_gap() const 
-    {
-        return length <= Threshold::max_small_gap;
-    }
-
-    //bool is_middle_gap() const 
-    //{
-    //    return length > Threshold::max_small_gap 
-    //        && length <= Threshold::max_middle_gap ;
-    //}
-
-    //bool is_big_gap() const 
-    //{
-    //    return length > Threshold::max_middle_gap ;
-    //}
 };
 
 /* general contigs and gaps information */

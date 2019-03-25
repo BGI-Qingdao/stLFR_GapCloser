@@ -18,6 +18,15 @@
 #include "Contig.hpp"
 #include "ContigTool.hpp"
 
+enum SubReadSetType
+{
+    Unknow = 0 ,
+    PE = 1 ,
+    PE_Barcode = 2 ,
+    Empty = 3 ,
+    Basic = 4
+};
+
 struct Kmer2Reads
 {
     std::vector<ReadElement> reads;
@@ -236,16 +245,21 @@ struct ConsensusResult
         return i ;
     }
 
-    bool is_consensus_done() const 
+    bool is_consensus_done(const SubReadSetType type ) const 
     {
+        if( type == SubReadSetType::Empty )
+            return false ;
         int cn = conflict_num() ;
         int ln = low_depth() ;
         GlobalAccesser::conflict_freq.Touch(cn);
         GlobalAccesser::too_low_freq.Touch(ln);
 
-        return  (cn <= Threshold::max_allowed_conflict )
-            && ( ln <= Threshold::max_accept_low_depth)
-            ;
+        if( type != SubReadSetType::Basic )
+            return  (cn <= 1 ) && ( ln <= 1 ) ;
+        else 
+            return  (cn <= Threshold::max_allowed_conflict )
+                && (ln <= Threshold::max_accept_low_depth)
+                ;
     }
 };
 
@@ -413,66 +427,41 @@ struct ReadMatrix
             return m_raw_reads.at(pos);
         }
 
+
         ReadMatrix GenSubMatrixByGap(const Contig & prev_contig ,
                 const Contig & next_contig ,
-                const GapInfo & gap )
+                /*const GapInfo & gap ,*/
+                SubReadSetType & ret_type )
         {
-
-            if( gap.is_small_gap() )
+            // try PE first 
+            auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
+            int s1 = sub1.ReadsNum() ;
+            if( s1 >= Threshold::min_pe_sub_reads_count )
             {
-                GlobalAccesser::gap_type.Touch("small_gap");
-                int total = ReadsNum() ;
-                Sub1ReadNum tmp ;
-                tmp.total_num = total ;
-                auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
-                int s1 = sub1.ReadsNum() ;
-                tmp.sub1_num = s1 ;
-                if( s1 >= Threshold::min_sub_reads_count 
-                ||
-                  Threshold::use_subset_only 
-                        )
-                {
-                    tmp.used_num = s1 ;
-                    GlobalAccesser::sub1_read_num.Touch(tmp);
-                    sub1.m_area = m_area ;
-                    return sub1;
-                }
-                tmp.used_num = total ;
-                GlobalAccesser::sub1_read_num.Touch(tmp);
+                ret_type = SubReadSetType::PE ;
+                return sub1 ;
+            }
+            // add Barcode and try again
+            auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
+            auto sub3 = Merge( sub1 , sub2 );
+            int s13 = sub3.ReadsNum() ;
+            if( s13>= Threshold::min_pe_barcode_sub_reads_count )
+            {
+                ret_type = SubReadSetType::PE_Barcode ;
+                return sub3;
+            }
+            // return null or basic
+            if( Threshold::use_subset_only )
+            {
+                ReadMatrix tmp ;
+                ret_type = SubReadSetType::Empty ;
+                return tmp;
+            }
+            else 
+            {
+                ret_type = SubReadSetType::Basic ;
                 return *this ;
             }
-            else
-            {
-                GlobalAccesser::gap_type.Touch("big_gap");
-                int total = ReadsNum() ;
-                Sub1_3ReadNum tmp ;
-                tmp.total_num = total ;
-
-                auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
-                auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
-                auto sub3 = Merge( sub1 , sub2 );
-                tmp.sub1_num = sub1.ReadsNum() ;
-                tmp.sub3_num = sub2.ReadsNum() ;
-                int s13 = sub3.ReadsNum() ;
-                tmp.sub1_3_num = s13 ;
-                if( s13>= Threshold::min_sub_reads_count 
-                ||
-                  Threshold::use_subset_only
-                  )
-                {
-                    tmp.used_num = s13;
-                    sub3.m_area = m_area ;
-                    GlobalAccesser::sub1_3_read_num.Touch(tmp);
-                    return sub3 ;
-                }
-                else
-                {
-                    tmp.used_num = total;
-                    GlobalAccesser::sub1_3_read_num.Touch(tmp);
-                    return *this ;
-                }
-            }
-            //return *this ;
         }
 
         ConsensusMatrix GenConsensusMatrix( const Contig & contig )

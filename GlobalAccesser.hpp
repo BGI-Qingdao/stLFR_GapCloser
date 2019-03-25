@@ -42,10 +42,13 @@ struct Threshold
     //  otherwise , can not consensus.
     static int      min_reads_count ;
 
-    // the minimum number of reads that can use sub matrix to
+    // the minimum number of pe reads that can use sub matrix to
     //  consensus , otherwhise use the basic matrix .
-    static int      min_sub_reads_count;
-    //static int      middle_sub_reads_count;
+    static int      min_pe_sub_reads_count;
+
+    // the minimum number of pe + barcode reads that can use sub matrix to
+    //  consensus , otherwhise use the basic matrix .
+    static int      min_pe_barcode_sub_reads_count;
 
     // the maximum number of confilicts that a map.
     //  can accept.

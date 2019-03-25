@@ -658,10 +658,10 @@ class GapCloser : public ContigAssembler
 
             int originalLen = contig.getLength();
             int end_pos  = originalLen ;
-            if( gap.is_small_gap() )
+            //if( gap.is_small_gap() )
                 end_pos += ((float)gap.length) * 1.5 ;
-            else
-                end_pos += ((float)gap.length) * 2 ;
+            //else
+            //    end_pos += ((float)gap.length) * 2 ;
 
             // step 0 , clean the barcodes in consensus area.
             ConsensusArea the_area = ConsensusConfig::GetConsensusArea(originalLen);
@@ -690,20 +690,26 @@ class GapCloser : public ContigAssembler
                     break ;
                 }
                 // step 1.2 abstract sub reads .
+                SubReadSetType sub_type = SubReadSetType::Unknow ;
                 readMatrix = readMatrix.GenSubMatrixByGap(contig
                         ,nextContig
-                        ,gap);
-                if( readMatrix.is_reads_too_little() )
+                        ,sub_type);
+
+                if( sub_type == SubReadSetType::Empty
+                        ||
+                        sub_type == SubReadSetType::Unknow
+                  )
                 {
-                    GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
+                    GlobalAccesser::consensus_failed_reason.Touch("no_sub_set");
                     break ;
                 }
+
                 GlobalAccesser::used_reads_set_freq.Touch(readMatrix.ReadsNum());
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
 
-                if( consensusResult.is_consensus_done() )
+                if( consensusResult.is_consensus_done(sub_type) )
                 {
                     GlobalAccesser::consensus_result_freq.Touch(1);
                     // step 1.5 update contig
