@@ -79,8 +79,6 @@ struct Threshold
     // the maximum length of a read that can loaded .
     static int      maxReadLength;
 
-    // 1 means DO NOT FILL GAP which is smaller than extend_len
-    static int      filter_too_small_gap ;
 
     // 1 means only use local sub-reads-set
     static int      use_subset_only ;

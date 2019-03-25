@@ -68,7 +68,7 @@ int      Threshold::max_accept_low_depth = 2 ;
 // For gap fill
 int      Threshold::NNumber = 1;
 int      Threshold::maxReadLength = 150;
-int      Threshold::filter_too_small_gap = 1;
+//int      Threshold::filter_too_small_gap = 1;
 int      Threshold::use_subset_only = 0 ;
 
 // global accessor class pointer here;
@@ -153,8 +153,8 @@ void usage(void)
         << Threshold::max_accept_low_depth<< ".\n";
 
     std::cout << "other:\n";
-    std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  default=" 
-        << Threshold::filter_too_small_gap<< ".\n";
+    //std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  default=" 
+    //    << Threshold::filter_too_small_gap<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. default=" 
         << Threshold::use_subset_only<< ".\n";
 
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
             case 'E': Threshold::min_nucleotide_depth = atoi(optarg); break;
             case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
-            case 'G': Threshold::filter_too_small_gap= atoi(optarg); break;
+            //case 'G': Threshold::filter_too_small_gap= atoi(optarg); break;
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
 
             case 'h': usage(); break;
@@ -341,8 +341,8 @@ int main(int argc, char *argv[])
     std::cout << "	-F	<int>		max low depth nucleotide,  =" 
         << Threshold::max_accept_low_depth<< ".\n";
     std::cout << "other:\n";
-    std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  =" 
-        << Threshold::filter_too_small_gap<< ".\n";
+    //std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  =" 
+    //    << Threshold::filter_too_small_gap<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. =" 
         << Threshold::use_subset_only<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
