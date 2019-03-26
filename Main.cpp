@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
     bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:"))
+                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:"))
             !=-1) 
     {
         switch(c) {
