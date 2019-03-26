@@ -45,7 +45,8 @@ int      Threshold::max_reads_depth = 1000 ;
 
 // For consensus area 
 int      ConsensusConfig::extend_len = 10 ;
-int      ConsensusConfig::extra_len = 10 ;
+int      ConsensusConfig::prev_extra_len = 50 ;
+int      ConsensusConfig::last_extra_len = 10 ;
 int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len ;
 
 // For reads set
@@ -126,15 +127,17 @@ void usage(void)
     std::cout << "consensus reads set options:\n";
     std::cout << "	-3	<int>		consensus length, default= [ the kvalue ] + 10 + [consensus extend length] ="
         << ConsensusConfig::consensus_len<< ".\n";
-    std::cout << "	-4	<int>		consensus extra length, default=" 
-        << ConsensusConfig::extra_len<< ".\n";
-    std::cout << "	-5	<int>		consensus extend length, default=" 
+    std::cout << "	-4	<int>		consensus prev extra length, default=" 
+        << ConsensusConfig::prev_extra_len<< ".\n";
+    std::cout << "	-5	<int>		consensus last extra length, default=" 
+        << ConsensusConfig::last_extra_len<< ".\n";
+    std::cout << "	-6	<int>		consensus extend length, default=" 
         << ConsensusConfig::extend_len<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-6	<int>		min reads count , default=" 
+    std::cout << "	-7	<int>		min reads count , default=" 
         << Threshold::min_reads_count<< ".\n";
-    std::cout << "	-7	<int>		max reads count , default=" 
+    std::cout << "	-8	<int>		max reads count , default=" 
         << Threshold::max_reads_count<< ".\n";
 
     std::cout << "extract sub reads set options:\n";
@@ -211,11 +214,12 @@ int main(int argc, char *argv[])
                           consensus_len_setted_flag = true ;
                           break;
                       }
-            case '4': ConsensusConfig::extra_len = atoi(optarg); break;
-            case '5': ConsensusConfig::extend_len = atoi(optarg); break;
+            case '4': ConsensusConfig::prev_extra_len = atoi(optarg); break;
+            case '5': ConsensusConfig::last_extra_len = atoi(optarg); break;
+            case '6': ConsensusConfig::extend_len = atoi(optarg); break;
 
-            case '6': Threshold::min_reads_count = atoi(optarg); break;
-            case '7': Threshold::max_reads_count = atoi(optarg); break;
+            case '7': Threshold::min_reads_count = atoi(optarg); break;
+            case '8': Threshold::max_reads_count = atoi(optarg); break;
 
             case 'A': Threshold::min_pe_sub_reads_count = atoi(optarg); break;
             case 'B': Threshold::min_pe_barcode_sub_reads_count = atoi(optarg); break;
@@ -315,15 +319,17 @@ int main(int argc, char *argv[])
     std::cout << "consensus reads set options:\n";
     std::cout << "	-3	<int>		consensus length,  =" 
         << ConsensusConfig::consensus_len<< ".\n";
-    std::cout << "	-4	<int>		consensus extra length,  =" 
-        << ConsensusConfig::extra_len<< ".\n";
-    std::cout << "	-5	<int>		consensus extend length,  =" 
+    std::cout << "	-4	<int>		consensus prev extra length,  =" 
+        << ConsensusConfig::prev_extra_len<< ".\n";
+    std::cout << "	-5	<int>		consensus last extra length,  =" 
+        << ConsensusConfig::last_extra_len<< ".\n";
+    std::cout << "	-6	<int>		consensus extend length,  =" 
         << ConsensusConfig::extend_len<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-6	<int>		min reads count ,  =" 
+    std::cout << "	-7	<int>		min reads count ,  =" 
         << Threshold::min_reads_count<< ".\n";
-    std::cout << "	-7	<int>		max reads count ,  =" 
+    std::cout << "	-8	<int>		max reads count ,  =" 
         << Threshold::max_reads_count<< ".\n";
 
     std::cout << "abstract sub reads set options:\n";
