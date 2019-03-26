@@ -660,6 +660,8 @@ struct ReadMatrixFactory
             {
                 TightString  tStrRead(read.getLen());
                 read.getSequence(tStrRead);
+                if( ret.is_reads_too_much() )
+                    break ;
                 for( int i = 0 ; i < (int)read.getLen() - Threshold::the_k ; i++ )
                 {
                     if( ret.is_reads_too_much() )
