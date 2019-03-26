@@ -255,11 +255,17 @@ struct ConsensusResult
         GlobalAccesser::too_low_freq.Touch(ln);
 
         if( type != SubReadSetType::Basic )
-            return  (cn <= 1 ) && ( ln <= 1 ) ;
-        else 
+        {
+            return  (cn <= Threshold::basic_set_max_conflict )
+                &&
+                ( ln <= Threshold::basic_set_max_low_depth ) ;
+        }
+        else
+        {
             return  (cn <= Threshold::max_allowed_conflict )
                 && (ln <= Threshold::max_accept_low_depth)
                 ;
+        }
     }
 };
 

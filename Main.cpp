@@ -73,6 +73,9 @@ int      Threshold::maxReadLength = 150;
 //int      Threshold::filter_too_small_gap = 1;
 int      Threshold::use_subset_only = 0 ;
 
+int      Threshold::basic_set_max_conflict = 1;
+int      Threshold::basic_set_max_low_depth = 1;
+
 // global accessor class pointer here;
 ReadAccessor *  GlobalAccesser::the_read_accessor = NULL;
 PairInfo *      GlobalAccesser::the_pair_info = NULL;
@@ -162,7 +165,10 @@ void usage(void)
         << Threshold::max_kmer_2_read<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. default=" 
         << Threshold::use_subset_only<< ".\n";
-
+    std::cout << "	-O	<int>		[ basic set ] max number of conflict can accepted . default=" 
+        << Threshold::basic_set_max_conflict<< ".\n";
+    std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . default=" 
+        << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     std::cout << "	-h	-?		output help information." << std::endl;
@@ -189,7 +195,7 @@ int main(int argc, char *argv[])
     bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:"))
+                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:"))
             !=-1) 
     {
         switch(c) {
@@ -231,6 +237,8 @@ int main(int argc, char *argv[])
             case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
             case 'G': Threshold::max_kmer_2_read= atoi(optarg); break;
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
+            case 'O': Threshold::basic_set_max_conflict = atoi(optarg); break;
+            case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -353,6 +361,10 @@ int main(int argc, char *argv[])
         << Threshold::max_kmer_2_read<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. =" 
         << Threshold::use_subset_only<< ".\n";
+    std::cout << "	-O	<int>		[ basic set ] max number of conflict can accepted . =" 
+        << Threshold::basic_set_max_conflict<< ".\n";
+    std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . =" 
+        << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     PairInfo* pairInfo;
