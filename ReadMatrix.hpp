@@ -434,6 +434,7 @@ struct ReadMatrix
                 SubReadSetType & ret_type )
         {
             SubReadsLog tmp ;
+            tmp.Init();
             tmp.basic_num = ReadsNum() ;
             // try PE first 
             auto sub1 = GetSubMatrixByPECheck( prev_contig) ;

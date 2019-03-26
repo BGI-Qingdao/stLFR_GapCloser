@@ -53,6 +53,16 @@ struct SubReadsLog
     int pe_barcode_num ;
     int used_num ;
 
+    void Init() 
+    {
+        type = "" ;
+        basic_num = 0 ;
+        pe_num = 0 ;
+        barcode_num = 0 ;
+        pe_barcode_num = 0 ;
+        used_num = 0 ;
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const SubReadsLog & me)
     {
         out<<me.type<<'\t'<<me.basic_num<<'\t'<<me.pe_num;
