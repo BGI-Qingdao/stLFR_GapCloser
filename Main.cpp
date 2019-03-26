@@ -52,6 +52,7 @@ int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfi
 // For reads set
 int      Threshold::max_reads_count = 300 ;
 int      Threshold::min_reads_count = 1 ;
+int      Threshold::max_kmer_2_read = 10 ;
 
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
@@ -157,8 +158,8 @@ void usage(void)
         << Threshold::max_accept_low_depth<< ".\n";
 
     std::cout << "other:\n";
-    //std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  default=" 
-    //    << Threshold::filter_too_small_gap<< ".\n";
+    std::cout << "	-G	<int>		the max number of reads that a kmer can find . default=" 
+        << Threshold::max_kmer_2_read<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. default=" 
         << Threshold::use_subset_only<< ".\n";
 
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
             case 'E': Threshold::min_nucleotide_depth = atoi(optarg); break;
             case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
-            //case 'G': Threshold::filter_too_small_gap= atoi(optarg); break;
+            case 'G': Threshold::max_kmer_2_read= atoi(optarg); break;
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
 
             case 'h': usage(); break;
@@ -348,8 +349,8 @@ int main(int argc, char *argv[])
     std::cout << "	-F	<int>		max low depth nucleotide,  =" 
         << Threshold::max_accept_low_depth<< ".\n";
     std::cout << "other:\n";
-    //std::cout << "	-G	<int>		do not fill small gap ( smaller than extend_len )  =" 
-    //    << Threshold::filter_too_small_gap<< ".\n";
+    std::cout << "	-G	<int>		the max number of reads that a kmer can find . =" 
+        << Threshold::max_kmer_2_read<< ".\n";
     std::cout << "	-I	<int>		use sub-reads-set only. =" 
         << Threshold::use_subset_only<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";

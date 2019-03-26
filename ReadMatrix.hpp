@@ -679,6 +679,8 @@ struct ReadMatrixFactory
                             (kmer ,contig , pos+ i );
                         if( reads.empty() )
                             continue ;
+                        if((int)reads.size() > Threshold::max_kmer_2_read )
+                            continue ;
                         GlobalAccesser::kmer_read_count.Touch(reads.size());
                         ret.AddKmer(kmer,reads,index,pos+i);
                         new_reads[pos + i]= reads;
@@ -715,6 +717,8 @@ struct ReadMatrixFactory
                 auto reads = ContigTool::find_all_reads_start_with
                     (kmer ,contig , i);
                 if( reads.empty() )
+                    continue ;
+                if((int)reads.size() > Threshold::max_kmer_2_read )
                     continue ;
                 GlobalAccesser::kmer_read_count.Touch(reads.size());
                 ret.AddKmer(kmer,reads,1,i);

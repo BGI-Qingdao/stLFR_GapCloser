@@ -83,6 +83,9 @@ struct Threshold
 
     // 1 means only use local sub-reads-set
     static int      use_subset_only ;
+
+    // the maximum numer of read that a kmer allowed hooked .
+    static int      max_kmer_2_read;
 };
 
 #endif //GLOBALACCESSER_HPP__
