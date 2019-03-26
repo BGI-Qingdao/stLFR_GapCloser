@@ -599,7 +599,6 @@ struct ReadMatrix
 
 struct ReadMatrixFactory
 {
-
     static ReadMatrix GenReadMatrix(const Contig & contig , const ConsensusArea & area )
     {
         ReadMatrix ret ;
@@ -651,17 +650,17 @@ struct ReadMatrixFactory
     {
         for( const auto & pair : prev_reads )
         {
-            int pos = pair.first ;
             if( ret.is_reads_too_much() )
                 break ;
+            int pos = pair.first ;
             if( ! area.valid_starter( pos ,Threshold::the_k ) )
                 continue ;
             for( const auto & read : pair.second )
             {
-                TightString  tStrRead(read.getLen());
-                read.getSequence(tStrRead);
                 if( ret.is_reads_too_much() )
                     break ;
+                TightString  tStrRead(read.getLen());
+                read.getSequence(tStrRead);
                 for( int i = 0 ; i < (int)read.getLen() - Threshold::the_k ; i++ )
                 {
                     if( ret.is_reads_too_much() )
@@ -680,6 +679,7 @@ struct ReadMatrixFactory
                             (kmer ,contig , pos+ i );
                         if( reads.empty() )
                             continue ;
+                        GlobalAccesser::kmer_read_count.Touch(reads.size());
                         ret.AddKmer(kmer,reads,index,pos+i);
                         new_reads[pos + i]= reads;
                     }
@@ -716,6 +716,7 @@ struct ReadMatrixFactory
                     (kmer ,contig , i);
                 if( reads.empty() )
                     continue ;
+                GlobalAccesser::kmer_read_count.Touch(reads.size());
                 ret.AddKmer(kmer,reads,1,i);
                 new_reads[i]= reads;
             }

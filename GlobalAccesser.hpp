@@ -20,6 +20,7 @@ struct GlobalAccesser
     static BGIQD::FREQ::Freq<int> too_low_freq;
     static BGIQD::FREQ::Freq<int> basic_reads_set_freq;
     static BGIQD::FREQ::Freq<int> used_reads_set_freq;
+    static BGIQD::FREQ::Freq<int> kmer_read_count;
 
     static BGIQD::FREQ::Freq<std::string> sub_type;
     static BGIQD::FREQ::Freq<SubReadsLog> sub_read_num ;

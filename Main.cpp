@@ -82,6 +82,7 @@ BGIQD::FREQ::Freq<int> GlobalAccesser::conflict_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::too_low_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::basic_reads_set_freq;
 BGIQD::FREQ::Freq<int> GlobalAccesser::used_reads_set_freq;
+BGIQD::FREQ::Freq<int> GlobalAccesser::kmer_read_count;
 
 BGIQD::FREQ::Freq<std::string> GlobalAccesser::sub_type;
 BGIQD::FREQ::Freq<SubReadsLog> GlobalAccesser::sub_read_num ;
@@ -393,5 +394,6 @@ int main(int argc, char *argv[])
     std::cerr<<" sub read set type freq        :\n"<<GlobalAccesser::sub_type.ToString() ;
     std::cerr<<" detail of read set freq        :\n"<<GlobalAccesser::sub_read_num.ToString() ;
 
+    std::cerr<<" detail of kmer read count        :\n"<<GlobalAccesser::kmer_read_count.ToString() ;
     return 0;
 }
