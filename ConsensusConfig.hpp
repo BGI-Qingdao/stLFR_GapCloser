@@ -58,7 +58,8 @@ struct ConsensusConfig
     {
         assert( contiglen > 0 );
         assert( extend_len > 0 );
-        assert( extra_len > 0 );
+        assert( prev_extra_len > 0 );
+        assert( last_extra_len > 0 );
         assert( consensus_len > 0 );
 
         ConsensusArea ret ;
