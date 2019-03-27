@@ -92,6 +92,9 @@ struct Threshold
 
     // the maximum numer of read that a kmer allowed hooked .
     static int      basic_set_max_low_depth;
+
+    // the 
+    static float    basic_NoConflictThreshold ;
 };
 
 #endif //GLOBALACCESSER_HPP__

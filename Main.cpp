@@ -63,6 +63,7 @@ int      Threshold::min_pe_barcode_sub_reads_count = 10 ;
 
 // For consensus
 float    Threshold::NoConflictThreshold = 0.8f ;
+float    Threshold::basic_NoConflictThreshold = 0.8f ;
 int      Threshold::max_allowed_conflict = 2 ;
 int      Threshold::min_nucleotide_depth = 2 ;
 int      Threshold::max_accept_low_depth = 2 ;
@@ -169,6 +170,8 @@ void usage(void)
         << Threshold::basic_set_max_conflict<< ".\n";
     std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . default=" 
         << Threshold::basic_set_max_low_depth<< ".\n";
+    std::cout << "	-Q	<int>	 	[ basic set ] the conflict_threshold of baisc set . default=" 
+        << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     std::cout << "	-h	-?		output help information." << std::endl;
@@ -195,7 +198,7 @@ int main(int argc, char *argv[])
     bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:"))
+                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:"))
             !=-1) 
     {
         switch(c) {
@@ -239,6 +242,7 @@ int main(int argc, char *argv[])
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
             case 'O': Threshold::basic_set_max_conflict = atoi(optarg); break;
             case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
+            case 'Q': Threshold::basic_NoConflictThreshold= atoi(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -365,6 +369,8 @@ int main(int argc, char *argv[])
         << Threshold::basic_set_max_conflict<< ".\n";
     std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . =" 
         << Threshold::basic_set_max_low_depth<< ".\n";
+    std::cout << "	-Q	<int>	 	[ basic set ] the conflict_threshold of baisc set . =" 
+        << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     PairInfo* pairInfo;

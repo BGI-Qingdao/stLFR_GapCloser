@@ -275,7 +275,7 @@ struct ConsensusMatrix
     private:
         std::vector<std::array<int,4>> depth_matrix;
 
-        std::tuple<char , bool , bool > consensus_pos(const std::array<int,4> &  a) const
+        std::tuple<char , bool , bool > consensus_pos(const std::array<int,4> &  a , const SubReadSetType type ) const
         {
             int total_depth = 0 ;
             int highest_depeth = 0 ;
@@ -295,7 +295,12 @@ struct ConsensusMatrix
             if ( total_depth == 0 )
                 return std::make_tuple( 'N' , true , ! is_low_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
-            if( highest_depeth >= (float)total_depth * Threshold::NoConflictThreshold )
+            float th = 1.0f ;
+            if ( type != SubReadSetType::Basic )
+                th = Threshold::NoConflictThreshold ;
+            else 
+                th = Threshold::basic_NoConflictThreshold ;
+            if( highest_depeth >= (float)total_depth * th )
                 return std::make_tuple( ret , true , ! is_low_depth ) ;
             else 
                 return std::make_tuple( ret , false , ! is_low_depth ) ;
@@ -312,7 +317,7 @@ struct ConsensusMatrix
             }
         }
 
-        ConsensusResult GenConsensusResult() const
+        ConsensusResult GenConsensusResult( const SubReadSetType type ) const
         {
             ConsensusResult ret ;
             for ( const auto & m : depth_matrix )
@@ -321,7 +326,7 @@ struct ConsensusMatrix
                 bool not_confilict ;
                 bool not_low_depth ;
                 std::tie( nucleotide,not_confilict,not_low_depth) 
-                    = consensus_pos( m );
+                    = consensus_pos( m ,type );
                 if( nucleotide == 'N' )
                     break ;
                 ret.conflict_flags.push_back(not_confilict);

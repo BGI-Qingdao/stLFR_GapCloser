@@ -696,7 +696,7 @@ class GapCloser : public ContigAssembler
                 GlobalAccesser::used_reads_set_freq.Touch(readMatrix.ReadsNum());
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
-                ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult();
+                ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult(sub_type);
 
                 if( consensusResult.is_consensus_done(sub_type) )
                 {
