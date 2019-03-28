@@ -170,7 +170,7 @@ void usage(void)
         << Threshold::basic_set_max_conflict<< ".\n";
     std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . default=" 
         << Threshold::basic_set_max_low_depth<< ".\n";
-    std::cout << "	-Q	<int>	 	[ basic set ] the conflict_threshold of baisc set . default=" 
+    std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . default=" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
             case 'O': Threshold::basic_set_max_conflict = atoi(optarg); break;
             case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
-            case 'Q': Threshold::basic_NoConflictThreshold= atoi(optarg); break;
+            case 'Q': Threshold::basic_NoConflictThreshold= atof(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
         << Threshold::basic_set_max_conflict<< ".\n";
     std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . =" 
         << Threshold::basic_set_max_low_depth<< ".\n";
-    std::cout << "	-Q	<int>	 	[ basic set ] the conflict_threshold of baisc set . =" 
+    std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . =" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
