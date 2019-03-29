@@ -644,6 +644,8 @@ struct ReadMatrixFactory
                 break ;
             if( new_reads.empty() )
                 break ;
+            if( relative_num > Threshold::max_reads_round )
+                break ;
         };
 
         return ret ;

@@ -53,7 +53,7 @@ int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfi
 int      Threshold::max_reads_count = 300 ;
 int      Threshold::min_reads_count = 1 ;
 int      Threshold::max_kmer_2_read = 10 ;
-
+int      Threshold::max_reads_round = 1 ;
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
 //int      Threshold::max_middle_gap = 1000 ;
@@ -172,6 +172,8 @@ void usage(void)
         << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . default=" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
+    std::cout << "	-R	<int>	 	max read-find-read round . default=" 
+        << Threshold::max_reads_round<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     std::cout << "	-h	-?		output help information." << std::endl;
@@ -198,7 +200,7 @@ int main(int argc, char *argv[])
     bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:"))
+                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
             !=-1) 
     {
         switch(c) {
@@ -243,6 +245,7 @@ int main(int argc, char *argv[])
             case 'O': Threshold::basic_set_max_conflict = atoi(optarg); break;
             case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
             case 'Q': Threshold::basic_NoConflictThreshold= atof(optarg); break;
+            case 'R': Threshold::max_reads_round= atoi(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -371,6 +374,8 @@ int main(int argc, char *argv[])
         << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . =" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
+    std::cout << "	-R	<int>	 	max read-find-read round .=" 
+        << Threshold::max_reads_round<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     PairInfo* pairInfo;

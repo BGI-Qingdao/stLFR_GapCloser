@@ -95,6 +95,8 @@ struct Threshold
 
     // the 
     static float    basic_NoConflictThreshold ;
+    // the 
+    static int      max_reads_round;
 };
 
 #endif //GLOBALACCESSER_HPP__
