@@ -680,7 +680,7 @@ class GapCloser : public ContigAssembler
                 }
                 // step 1.2 abstract sub reads .
                 SubReadSetType sub_type = SubReadSetType::Unknow ;
-                readMatrix = readMatrix.GenSubMatrix(contig
+                auto subReadMatrix =  readMatrix.GenSubMatrix(contig
                         ,nextContig
                         ,sub_type);
 
@@ -693,9 +693,9 @@ class GapCloser : public ContigAssembler
                     break ;
                 }
 
-                GlobalAccesser::used_reads_set_freq.Touch(readMatrix.ReadsNum());
+                GlobalAccesser::used_reads_set_freq.Touch(subReadMatrix.ReadsNum());
                 // step 1.3 do consensus .
-                ConsensusMatrix consensusMatrix = readMatrix.GenConsensusMatrix(contig);
+                ConsensusMatrix consensusMatrix = subReadMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult(sub_type);
 
                 if( consensusResult.is_consensus_done(sub_type) )
