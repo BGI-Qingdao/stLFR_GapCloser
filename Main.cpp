@@ -43,11 +43,18 @@ int      Threshold::the_k = 27 ;
 int      Threshold::max_error_count = 2 ;
 int      Threshold::max_reads_depth = 1000 ;
 
-// For consensus area 
+// For consensus area
+/*
 int      ConsensusConfig::extend_len = 10 ;
 int      ConsensusConfig::prev_extra_len = 90 ;
 int      ConsensusConfig::last_extra_len = 10 ;
 int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len ;
+*/
+
+int     NewConsensusConfig::x1 = 50  ;
+int     NewConsensusConfig::y1 = -10 ;
+int     NewConsensusConfig::x2 = 27  ;
+int     NewConsensusConfig::y2 = -10 ;
 
 // For reads set
 int      Threshold::max_reads_count = 300 ;
@@ -130,6 +137,7 @@ void usage(void)
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
+    /*
     std::cout << "	-3	<int>		consensus length, default= [ the kvalue ] + 10 + [consensus extend length] ="
         << ConsensusConfig::consensus_len<< ".\n";
     std::cout << "	-4	<int>		consensus prev extra length, default=" 
@@ -138,6 +146,15 @@ void usage(void)
         << ConsensusConfig::last_extra_len<< ".\n";
     std::cout << "	-6	<int>		consensus extend length, default=" 
         << ConsensusConfig::extend_len<< ".\n";
+    */
+    std::cout << "	-3	<int>		consensus x1 , default= "
+        << NewConsensusConfig::x1 << ".\n";
+    std::cout << "	-4	<int>		consensus y1 , default= "
+        << NewConsensusConfig::y1 << ".\n";
+    std::cout << "	-5	<int>		consensus x2 , default= "
+        << NewConsensusConfig::x2 << ".\n";
+    std::cout << "	-6	<int>		consensus y2 , default= "
+        << NewConsensusConfig::y2 << ".\n";
 
     std::cout << "consensus reads set options:\n";
     std::cout << "	-7	<int>		min reads count , default=" 
@@ -197,7 +214,7 @@ int main(int argc, char *argv[])
     Len_t mismatchLen=5;
     float loadFactor = 0.75;
     Len_t threadSum=1;
-    bool consensus_len_setted_flag = false ;
+    //bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
                     "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
@@ -221,6 +238,7 @@ int main(int argc, char *argv[])
             case '1': Threshold::max_reads_depth= atoi(optarg); break;
             case '2': Threshold::max_error_count= atoi(optarg); break;
 
+            /*
             case '3': {
                           ConsensusConfig::consensus_len= atoi(optarg); 
                           consensus_len_setted_flag = true ;
@@ -229,6 +247,11 @@ int main(int argc, char *argv[])
             case '4': ConsensusConfig::prev_extra_len = atoi(optarg); break;
             case '5': ConsensusConfig::last_extra_len = atoi(optarg); break;
             case '6': ConsensusConfig::extend_len = atoi(optarg); break;
+            */
+            case '3': NewConsensusConfig::x1= atoi(optarg); break;
+            case '4': NewConsensusConfig::y1= atoi(optarg); break;
+            case '5': NewConsensusConfig::x2= atoi(optarg); break;
+            case '6': NewConsensusConfig::y2= atoi(optarg); break;
 
             case '7': Threshold::min_reads_count = atoi(optarg); break;
             case '8': Threshold::max_reads_count = atoi(optarg); break;
@@ -259,10 +282,11 @@ int main(int argc, char *argv[])
         std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << Threshold::the_k << ".\n";
         Threshold::the_k = 31;
     }
+    /*
     if( ! consensus_len_setted_flag )
     {
         ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len;
-    }
+    }*/
 
     endNumLen = Threshold::the_k;
 
@@ -333,6 +357,15 @@ int main(int argc, char *argv[])
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
+    std::cout << "	-3	<int>		consensus x1 , = "
+        << NewConsensusConfig::x1 << ".\n";
+    std::cout << "	-4	<int>		consensus y1 , = "
+        << NewConsensusConfig::y1 << ".\n";
+    std::cout << "	-5	<int>		consensus x2 , = "
+        << NewConsensusConfig::x2 << ".\n";
+    std::cout << "	-6	<int>		consensus y2 , = "
+        << NewConsensusConfig::y2 << ".\n";
+    /*
     std::cout << "	-3	<int>		consensus length,  =" 
         << ConsensusConfig::consensus_len<< ".\n";
     std::cout << "	-4	<int>		consensus prev extra length,  =" 
@@ -341,7 +374,7 @@ int main(int argc, char *argv[])
         << ConsensusConfig::last_extra_len<< ".\n";
     std::cout << "	-6	<int>		consensus extend length,  =" 
         << ConsensusConfig::extend_len<< ".\n";
-
+    */
     std::cout << "consensus reads set options:\n";
     std::cout << "	-7	<int>		min reads count ,  =" 
         << Threshold::min_reads_count<< ".\n";

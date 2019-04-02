@@ -5,6 +5,7 @@
 
 struct ConsensusArea
 {
+    /* all position index in 1 base */
     int left_most_pos_in_contig ;
     int right_most_pos_in_contig ;
     int consensus_start_pos_in_contig;
@@ -43,10 +44,31 @@ struct ConsensusArea
 
     bool valid_starter( int pos , int kvalue ) const
     {
-        return pos + kvalue < consensus_end_pos_in_contig ;
+        return  pos >= left_most_pos_in_contig &&
+            ( pos + kvalue -1 ) <= right_most_pos_in_contig;
+    }
+
+    int reads_area_len() const 
+    {
+        return right_most_pos_in_contig - left_most_pos_in_contig + 1;
+    }
+
+    int consensus_area_len() const 
+    {
+        return consensus_end_pos_in_contig -  consensus_start_pos_in_contig + 1 ;
+    }
+
+    bool IsValid( int kvalue ) const 
+    {
+        return ( reads_area_len() >= kvalue )
+            && ( left_most_pos_in_contig
+                <= consensus_start_pos_in_contig )
+            && ( -left_most_pos_in_contig + contig_len +1
+               >= kvalue );
     }
 };
 
+/*
 struct ConsensusConfig
 {
     static int extend_len ;
@@ -76,6 +98,41 @@ struct ConsensusConfig
         if ( ret.consensus_start_pos_in_contig <= 0 )
             ret.consensus_start_pos_in_contig = 1 ;
 
+
+        return ret ;
+    }
+};
+*/
+//                        0
+//                        |
+//          x1            |       y1
+//<<-----------------------
+//             x2             y2
+//
+
+struct NewConsensusConfig
+{
+    static int x1 ;
+    static int y1 ;
+    static int x2 ;
+    static int y2 ;
+
+    static ConsensusArea  GetConsensusArea( int contiglen )
+    {
+        ConsensusArea ret ;
+        ret.contig_len = contiglen ;
+
+        // Calc the reads area.
+        ret.left_most_pos_in_contig =
+            contiglen - x1 > 0 ? contiglen - x1 : 0  ;
+        ret.right_most_pos_in_contig =
+            contiglen - y1 > 0 ?  contiglen - y1 : 0 ;
+
+        // Calc the consensus area.
+        ret.consensus_start_pos_in_contig =
+            contiglen - x2 > 0 ? contiglen - x2 : 0  ;
+        ret.consensus_end_pos_in_contig =
+            contiglen - y2 > 0 ?  contiglen - y2 : 0 ;
 
         return ret ;
     }
