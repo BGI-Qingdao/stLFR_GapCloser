@@ -780,6 +780,8 @@ class GapCloser : public ContigAssembler
 
             TightString & contig_seq = contig.getTightString();
             TightString consensus_seq = consensusResult.getTightString() ;
+            if( (int)consensus_seq.getLength() < contigRemainLen )
+                contigRemainLen = consensus_seq.getLength() ;
             // step 1 , Update sequence first 
             for( int i = 0 ; i < contigRemainLen ; i ++ )
             { // 1.1 check for replace
