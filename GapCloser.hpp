@@ -785,12 +785,14 @@ class GapCloser : public ContigAssembler
             // step 1 , Update sequence first 
             for( int i = 0 ; i < contigRemainLen ; i ++ )
             { // 1.1 check for replace
-                if ( contig_seq[the_area.consensus_start_pos_in_contig+i] 
-                        != consensus_seq[i] )
+                int index = ConsensusArea::pos2index(
+                            the_area.contig2matrix_translate_pos(i)
+                            ) ;
+                if ( contig_seq[index] != consensus_seq[i] )
                 {
                     contig_seq.writeNucleotideAtPosition(
                             consensus_seq[i]
-                            ,the_area.consensus_start_pos_in_contig+i
+                            ,index
                             );
                 }
             }
