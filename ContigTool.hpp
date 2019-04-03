@@ -15,7 +15,7 @@ struct  ContigTool
         static std::vector<ReadElement> find_all_reads_start_with(
                 const Number_t & kmer
                 , const Contig & contig 
-                , int position
+                , int position /* in 1 base */
                 )
         {
             std::vector<ReadElement> ret ;

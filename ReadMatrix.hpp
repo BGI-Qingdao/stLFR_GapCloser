@@ -721,7 +721,9 @@ struct ReadMatrixFactory
                 break ;
             Number_t kmer;
             tStrContig.readTightStringFragment
-                (i-1, i+Threshold::the_k-1, kmer);
+                (ConsensusArea::pos2index(i)
+                 ,ConsensusArea::pos2index(i+Threshold::the_k)
+                 , kmer); /* 0 base */
             ret.tryInitPos(i);
             if( ret.checkKmerInPos(kmer,i) )
                 continue ;

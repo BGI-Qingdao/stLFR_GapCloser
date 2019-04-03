@@ -29,7 +29,18 @@ struct ConsensusArea
             && contig_len == other.contig_len ;
     }
 
-    int pos_translate_contig2martix(int pos) const
+    static int pos2index( int pos )
+    {
+        return pos -1 ;
+    }
+
+    int contig2matrix_translate_pos( int index /* 0base */) const
+    {
+        assert( index >= 0 );
+        return index + consensus_start_pos_in_contig ; 
+    }
+
+    int pos_translate_contig2martix(int pos /* in 1 base */ ) const
     {
         if( pos < consensus_start_pos_in_contig 
                 || pos > consensus_end_pos_in_contig )
@@ -42,7 +53,7 @@ struct ConsensusArea
         }
     }
 
-    bool valid_starter( int pos , int kvalue ) const
+    bool valid_starter( int pos /* in 1 base */ , int kvalue ) const
     {
         return  pos >= left_most_pos_in_contig &&
             ( pos + kvalue -1 ) <= right_most_pos_in_contig;
