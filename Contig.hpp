@@ -39,8 +39,8 @@ struct BarcodeInfo
     // the first position that one barcode mapped.
     //  this is used to mask some area's barcodes.
     //  Key : barcode id
-    //  Value : position in 0 base ;
-    std::map<int , int >  m_data ;
+    //  Value : position set (in 0 base) ;
+    std::map<int , std::set<int> >  m_barcode_pos ;
 
     void UpdateBarcode(const ReadElement & read , int position )
     {
@@ -53,15 +53,7 @@ struct BarcodeInfo
 
     void UpdateBarcode(int barcode , int position)
     {
-        if ( m_data.find( barcode ) == m_data.end() )
-        {
-            m_data[barcode] = position ;
-        }
-        else
-        {
-            if( m_data.at(barcode) > position )
-                m_data[barcode] = position ;
-        }
+        m_barcode_pos[barcode].insert(position) ;
         barcodes.insert(barcode);
     }
     /*
@@ -69,28 +61,35 @@ struct BarcodeInfo
      */
     void Erase( int start )
     {
-        for(const auto & pair : m_data )
+        for(auto & pair : m_barcode_pos )
         {
-            if( pair.second >= start )
+            bool need_del = true ;
+            std::set<int> to_del;
+            for( const auto & i : pair.second )
+            {
+                if( i < start ) 
+                    need_del = false ;
+                else 
+                    to_del.insert(i);
+            }
+            for( const auto i : to_del )
+                pair.second.erase(i);
+            if( need_del  )
                 barcodes.erase(pair.first);
         }
-        auto itr = m_data.begin();
-        while (itr != m_data.end()) 
+        std::set<int> to_del ;
+        for( const auto & pair : m_barcode_pos )
         {
-            if (barcodes.find(itr->first) == barcodes.end() )
-            {
-                auto toErase = itr;
-                ++itr;
-                m_data.erase(toErase);
-            } else {
-                ++itr;
-            }
+            if( pair.second.empty() )
+                to_del.insert(pair.first);
         }
+        for( const auto i : to_del )
+            m_barcode_pos.erase(i);
     }
     void purge()
     {
         barcodes.clear() ;
-        m_data.clear();
+        m_barcode_pos.clear();
     }
 };
 
