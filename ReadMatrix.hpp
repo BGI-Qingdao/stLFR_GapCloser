@@ -21,6 +21,7 @@
 enum SubReadSetType
 {
     Unknow = 0 ,
+    PE_with_brcode = 5 ,
     PE = 1 ,
     PE_Barcode = 2 ,
     Empty = 3 ,
@@ -31,6 +32,7 @@ struct Kmer2Reads
 {
     std::vector<ReadElement> reads;
     int relative_num ;
+    std::vector<int> pe_pos ;
 };
 
 struct PositionInfoKeeper
@@ -48,6 +50,19 @@ struct PositionInfoKeeper
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.relative_num = relative_num ;
             new_one.reads.push_back(reads) ;
+            reads_num ++ ;
+        }
+
+        void AddKmerWithPE(const Number_t & kmer,
+                const ReadElement & reads ,
+                int relative_num ,
+                int PE_pos )
+        {
+            auto & new_one = all_kmer2reads[kmer] ;
+            new_one.relative_num = relative_num ;
+            assert( new_one.reads.size() == new_one.pe_pos.size() );
+            new_one.reads.push_back(reads) ;
+            new_one.pe_pos.push_back(PE_pos);
             reads_num ++ ;
         }
 
@@ -119,7 +134,7 @@ struct PositionInfoKeeper
             return reads_num ;
         }
 
-        bool KmerExist( const Number_t & kmer)
+        bool KmerExist( const Number_t & kmer) const
         {
             auto itr = all_kmer2reads.find(kmer) ;
             if( itr == all_kmer2reads.end() )
@@ -137,7 +152,34 @@ struct PositionInfoKeeper
             reads_num += new_one.reads.size() ;
         }
 
-        PositionInfoKeeper GetSubReadsByPE( int pos , const Contig & prev_contig ) const
+        PositionInfoKeeper GetSubReadsByNotPEBarcode(
+                const Contig & prev_contig ,
+                const Contig & next_contig 
+                ) const
+        {
+            PositionInfoKeeper ret;
+            ret.Init();
+            for( const auto & pair : all_kmer2reads )
+            {
+                const Number_t & kmer = pair.first ;
+                const Kmer2Reads & reads = pair.second ;
+                assert( reads.reads.size() == reads.pe_pos.size());
+                for( size_t i = 0 ; i < reads.reads.size() ; i++ )
+                {
+                    const auto & a_read = reads.reads.at(i);
+                    int pe_pos = reads.pe_pos.at(i);
+                    if( ContigTool::IsEligibleBarcodeCheckRead_NOTPE
+                            (a_read, prev_contig,next_contig , pe_pos) )
+                    {
+                        ret.AddKmer(kmer,a_read, reads.relative_num);
+                    }
+                }
+            }
+            return ret ;
+        }
+
+        PositionInfoKeeper GetSubReadsByPE(
+                int pos , const Contig & prev_contig ) const
         {
             PositionInfoKeeper ret;
             ret.Init();
@@ -147,9 +189,12 @@ struct PositionInfoKeeper
                 const Kmer2Reads & reads = pair.second ;
                 for( const auto & a_read : reads.reads )
                 {
-                    if( ContigTool::IsEligiblePECheckRead(a_read, prev_contig,pos) )
+                    int pe_pos = 0 ;
+                    if( ContigTool::IsEligiblePECheckRead(
+                                a_read, prev_contig,pos , pe_pos ) )
                     {
-                        ret.AddKmer(kmer,a_read, reads.relative_num);
+                        ret.AddKmerWithPE
+                            (kmer,a_read, reads.relative_num,pe_pos);
                     }
                 }
             }
@@ -178,7 +223,7 @@ struct PositionInfoKeeper
             }
             return ret ;
         }
-
+/*
         PositionInfoKeeper GetSubReadsByONT(
                 const Contig & prev_contig ,
                 const Contig & next_contig 
@@ -201,6 +246,7 @@ struct PositionInfoKeeper
             }
             return ret ;
         }
+    */
 };
 
 struct ConsensusResult
@@ -388,7 +434,27 @@ struct ReadMatrix
             return ret ;
         }
 
-        ReadMatrix GetSubMatrixByPECheck(const Contig & prev_contig)
+
+        ReadMatrix GetSubMatrixByNotPEBarcode(
+                const Contig & prev_contig,
+                const Contig & next_contig 
+                ) const
+        {
+            ReadMatrix ret ;
+            for( const auto & pair : m_raw_reads )
+            {
+                int pos = pair.first ;
+                const PositionInfoKeeper & reads  =  pair.second ;
+                PositionInfoKeeper sub =
+                    reads.GetSubReadsByNotPEBarcode(
+                            prev_contig , next_contig );
+                if( sub.ReadsNum() > 0 )
+                    ret.m_raw_reads[pos]=sub ;
+            }
+            return ret ;
+        }
+
+        ReadMatrix GetSubMatrixByPECheck(const Contig & prev_contig) const
         {
             ReadMatrix ret ;
             for( const auto & pair : m_raw_reads )
@@ -405,7 +471,7 @@ struct ReadMatrix
         ReadMatrix GetSubMatrixByBarcodeCheck(
                 const Contig & prev_contig,
                 const Contig & next_contig
-                )
+                ) const 
         {
             ReadMatrix ret ;
             for( const auto & pair : m_raw_reads )
@@ -451,6 +517,23 @@ struct ReadMatrix
             auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
             int s1 = sub1.ReadsNum() ;
             tmp.pe_num = s1 ;
+            // check if can use pe_with_extra_barcode
+            {
+                auto sub1b = sub1.GetSubMatrixByNotPEBarcode(prev_contig , next_contig) ;
+                int s1b = sub1b.ReadsNum() ;
+                tmp.pe_with_extra_barcode_num = s1b ;
+                if( s1b >= Threshold::min_pe_with_extra_barcode_reads_count )
+                {
+                    tmp.used_num = s1b ;
+                    tmp.type = "PE&Barcode";
+                    GlobalAccesser::sub_read_num.Touch(tmp);
+                    GlobalAccesser::sub_type.Touch("PE&Barcode");
+                    sub1b.m_area = m_area ;
+                    ret_type = SubReadSetType::PE_with_brcode ;
+                    return sub1b ;
+                }
+            }
+
             if( s1 >= Threshold::min_pe_sub_reads_count )
             {
                 tmp.used_num = s1 ;
@@ -461,6 +544,7 @@ struct ReadMatrix
                 ret_type = SubReadSetType::PE ;
                 return sub1 ;
             }
+
             // add Barcode and try again
             auto sub2 = GetSubMatrixByBarcodeCheck(prev_contig , next_contig );
             int s2 = sub2.ReadsNum() ;
@@ -471,9 +555,9 @@ struct ReadMatrix
             if( s13>= Threshold::min_pe_barcode_sub_reads_count )
             {
                 tmp.used_num = s13 ;
-                tmp.type = "PE_BARCODE" ;
+                tmp.type = "PE|BARCODE" ;
                 GlobalAccesser::sub_read_num.Touch(tmp);
-                GlobalAccesser::sub_type.Touch("PE_BARCODE");
+                GlobalAccesser::sub_type.Touch("PE|BARCODE");
                 ret_type = SubReadSetType::PE_Barcode ;
                 sub3.m_area = m_area ;
                 return sub3;
@@ -588,12 +672,11 @@ struct ReadMatrix
             m_raw_reads[pos].AddKmer(kmer,reads,relative_num);
         }
 
-
-        bool checkKmerInPos(const Number_t & kmer , int pos )
+        bool checkKmerInPos(const Number_t & kmer , int pos ) const
         {
             if( m_raw_reads.find(pos) == m_raw_reads.end())
                 return false ;
-            return m_raw_reads[pos].KmerExist(kmer);
+            return m_raw_reads.at(pos).KmerExist(kmer);
         }
 
         void tryInitPos(int pos)

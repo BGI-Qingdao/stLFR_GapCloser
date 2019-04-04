@@ -43,6 +43,8 @@ struct Threshold
     //  otherwise , can not consensus.
     static int      min_reads_count ;
 
+    // the 
+    static int      min_pe_with_extra_barcode_reads_count ;
     // the minimum number of pe reads that can use sub matrix to
     //  consensus , otherwhise use the basic matrix .
     static int      min_pe_sub_reads_count;

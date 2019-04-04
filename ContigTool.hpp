@@ -120,8 +120,49 @@ struct  ContigTool
             return std::make_tuple(false,-1,-1);
         }
 
+        static bool
+            IsEligibleBarcodeCheckRead_NOTPE(
+                    ReadElement const& readElement
+                    , const Contig& prev_contig
+                    , const Contig& next_contig
+                    , int pe_pos
+                    )
+            {
+                auto rbarcode = readElement.getBarodes() ;
+                if( rbarcode.empty() )
+                    return false ;
+                const auto & prev_barcode = prev_contig.getBarodes();
+                if( prev_barcode.empty() )
+                    return false ;
+                auto with_prev = SetIntersection(rbarcode,prev_barcode);
+                if( with_prev.empty()) 
+                    return false ;
+                const auto &  next_barcode = next_contig.getBarodes() ;
+                if( next_barcode.empty()) 
+                    return false ;
+                auto  with_next = SetIntersection( rbarcode, next_barcode);
+                if( with_next.empty() )
+                    return false ;
+                auto both = SetIntersection( with_prev, with_next );
+                if( both.empty() )
+                    return false ;
+                // to check not pe barcode
+                for( const auto a_barcode : both )
+                {
+                    const auto & bi = prev_contig.getBarodeInfo() ;
+                    const auto & bps = bi.m_barcode_pos.at(a_barcode);
+                    if( bps.size() <= 1 )
+                        continue ;
+                    for( const auto pos : bps )
+                    {
+                        if( pos != pe_pos )
+                            return true ;
+                    }
+                }
+                return false ;
+            }
 
-        static bool 
+        static bool
             IsEligibleBarcodeCheckRead( ReadElement const& readElement
                     , const Contig& prev_contig 
                     , const Contig& next_contig 
@@ -148,7 +189,7 @@ struct  ContigTool
                 return true  ;
             }
 
-        static bool 
+        static bool
             IsEligibleONTCheckRead( ReadElement const& /*readElement*/
                     , const Contig& /*prev_contig */
                     , const Contig& /*next_contig */
@@ -156,10 +197,11 @@ struct  ContigTool
             {
                 return false;
             }
-        static bool 
+        static bool
             IsEligiblePECheckRead( ReadElement const& readElement
-                    , const Contig& contig 
-                    , int read_pos ) 
+                    , const Contig& contig
+                    , int read_pos 
+                    , int & pe_pos ) 
             {
                 std::vector<std::vector<int>> contigPos;
                 Len_t arrayLen = GlobalAccesser::the_pair_info->getArrayLen();
@@ -189,6 +231,7 @@ struct  ContigTool
                                 ) 
                            ) 
                         {
+                            pe_pos = pos ;
                             PECount++;		
                         }
                     }
