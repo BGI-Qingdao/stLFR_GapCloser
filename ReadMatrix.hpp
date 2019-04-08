@@ -33,6 +33,8 @@ struct Kmer2Reads
     std::vector<ReadElement> reads;
     int relative_num ;
     std::vector<int> pe_pos ;
+
+    int ReadsNum() const { return reads.size() ; }
 };
 
 struct PositionInfoKeeper
@@ -41,7 +43,7 @@ struct PositionInfoKeeper
 
         std::map<Number_t , Kmer2Reads> all_kmer2reads;
 
-        int reads_num ;
+        //int reads_num ;
 
         void AddKmer(const Number_t & kmer,
                 const ReadElement & reads ,
@@ -50,7 +52,7 @@ struct PositionInfoKeeper
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.relative_num = relative_num ;
             new_one.reads.push_back(reads) ;
-            reads_num ++ ;
+            //reads_num ++ ;
         }
 
         void AddKmerWithPE(const Number_t & kmer,
@@ -63,7 +65,7 @@ struct PositionInfoKeeper
             assert( new_one.reads.size() == new_one.pe_pos.size() );
             new_one.reads.push_back(reads) ;
             new_one.pe_pos.push_back(PE_pos);
-            reads_num ++ ;
+            //reads_num ++ ;
         }
 
     public :
@@ -127,12 +129,19 @@ struct PositionInfoKeeper
 
         void Init()
         {
-            reads_num = 0 ;
+            //reads_num = 0 ;
         }
 
         int ReadsNum() const {
-            return reads_num ;
+            int ret = 0 ;
+            for( const auto & pair : all_kmer2reads )
+            {
+                ret += pair.second.ReadsNum();
+            }
+            return ret ;
+            //return reads_num ;
         }
+
 
         bool KmerExist( const Number_t & kmer) const
         {
@@ -146,10 +155,11 @@ struct PositionInfoKeeper
                 const std::vector<ReadElement> & reads ,
                 int relative_num )
         {
+
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.relative_num = relative_num ;
             new_one.reads = reads ;
-            reads_num += new_one.reads.size() ;
+            //reads_num += new_one.reads.size() ;
         }
 
         PositionInfoKeeper GetSubReadsByNotPEBarcode(
