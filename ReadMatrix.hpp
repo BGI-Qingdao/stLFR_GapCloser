@@ -31,6 +31,7 @@ struct Kmer2Reads
 {
     std::vector<ReadElement> reads;
     int relative_num ;
+    int ReadsNum() const { return reads.size() ; }
 };
 
 struct PositionInfoKeeper
@@ -39,7 +40,7 @@ struct PositionInfoKeeper
 
         std::map<Number_t , Kmer2Reads> all_kmer2reads;
 
-        int reads_num ;
+//        int reads_num ;
 
         void AddKmer(const Number_t & kmer,
                 const ReadElement & reads ,
@@ -48,7 +49,7 @@ struct PositionInfoKeeper
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.relative_num = relative_num ;
             new_one.reads.push_back(reads) ;
-            reads_num ++ ;
+//            reads_num ++ ;
         }
 
     public :
@@ -112,11 +113,17 @@ struct PositionInfoKeeper
 
         void Init()
         {
-            reads_num = 0 ;
+//            reads_num = 0 ;
         }
 
         int ReadsNum() const {
-            return reads_num ;
+//            return reads_num ;
+            int ret = 0 ;
+            for( const auto & i : all_kmer2reads )
+            {
+                ret += i.second.ReadsNum() ;
+            }
+            return ret ;
         }
 
         bool KmerExist( const Number_t & kmer)
@@ -134,7 +141,7 @@ struct PositionInfoKeeper
             auto & new_one = all_kmer2reads[kmer] ;
             new_one.relative_num = relative_num ;
             new_one.reads = reads ;
-            reads_num += new_one.reads.size() ;
+//            reads_num += new_one.reads.size() ;
         }
 
         PositionInfoKeeper GetSubReadsByPE( int pos , const Contig & prev_contig ) const
