@@ -53,6 +53,8 @@ struct BarcodeInfo
 
     void UpdateBarcode(int barcode , int position)
     {
+        if( barcode < 1 ) 
+            return ;
         m_barcode_pos[barcode].insert(position) ;
         barcodes.insert(barcode);
     }
