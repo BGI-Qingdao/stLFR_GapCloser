@@ -53,6 +53,8 @@ struct BarcodeInfo
 
     void UpdateBarcode(int barcode , int position)
     {
+        if( barcode < 1 )
+            return ;
         if ( m_data.find( barcode ) == m_data.end() )
         {
             m_data[barcode] = position ;

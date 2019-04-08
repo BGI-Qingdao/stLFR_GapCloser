@@ -335,7 +335,7 @@ class LibInfo
                 libInfoArray[i].readsSum=0;
                 libInfoArray[i].pairReadsSum=0;
                 libInfoArray[i].curr_type=1;
-                libInfoArray[i].with_barcode=0;
+                libInfoArray[i].with_barcode=1;
                 libInfoArray[i].curr_index=0;
                 libInfoArray[i].fp1=NULL;
                 libInfoArray[i].fp2=NULL;

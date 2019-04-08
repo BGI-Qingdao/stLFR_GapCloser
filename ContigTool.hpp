@@ -128,6 +128,14 @@ struct  ContigTool
                     )
             {
                 auto rbarcode = readElement.getBarodes() ;
+                bool valid = false ;
+                for( auto x : rbarcode )
+                {
+                    if( x > 0 )
+                        valid = true ;
+                }
+                if( ! valid )
+                    return false ;
                 if( rbarcode.empty() )
                     return false ;
                 const auto & prev_barcode = prev_contig.getBarodes();
