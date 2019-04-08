@@ -691,7 +691,7 @@ struct ReadMatrixFactory
                     tStrRead.readTightStringFragment
                         (i, i+Threshold::the_k, kmer);
                     ret.tryInitPos(pos+i);
-                    if( ret.checkKmerInPos( pos+i , kmer ) )
+                    if( ret.checkKmerInPos(  kmer , pos+i ) )
                         continue ;
                     else
                     {
