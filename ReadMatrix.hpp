@@ -619,6 +619,7 @@ struct ReadMatrixFactory
 {
     static ReadMatrix GenReadMatrix(const Contig & contig , const ConsensusArea & area )
     {
+        std::set<Number_t> used_kmers;
         ReadMatrix ret ;
         ret.AddArea( area) ;
         int relative_num = 0 ;
@@ -633,6 +634,7 @@ struct ReadMatrixFactory
                         ,area
                         ,ret
                         ,new_reads
+                        ,used_kmers
                         );
             }
             else
@@ -644,7 +646,9 @@ struct ReadMatrixFactory
                         contig ,
                         relative_num ,
                         ret ,
-                        new_reads);
+                        new_reads,
+                        used_kmers 
+                        );
             }
 
             if( ret.is_reads_too_much() )
@@ -665,7 +669,8 @@ struct ReadMatrixFactory
             const Contig & contig ,
             int index,
             ReadMatrix & ret,
-            std::map<int ,std::vector<ReadElement>> & new_reads
+            std::map<int ,std::vector<ReadElement>> & new_reads,
+            std::set<Number_t> & used_kmers
             )
     {
         for( const auto & pair : prev_reads )
@@ -690,6 +695,8 @@ struct ReadMatrixFactory
                     Number_t kmer;
                     tStrRead.readTightStringFragment
                         (i, i+Threshold::the_k, kmer);
+                    if( used_kmers.find( kmer ) != used_kmers.end () )
+                        continue ;
                     ret.tryInitPos(pos+i);
                     if( ret.checkKmerInPos(  kmer , pos+i ) )
                         continue ;
@@ -704,6 +711,7 @@ struct ReadMatrixFactory
                         GlobalAccesser::kmer_read_count.Touch(reads.size());
                         ret.AddKmer(kmer,reads,index,pos+i);
                         new_reads[pos + i]= reads;
+                        used_kmers.insert(kmer);
                     }
                 }
             }
@@ -714,7 +722,8 @@ struct ReadMatrixFactory
             const Contig & contig,
             const ConsensusArea & area ,
             ReadMatrix & ret,
-            std::map<int ,std::vector<ReadElement>> & new_reads
+            std::map<int ,std::vector<ReadElement>> & new_reads ,
+            std::set<Number_t> & used_kmers
             )
     {
 
@@ -731,7 +740,10 @@ struct ReadMatrixFactory
                 (ConsensusArea::pos2index(i)
                  ,ConsensusArea::pos2index(i+Threshold::the_k)
                  , kmer); /* 0 base */
+            if( used_kmers.find( kmer ) != used_kmers.end () )
+                continue ;
             ret.tryInitPos(i);
+
             if( ret.checkKmerInPos(kmer,i) )
                 continue ;
             else
@@ -745,6 +757,7 @@ struct ReadMatrixFactory
                 GlobalAccesser::kmer_read_count.Touch(reads.size());
                 ret.AddKmer(kmer,reads,1,i);
                 new_reads[i]= reads;
+                used_kmers.insert(kmer);
             }
         }
     }
