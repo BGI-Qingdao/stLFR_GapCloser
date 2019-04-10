@@ -488,7 +488,7 @@ class GapCloser : public ContigAssembler
 
                 Contig const& contig = contigs[i];
                 GapInfo const& gap = gaps[i];
-                Len_t j = i<gapCount-1 ? i+1: i;
+                Len_t j = i<contigCount-1 ? i+1: i;
                 Contig const& nextContig = contigs[j];
 
                 Len_t notNCtgLen = 0;		
@@ -802,7 +802,7 @@ class GapCloser : public ContigAssembler
 
                 TightString extend_seq = 
                     consensusResult.getTightString(
-                            contigRemainLen-1
+                            contigRemainLen
                             ,extend_len ) ;
                 contig.append( extend_seq , extend_len ); 
             }
