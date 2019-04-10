@@ -223,9 +223,12 @@ struct ConsensusResult
         return ret ;
     }
 
-    TightString getTightString(int pos , int len ) const 
+    TightString getSubTightString(
+            int skip_len ,
+            int len 
+            ) const 
     {
-        TightString ret(consensus_str.c_str() + pos  , 
+        TightString ret(consensus_str.c_str() +skip_len ,
                 len);
         return ret ;
     }

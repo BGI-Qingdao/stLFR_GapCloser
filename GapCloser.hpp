@@ -773,15 +773,17 @@ class GapCloser : public ContigAssembler
                 )
         {
             const auto & the_area = readMatrix.Area() ;
+            // how many bp in consensus_seq belong to old contig.
             int contigRemainLen = contig.getLength()
                 - the_area.consensus_start_pos_in_contig + 1;
-
+            // how many bp in consensus_seq belong to extend seq.
             int extend_len = consensusResult.getLength() - contigRemainLen ;
 
             TightString & contig_seq = contig.getTightString();
             TightString consensus_seq = consensusResult.getTightString() ;
             if( (int)consensus_seq.getLength() < contigRemainLen )
                 contigRemainLen = consensus_seq.getLength() ;
+
             // step 1 , Update sequence first 
             for( int i = 0 ; i < contigRemainLen ; i ++ )
             { // 1.1 check for replace
@@ -801,8 +803,8 @@ class GapCloser : public ContigAssembler
             { // 1.2 extend contig
 
                 TightString extend_seq = 
-                    consensusResult.getTightString(
-                            contigRemainLen-1
+                    consensusResult.getSubTightString(
+                            contigRemainLen
                             ,extend_len ) ;
                 contig.append( extend_seq , extend_len ); 
             }
@@ -812,7 +814,7 @@ class GapCloser : public ContigAssembler
             {
                 for( int i = 0 ; i < extend_len ; i++ )
                 {   // for each point 
-                    int contig_pos = 
+                    int contig_pos =
                         the_area.left_most_pos_in_contig + i ;
                     if( readMatrix.HasReads(contig_pos) )
                     {
