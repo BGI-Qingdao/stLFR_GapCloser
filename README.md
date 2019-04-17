@@ -72,6 +72,49 @@ YOUR-DOWNLOAD-DIR/Release/GapCloser -a your-scaffold-file -b lib.cfg -o result.s
 
 ### <a name=usage>General usage</a>
 
+```
+Usage:
+        GapCloser [options]
+Basic options :
+        -a      <string>        input scaffold file name, required.
+        -b      <string>        input library info file name, required.
+        -o      <string>        output file name, required.
+        -l      <int>           maximum read length (<=155), default=150.
+        -p      <int>           overlap param(<=31) [the kvalue], default=27
+Performance options :
+        -t      <int>           thread number, default=1.
+        -c      <float>         hash load fractor, default=0.75.
+mapping read to contig options:
+        -1      <int>           maximum read depth, default=100.
+        -2      <int>           maximum mismatch , default=1.
+consensus reads set options:
+        -3      <int>           consensus length, default= 41.
+        -4      <int>           consensus prev extra length, default=57.
+        -5      <int>           consensus last extra length, default=1.
+        -6      <int>           consensus extend length, default=40.
+consensus reads set options:
+        -7      <int>           min reads count , default=1.
+        -8      <int>           max reads count , default=5000.
+extract sub reads set options:
+        -A      <int>           min pe subset reads count threshold , default=1.
+        -B      <int>           min pe & barcode subset reads count threshold , default=1.
+consensus options:
+        -C      <float>         non-conflict threshold , default=0.6.
+        -D      <int>           max number of conflict can accepted , default=2.
+        -E      <int>           min depth threshold, default=1.
+        -F      <int>           max number of low depth nucleotide, default=1.
+other:
+        -G      <int>           the max number of reads that a kmer can find . default=50.
+        -I      <int>           use sub-reads-set only. default=0.
+        -O      <int>           [ basic set ] max number of conflict can accepted . default=2.
+        -P      <int>           [ basic set ] max number of low depth nucleotide . default=1.
+        -Q      <float>         [ basic set ] the conflict_threshold of baisc set . default=0.8.
+        -R      <int>           max read-find-read round . default=1.
+ ---------- new parameters end     ---------
+        -h      -?              output help information.
+```
+
+
 ## <a name=ref>Reference</a>
 
 [1] [SOAPdenovo2: an empirically improved memory-efficient short-read de novo assembler][11]
