@@ -40,33 +40,33 @@
 int      Threshold::the_k = 27 ;
 
 // For map read to contig 
-int      Threshold::max_error_count = 2 ;
-int      Threshold::max_reads_depth = 1000 ;
+int      Threshold::max_error_count = 1 ;
+int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
-int      ConsensusConfig::extend_len = 10 ;
-int      ConsensusConfig::prev_extra_len = 90 ;
-int      ConsensusConfig::last_extra_len = 10 ;
-int      ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len ;
+int      ConsensusConfig::extend_len = 40 ;
+int      ConsensusConfig::prev_extra_len = 57 ;
+int      ConsensusConfig::last_extra_len = 1 ;
+int      ConsensusConfig::consensus_len = 41 ;
 
 // For reads set
-int      Threshold::max_reads_count = 300 ;
+int      Threshold::max_reads_count = 5000 ;
 int      Threshold::min_reads_count = 1 ;
-int      Threshold::max_kmer_2_read = 10 ;
+int      Threshold::max_kmer_2_read = 50 ;
 int      Threshold::max_reads_round = 1 ;
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
 //int      Threshold::max_middle_gap = 1000 ;
-int      Threshold::min_pe_sub_reads_count = 10 ;
-int      Threshold::min_pe_barcode_sub_reads_count = 10 ;
+int      Threshold::min_pe_sub_reads_count = 1 ;
+int      Threshold::min_pe_barcode_sub_reads_count = 1 ;
 //int      Threshold::middle_sub_reads_count = 10 ;
 
 // For consensus
-float    Threshold::NoConflictThreshold = 0.8f ;
+float    Threshold::NoConflictThreshold = 0.6f ;
 float    Threshold::basic_NoConflictThreshold = 0.8f ;
 int      Threshold::max_allowed_conflict = 2 ;
-int      Threshold::min_nucleotide_depth = 2 ;
-int      Threshold::max_accept_low_depth = 2 ;
+int      Threshold::min_nucleotide_depth = 1 ;
+int      Threshold::max_accept_low_depth = 1 ;
 
 // For gap fill
 int      Threshold::NNumber = 1;
@@ -74,7 +74,7 @@ int      Threshold::maxReadLength = 150;
 //int      Threshold::filter_too_small_gap = 1;
 int      Threshold::use_subset_only = 0 ;
 
-int      Threshold::basic_set_max_conflict = 1;
+int      Threshold::basic_set_max_conflict = 2;
 int      Threshold::basic_set_max_low_depth = 1;
 
 // global accessor class pointer here;
@@ -103,26 +103,24 @@ void usage(void)
     std::cout << std::endl;
 
     std::cout << "Contact:" << std::endl;
-    std::cout << "	soap@genomics.org.cn" << std::endl;
+    std::cout << "	guolidong@genomics.cn" << std::endl;
     std::cout << std::endl;
 
     std::cout << "Usage:" << std::endl;
-    std::cout << "	GapCloser [options]" << std::endl;
+    std::cout << "	GapCloser_stLFR [options]" << std::endl;
     std::cout << "Basic options :\n";
     std::cout << "	-a	<string>	input scaffold file name, required." << std::endl;
     std::cout << "	-b	<string>	input library info file name, required." << std::endl;
     std::cout << "	-o	<string>	output file name, required." << std::endl;
     std::cout << "	-l	<int>		maximum read length (<=155), default=" 
         << Threshold::maxReadLength << ".\n";
-    std::cout << "	-p	<int>		overlap param(<=31) [the kvalue], default=25.\n";
+    std::cout << "	-p	<int>		overlap param(<=31) [the kvalue], default="<<Threshold::the_k<<"\n";
     //std::cout << "	-N	<int>		how many N that insert into a unfinished gap .\n";
 
     std::cout << "Performance options :\n";
     std::cout << "	-t	<int>		thread number, default=1.\n";
     std::cout << "	-c	<float>		hash load fractor, default=0.75.\n";
 
-
-    std::cout << " ---------- new parameters below : ---------\n";
     std::cout << "mapping read to contig options:\n";
     std::cout << "	-1	<int>		maximum read depth, default="
         << Threshold::max_reads_depth << ".\n";
@@ -130,7 +128,7 @@ void usage(void)
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-3	<int>		consensus length, default= [ the kvalue ] + 10 + [consensus extend length] ="
+    std::cout << "	-3	<int>		consensus length, default= "
         << ConsensusConfig::consensus_len<< ".\n";
     std::cout << "	-4	<int>		consensus prev extra length, default=" 
         << ConsensusConfig::prev_extra_len<< ".\n";
@@ -259,10 +257,10 @@ int main(int argc, char *argv[])
         std::cout << "[WARNING] Overlap length should be <= 31. Program will use 31 instead of " << Threshold::the_k << ".\n";
         Threshold::the_k = 31;
     }
-    if( ! consensus_len_setted_flag )
-    {
-        ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len;
-    }
+    //if( ! consensus_len_setted_flag )
+    //{
+    //    ConsensusConfig::consensus_len = Threshold::the_k + 10 + ConsensusConfig::extend_len;
+    //}
 
     endNumLen = Threshold::the_k;
 
