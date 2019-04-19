@@ -41,11 +41,8 @@ git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNL
   *We assume your stLFR reads is the reads that after barcode splitted.*
 *The official barcode split step is the "1.fq_BarcodeSplit" step of stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
 
-  *If you don't want to download the stLFR_v1 package , you can try our split barcode script:*
+  *If you don't want to download the stLFR_v1 package (because it is huge maybe), you can try our split barcode script:https://github.com/BGI-Qingdao/stLFR_barcode_split.git*
 
-```
-//TODO
-```
 
 ### <a name=quick-start>Quick start</a>
 
