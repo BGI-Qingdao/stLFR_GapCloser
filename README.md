@@ -16,6 +16,7 @@ We alse change the original extern strategy to get a more accuracy result .
     - [Quick start](#quick-start)
     - [General usage](#usage)
 - [Reference](#ref)
+- [Contact](#contact)
 
 ## <a name=user-guide>User's Guide</a>
 
@@ -118,3 +119,10 @@ other:
 
 [11]:https://www.ncbi.nlm.nih.gov/pubmed/23587118
 
+## <a name=contact>Contact</a>
+
+- for algrothim detail & discussion
+    - please contact dengli1@genomics.cn
+- for code detail & bug report 
+    - please contact guolidong@genomics.cn 
+    - or please raise an issue in github.
