@@ -45,7 +45,7 @@ int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
 int      ConsensusConfig::extend_len = 40 ;
-int      ConsensusConfig::prev_extra_len = 57 ;
+int      ConsensusConfig::prev_extra_len = 100 ;
 int      ConsensusConfig::last_extra_len = 1 ;
 int      ConsensusConfig::consensus_len = 41 ;
 
