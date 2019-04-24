@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     Len_t mismatchLen=5;
     float loadFactor = 0.75;
     Len_t threadSum=1;
-    bool consensus_len_setted_flag = false ;
+    //bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
                     "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
@@ -219,11 +219,7 @@ int main(int argc, char *argv[])
             case '1': Threshold::max_reads_depth= atoi(optarg); break;
             case '2': Threshold::max_error_count= atoi(optarg); break;
 
-            case '3': {
-                          ConsensusConfig::consensus_len= atoi(optarg); 
-                          consensus_len_setted_flag = true ;
-                          break;
-                      }
+            case '3':ConsensusConfig::consensus_len= atoi(optarg); break;
             case '4': ConsensusConfig::prev_extra_len = atoi(optarg); break;
             case '5': ConsensusConfig::last_extra_len = atoi(optarg); break;
             case '6': ConsensusConfig::extend_len = atoi(optarg); break;
