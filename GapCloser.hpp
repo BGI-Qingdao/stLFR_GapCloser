@@ -648,8 +648,9 @@ class GapCloser : public ContigAssembler
             int originalLen = contig.getLength();
             int end_pos  = originalLen ;
             end_pos += ((float)gap.length) * 1.5 ;
-            if( end_pos < (1000 + originalLen ) )
-                end_pos = 1000 + originalLen ;
+            // Ignore this first . 20190424
+            //if( end_pos < (1000 + originalLen ) )
+            //    end_pos = 1000 + originalLen ;
             ConsensusArea the_area = ConsensusConfig::GetConsensusArea(originalLen);
             BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
             barcode_info.Erase(the_area.left_most_pos_in_contig - 1 );
