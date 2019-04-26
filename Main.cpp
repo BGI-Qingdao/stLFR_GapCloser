@@ -99,15 +99,15 @@ Read          * ReadElement::read=NULL;
 void usage(void)
 {
     std::cout << "Version:" << std::endl;
-    std::cout << "	1.12" << std::endl;
+    std::cout << "	1.00" << std::endl;
     std::cout << std::endl;
 
     std::cout << "Contact:" << std::endl;
-    std::cout << "	guolidong@genomics.cn" << std::endl;
+    std::cout << "	dengli1@genomics.cn && guolidong@genomics.cn" << std::endl;
     std::cout << std::endl;
 
     std::cout << "Usage:" << std::endl;
-    std::cout << "	GapCloser_stLFR [options]" << std::endl;
+    std::cout << "	stLFR_GapCloser [options]" << std::endl;
     std::cout << "Basic options :\n";
     std::cout << "	-a	<string>	input scaffold file name, required." << std::endl;
     std::cout << "	-b	<string>	input library info file name, required." << std::endl;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     //bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "i:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
+                    "hi:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
             !=-1) 
     {
         switch(c) {

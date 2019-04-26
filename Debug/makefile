@@ -37,19 +37,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: GapCloser
+all: stLFR_GapCloser
 
 # Tool invocations
-GapCloser: $(OBJS) $(USER_OBJS)
+stLFR_GapCloser: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cygwin C++ Linker'
-	g++  -std=c++11 -o "GapCloser"   -g $(OBJS) $(USER_OBJS) $(LIBS) #-pg
+	g++  -std=c++11 -o "stLFR_GapCloser"   -g $(OBJS) $(USER_OBJS) $(LIBS) #-pg
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(EXECUTABLES)$(CC_DEPS)$(C_DEPS)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) GapCloser
+	-$(RM) $(OBJS)$(C++_DEPS)$(EXECUTABLES)$(CC_DEPS)$(C_DEPS)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) stLFR_GapCloser
 	-@echo ' '
 
 .PHONY: all clean dependents
