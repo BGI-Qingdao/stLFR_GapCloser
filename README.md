@@ -2,9 +2,9 @@
 
 ## <a name=intro>Introduction</a>
 
-This project is a modified version of original GapCloser from SOAPdenovo2[1].
-Instread of use NGS reads to fill gap , this GapCloser can use stLFR reads .
-We alse change the original extern strategy to get a more accuracy result .
+This project is a advanced version of the original GapCloser from SOAPdenovo2[1].
+Instead of using PE information from NGS reads, this version use barcode information from stLFR reads to fill gaps.
+We alse change the original extendsion strategy to get more accurate results.
 
 ## <a name=table>Table of Contents</a>
 
@@ -26,7 +26,7 @@ We alse change the original extern strategy to get a more accuracy result .
 ```
 git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
 ```
-- How to compiler source codes .
+- How to compile source codes .
 ```
 > cd YOUR-DOWNLOAD-DIR
 > make
@@ -35,20 +35,24 @@ git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNL
 
 ### <a name=pre>Preliminary</a> 
 
-- the stLFR reads must have and only have 2 file :
+- the stLFR reads are required as 2 files :
     - your-prefix.read1.your-suffix
     - your-prefix.read2.your-suffix
 
-  *We assume your stLFR reads is the reads that after barcode splitted.*
-*The official barcode split step is the "1.fq_BarcodeSplit" step of stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
-
-  *If you don't want to download the stLFR_v1 package (because it is huge maybe), you can try our split barcode script:https://github.com/BGI-Qingdao/stLFR_barcode_split.git*
+  *We assume your stLFR reads and barcode information have already been splitted.*
+  
+  *If your data have not been splitted yet, then use the split barcode script below:*
+```
+# if your raw stLFR reads contain more than 1 lane, you need to cat all lines into a single file first!
+YOUR-INSTALL-DIR/split_barcode/split_barcode.sh raw_read1.fq.gz raw_read2.fq.gz
+```
+*Also, you can try "1.fq_BarcodeSplit" step from stLFR_v1(https://github.com/MGI-tech-bioinformatics/stLFR_v1.git)*
 
 
 ### <a name=quick-start>Quick start</a>
 
 - 1st. prepare the lib.cfg
-*The format comes from SOAPdenovo, see details from https://github.com/aquaskyline/SOAPdenovo2 . Here is a basic example :*
+*The format comes from SOAPdenovo, see details from https://github.com/aquaskyline/SOAPdenovo2 . Here is a basic example:*
 
 ```
 #maximal read length
@@ -58,7 +62,7 @@ max_rd_len=100
 avg_ins=300
 #if sequence needs to be reversed
 reverse_seq=0
-#a pair of fastq file, read 1 file should always be followed by read 2 file
+#a pair of fastq files, read1 file should be followed by read2 file
 q1=split_reads.1.fq.gz
 q2=split_reads.2.fq.gz
 ```
@@ -98,15 +102,15 @@ extract sub reads set options:
         -B      <int>           min pe & barcode subset reads count threshold , default=1.
 consensus options:
         -C      <float>         non-conflict threshold , default=0.6.
-        -D      <int>           max number of conflict can accepted , default=2.
+        -D      <int>           max number of acceptable conflicts, default=2.
         -E      <int>           min depth threshold, default=1.
         -F      <int>           max number of low depth nucleotide, default=1.
 other:
-        -G      <int>           the max number of reads that a kmer can find . default=50.
+        -G      <int>           max number of reads that a kmer can find. default=50.
         -I      <int>           use sub-reads-set only. default=0.
-        -O      <int>           [ basic set ] max number of conflict can accepted . default=2.
-        -P      <int>           [ basic set ] max number of low depth nucleotide . default=1.
-        -Q      <float>         [ basic set ] the conflict_threshold of baisc set . default=0.8.
+        -O      <int>           [ basic set ] max number of acceptable conflicts. default=2.
+        -P      <int>           [ basic set ] max number of low depth nucleotide. default=1.
+        -Q      <float>         [ basic set ] the conflict_threshold of baisc set. default=0.8.
         -R      <int>           max read-find-read round . default=1.
  ---------- new parameters end     ---------
         -h      -?              output help information.
@@ -125,4 +129,4 @@ other:
     - please contact dengli1@genomics.cn
 - for code detail & bug report 
     - please contact guolidong@genomics.cn 
-    - or please raise an issue in github.
+    - or please creat an issue in github.
