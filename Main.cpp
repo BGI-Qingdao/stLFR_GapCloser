@@ -40,7 +40,7 @@
 int      Threshold::the_k = 27 ;
 
 // For map read to contig 
-int      Threshold::max_error_count = 1 ;
+int      Threshold::max_error_count = 2 ;
 int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
@@ -50,23 +50,23 @@ int      ConsensusConfig::last_extra_len = 1 ;
 int      ConsensusConfig::consensus_len = 41 ;
 
 // For reads set
-int      Threshold::max_reads_count = 5000 ;
+int      Threshold::max_reads_count = 500 ;
 int      Threshold::min_reads_count = 1 ;
-int      Threshold::max_kmer_2_read = 50 ;
+int      Threshold::max_kmer_2_read = 5 ;
 int      Threshold::max_reads_round = 1 ;
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
 //int      Threshold::max_middle_gap = 1000 ;
-int      Threshold::min_pe_sub_reads_count = 1 ;
-int      Threshold::min_pe_barcode_sub_reads_count = 1 ;
+int      Threshold::min_pe_sub_reads_count = 3 ;
+int      Threshold::min_pe_barcode_sub_reads_count = 5 ;
 //int      Threshold::middle_sub_reads_count = 10 ;
 
 // For consensus
 float    Threshold::NoConflictThreshold = 0.6f ;
 float    Threshold::basic_NoConflictThreshold = 0.8f ;
 int      Threshold::max_allowed_conflict = 2 ;
-int      Threshold::min_nucleotide_depth = 1 ;
-int      Threshold::max_accept_low_depth = 1 ;
+int      Threshold::min_nucleotide_depth = 3 ;
+int      Threshold::max_accept_low_depth = 2 ;
 
 // For gap fill
 int      Threshold::NNumber = 1;
