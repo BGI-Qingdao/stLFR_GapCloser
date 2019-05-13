@@ -24,7 +24,7 @@ We alse change the original extendsion strategy to get more accurate results.
 
 - How to download the source codes.
 ```
-git clone https://github.com/BGI-QingDao/stLFR_Scaffold_Assembler.git YOUR-DOWNLOAD-DIR
+git clone https://github.com/BGI-Qingdao/stLFR_GapCloser.git YOUR-DOWNLOAD-DIR
 ```
 - How to compile source codes .
 ```
