@@ -527,12 +527,13 @@ class ReadHash
 
             Number_t readsSum=0;
             char name[MAX_STRING_LEN];
+            char third[MAX_STRING_LEN];
             char sequence[MAX_STRING_LEN];
             char quality[MAX_STRING_LEN];
             while(fgets(name, MAX_STRING_LEN, fp)) {
 
                 fgets(sequence, MAX_STRING_LEN, fp);
-                fgets(name, MAX_STRING_LEN, fp);
+                fgets(third, MAX_STRING_LEN, fp);
                 fgets(quality, MAX_STRING_LEN, fp);
 
 
@@ -782,12 +783,13 @@ class ReadHash
             FILE *fp = popen(cmd, "r");
 
             char name[MAX_STRING_LEN];
+            char third[MAX_STRING_LEN];
             char sequence[MAX_STRING_LEN];
             char quality[MAX_STRING_LEN];
             while(fgets(name, MAX_STRING_LEN, fp)) {
 
                 fgets(sequence, MAX_STRING_LEN, fp);
-                fgets(name, MAX_STRING_LEN, fp);
+                fgets(third, MAX_STRING_LEN, fp);
                 fgets(quality, MAX_STRING_LEN, fp);
 
 
