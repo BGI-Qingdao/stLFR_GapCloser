@@ -47,13 +47,12 @@ int GetBarcodeFromReadName( const char* name)
             ||
             header.type 
             == stLFRHeader::ReadType::readName_barcodeStr_index
+            ||
+            header.type 
+            == stLFRHeader::ReadType::readName_barcodeStr_index_barcodeNum 
             )
     {
         return GlobalAccesser::barcode_ider.GetId(header.barcode_str);
-    }
-    else if ( header.type == stLFRHeader::ReadType::readName_barcodeStr_index_barcodeNum )
-    {
-        return header.barcode_num ;
     }
     else 
         return 0 ;

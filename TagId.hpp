@@ -11,6 +11,10 @@ struct TagId
     public:
         unsigned int GetId(const std::string & id ,bool new_id = true  )
         {
+            if( id == "0_0_0" 
+                    ||id == "0_0"
+                    || id == "0" )
+                return 0;
             auto itr = data.find(id) ;
 
             if( itr == data.end() )
