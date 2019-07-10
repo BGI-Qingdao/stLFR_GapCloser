@@ -300,8 +300,8 @@ struct ConsensusMatrix
                 }
             }
             bool is_low_depth = (total_depth < Threshold::min_nucleotide_depth );
-            if( total_depth == highest_depeth ) 
-                is_low_depth = false ;
+            //if( total_depth == highest_depeth ) 
+            //    is_low_depth = false ;
             if ( total_depth == 0 )
                 return std::make_tuple( 'N' , true , ! is_low_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
