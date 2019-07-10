@@ -650,7 +650,7 @@ class GapCloser : public ContigAssembler
             end_pos += ((float)gap.length) * 1.5 ;
             if( end_pos < (1000 + originalLen ) )
                 end_pos = 1000 + originalLen ;
-            ConsensusArea the_area = ConsensusConfig::GetConsensusArea(originalLen);
+            ConsensusArea the_area = NewConsensusConfig::GetConsensusArea(originalLen);
             BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
             barcode_info.Erase(the_area.left_most_pos_in_contig - 1 );
 
@@ -659,7 +659,7 @@ class GapCloser : public ContigAssembler
             int prev_contig_len = contig.getLength() ;
             while (true) 
             {
-                ConsensusArea curr_area = ConsensusConfig::GetConsensusArea(contig.getLength());
+                ConsensusArea curr_area = NewConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                 {
                     GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");

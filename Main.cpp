@@ -44,11 +44,10 @@ int      Threshold::max_error_count = 2 ;
 int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
-int      ConsensusConfig::extend_len = 40 ;
-int      ConsensusConfig::prev_extra_len = 100 ;
-int      ConsensusConfig::last_extra_len = 1 ;
-int      ConsensusConfig::consensus_len = 41 ;
-
+int     NewConsensusConfig::x1 = 100  ;
+int     NewConsensusConfig::y1 = -10 ;
+int     NewConsensusConfig::x2 = 10  ;
+int     NewConsensusConfig::y2 = -40 ;
 // For reads set
 int      Threshold::max_reads_count = 500 ;
 int      Threshold::min_reads_count = 1 ;
@@ -128,14 +127,14 @@ void usage(void)
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-3	<int>		consensus length, default= "
-        << ConsensusConfig::consensus_len<< ".\n";
-    std::cout << "	-4	<int>		consensus prev extra length, default=" 
-        << ConsensusConfig::prev_extra_len<< ".\n";
-    std::cout << "	-5	<int>		consensus last extra length, default=" 
-        << ConsensusConfig::last_extra_len<< ".\n";
-    std::cout << "	-6	<int>		consensus extend length, default=" 
-        << ConsensusConfig::extend_len<< ".\n";
+    std::cout << "	-3	<int>		consensus x1 , default= "
+        << NewConsensusConfig::x1 << ".\n";
+    std::cout << "	-4	<int>		consensus y1 , default= "
+        << NewConsensusConfig::y1 << ".\n";
+    std::cout << "	-5	<int>		consensus x2 , default= "
+        << NewConsensusConfig::x2 << ".\n";
+    std::cout << "	-6	<int>		consensus y2 , default= "
+        << NewConsensusConfig::y2 << ".\n";
 
     std::cout << "consensus reads set options:\n";
     std::cout << "	-7	<int>		min reads count , default=" 
@@ -219,11 +218,10 @@ int main(int argc, char *argv[])
             case '1': Threshold::max_reads_depth= atoi(optarg); break;
             case '2': Threshold::max_error_count= atoi(optarg); break;
 
-            case '3':ConsensusConfig::consensus_len= atoi(optarg); break;
-            case '4': ConsensusConfig::prev_extra_len = atoi(optarg); break;
-            case '5': ConsensusConfig::last_extra_len = atoi(optarg); break;
-            case '6': ConsensusConfig::extend_len = atoi(optarg); break;
-
+            case '3': NewConsensusConfig::x1= atoi(optarg); break;
+            case '4': NewConsensusConfig::y1= atoi(optarg); break;
+            case '5': NewConsensusConfig::x2= atoi(optarg); break;
+            case '6': NewConsensusConfig::y2= atoi(optarg); break;
             case '7': Threshold::min_reads_count = atoi(optarg); break;
             case '8': Threshold::max_reads_count = atoi(optarg); break;
 
@@ -327,15 +325,14 @@ int main(int argc, char *argv[])
         << Threshold::max_error_count<< ".\n";
 
     std::cout << "consensus reads set options:\n";
-    std::cout << "	-3	<int>		consensus length,  =" 
-        << ConsensusConfig::consensus_len<< ".\n";
-    std::cout << "	-4	<int>		consensus prev extra length,  =" 
-        << ConsensusConfig::prev_extra_len<< ".\n";
-    std::cout << "	-5	<int>		consensus last extra length,  =" 
-        << ConsensusConfig::last_extra_len<< ".\n";
-    std::cout << "	-6	<int>		consensus extend length,  =" 
-        << ConsensusConfig::extend_len<< ".\n";
-
+    std::cout << "	-3	<int>		consensus x1 , = "
+        << NewConsensusConfig::x1 << ".\n";
+    std::cout << "	-4	<int>		consensus y1 , = "
+        << NewConsensusConfig::y1 << ".\n";
+    std::cout << "	-5	<int>		consensus x2 , = "
+        << NewConsensusConfig::x2 << ".\n";
+    std::cout << "	-6	<int>		consensus y2 , = "
+        << NewConsensusConfig::y2 << ".\n";
     std::cout << "consensus reads set options:\n";
     std::cout << "	-7	<int>		min reads count ,  =" 
         << Threshold::min_reads_count<< ".\n";

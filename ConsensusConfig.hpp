@@ -57,7 +57,7 @@ struct ConsensusArea
         return pos + kvalue < consensus_end_pos_in_contig ;
     }
 };
-
+/*
 struct ConsensusConfig
 {
     static int extend_len ;
@@ -88,6 +88,43 @@ struct ConsensusConfig
             ret.consensus_start_pos_in_contig = 1 ;
 
 
+        return ret ;
+    }
+};*/
+
+//             | <-----------reads------>|
+//             |               0 pos     |
+//             |               |         |
+// contig      | x1            |       y1|
+//<<----------------------------
+//                 |x2             y2|
+//                 |                 |
+//                 |<---consensus--->|
+//
+struct NewConsensusConfig
+{
+    static int x1 ;
+    static int y1 ;
+    static int x2 ;
+    static int y2 ;
+
+    static ConsensusArea  GetConsensusArea( int contiglen )
+    {
+        ConsensusArea ret ;
+        ret.contig_len = contiglen ;
+
+        // Calc the reads area.
+        ret.left_most_pos_in_contig =
+            contiglen - x1 > 0 ? contiglen - x1 : 0  ;
+        ret.right_most_pos_in_contig =
+            contiglen - y1 > 0 ?  contiglen - y1 : 0 ;
+        assert( ret.left_most_pos_in_contig < ret.right_most_pos_in_contig );
+        // Calc the consensus area.
+        ret.consensus_start_pos_in_contig =
+            contiglen - x2 > 0 ? contiglen - x2 : 0  ;
+        ret.consensus_end_pos_in_contig =
+            contiglen - y2 > 0 ?  contiglen - y2 : 0 ;
+        assert( ret.left_most_pos_in_contig < ret.right_most_pos_in_contig );
         return ret ;
     }
 };
