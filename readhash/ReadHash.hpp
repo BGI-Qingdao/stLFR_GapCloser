@@ -702,10 +702,12 @@ class ReadHash
             //		fin.seekg(0, ios_base::beg);
 
             char str[MAX_STRING_LEN];
+            int prev_barcode  = -1 ;
             while(!fin.eof()) {
 
                 fin.getline(str, MAX_STRING_LEN);
                 if (str[0] == '>') {
+                    prev_barcode = GetBarcodeFromReadName(str);
                     continue;
                 }
                 else {
@@ -713,8 +715,11 @@ class ReadHash
                     size_t size = strlen(str);
                     if (size == 0)
                         continue;
-
-                    _initializeReads(str, size);
+                    if( prev_barcode >= 0 ) 
+                        _initializeReads(str, size,prev_barcode);
+                    else
+                        _initializeReads(str, size);
+                    prev_barcode = -1 ;
                 }
             }
         }
@@ -726,10 +731,10 @@ class ReadHash
             FILE *fp = popen(cmd, "r");
 
             char str[MAX_STRING_LEN];
+            int prev_barcode  = -1 ;
             while(fgets(str, MAX_STRING_LEN, fp)) {
-
-
                 if (str[0] == '>') {
+                    prev_barcode = GetBarcodeFromReadName(str);
                     continue;
                 }
                 else {
@@ -738,7 +743,11 @@ class ReadHash
                     if (size == 0)
                         continue;
 
-                    _initializeReads(str, size);
+                    if( prev_barcode >= 0 ) 
+                        _initializeReads(str, size,prev_barcode);
+                    else
+                        _initializeReads(str, size);
+                    prev_barcode = -1 ;
                 }
             }
 
@@ -819,8 +828,9 @@ class ReadHash
             char str1[MAX_STRING_LEN];
             char str2[MAX_STRING_LEN];
             while(!fin1.eof() && !fin2.eof()) {
-
+                int prev_barcode ; 
                 fin1.getline(str1, MAX_STRING_LEN);
+                prev_barcode = GetBarcodeFromReadName(str1);
                 fin1.getline(str1, MAX_STRING_LEN);
 
                 chomp(str1);
@@ -828,9 +838,13 @@ class ReadHash
                 if (size == 0)
                     continue;
 
-                _initializeReads(str1, size);
+                if( prev_barcode >= 0 ) 
+                    _initializeReads(str1, size,prev_barcode);
+                else
+                    _initializeReads(str1, size);
 
                 fin2.getline(str2, MAX_STRING_LEN);
+                prev_barcode = GetBarcodeFromReadName(str2);
                 fin2.getline(str2, MAX_STRING_LEN);
 
                 chomp(str2);
@@ -838,7 +852,10 @@ class ReadHash
                 if (size == 0)
                     continue;
 
-                _initializeReads(str2, size);
+                if( prev_barcode >= 0 ) 
+                    _initializeReads(str2, size,prev_barcode);
+                else
+                    _initializeReads(str2, size);
             }
         }
 
@@ -852,10 +869,13 @@ class ReadHash
             sprintf(cmd2, "gzip -dc %s", fin2.c_str());
             FILE *fp2 = popen(cmd2, "r");
 
+            char str1n[MAX_STRING_LEN];
+            char str2n[MAX_STRING_LEN];
             char str1[MAX_STRING_LEN];
             char str2[MAX_STRING_LEN];
-            while(fgets(str1, MAX_STRING_LEN, fp1)&& fgets(str2, MAX_STRING_LEN, fp2)) {
+            while(fgets(str1n, MAX_STRING_LEN, fp1)&& fgets(str2n, MAX_STRING_LEN, fp2)) {
 
+                int prev_barcode = GetBarcodeFromReadName(str1n );
                 fgets(str1, MAX_STRING_LEN, fp1);
 
                 chomp(str1);
@@ -863,7 +883,10 @@ class ReadHash
                 if (size == 0)
                     continue;
 
-                _initializeReads(str1, size);
+                if( prev_barcode >= 0 ) 
+                    _initializeReads(str1, size,prev_barcode);
+                else
+                    _initializeReads(str1, size);
 
                 fgets(str2, MAX_STRING_LEN, fp2);
 
@@ -872,7 +895,10 @@ class ReadHash
                 if (size == 0)
                     continue;
 
-                _initializeReads(str2, size);
+                if( prev_barcode >= 0 ) 
+                    _initializeReads(str2, size,prev_barcode);
+                else
+                    _initializeReads(str2, size);
             }
 
             delete [] cmd1;
