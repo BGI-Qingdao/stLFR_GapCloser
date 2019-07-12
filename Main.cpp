@@ -37,7 +37,7 @@
  * ***************************************/
 
 // The K Value 
-int      Threshold::the_k = 27 ;
+int      Threshold::the_k = 31 ;
 
 // For map read to contig 
 int      Threshold::max_error_count = 2 ;
@@ -45,13 +45,13 @@ int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
 int     NewConsensusConfig::x1 = 100  ;
-int     NewConsensusConfig::y1 = -10 ;
+int     NewConsensusConfig::y1 = -3 ;
 int     NewConsensusConfig::x2 = 10  ;
 int     NewConsensusConfig::y2 = -40 ;
 // For reads set
-int      Threshold::max_reads_count = 500 ;
-int      Threshold::min_reads_count = 1 ;
-int      Threshold::max_kmer_2_read = 5 ;
+int      Threshold::max_reads_count = 200 ;
+int      Threshold::min_reads_count = 3 ;
+int      Threshold::max_kmer_2_read = 2 ;
 int      Threshold::max_reads_round = 1 ;
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
@@ -61,8 +61,8 @@ int      Threshold::min_pe_barcode_sub_reads_count = 5 ;
 //int      Threshold::middle_sub_reads_count = 10 ;
 
 // For consensus
-float    Threshold::NoConflictThreshold = 0.6f ;
-float    Threshold::basic_NoConflictThreshold = 0.8f ;
+float    Threshold::NoConflictThreshold = 0.7f ;
+float    Threshold::basic_NoConflictThreshold = 0.9f ;
 int      Threshold::max_allowed_conflict = 2 ;
 int      Threshold::min_nucleotide_depth = 3 ;
 int      Threshold::max_accept_low_depth = 2 ;
@@ -117,7 +117,7 @@ void usage(void)
     //std::cout << "	-N	<int>		how many N that insert into a unfinished gap .\n";
 
     std::cout << "Performance options :\n";
-    std::cout << "	-t	<int>		thread number, default=1.\n";
+    std::cout << "	-t	<int>		thread number, default=16.\n";
     std::cout << "	-c	<float>		hash load fractor, default=0.75.\n";
 
     std::cout << "mapping read to contig options:\n";
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
     Len_t endNumLen=10;
     Len_t mismatchLen=5;
     float loadFactor = 0.75;
-    Len_t threadSum=1;
+    Len_t threadSum=16;
     //bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
