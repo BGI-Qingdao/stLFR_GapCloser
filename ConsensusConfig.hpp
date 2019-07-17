@@ -5,10 +5,10 @@
 
 struct ConsensusArea
 {
-    int left_most_pos_in_contig ;
-    int right_most_pos_in_contig ;
-    int consensus_start_pos_in_contig;
-    int consensus_end_pos_in_contig ;
+    int left_most_pos_in_contig ;  /*1base*/
+    int right_most_pos_in_contig ; /*1base*/
+    int consensus_start_pos_in_contig;/*1base*/
+    int consensus_end_pos_in_contig ;/*1base*/
     int contig_len ;
 
 
@@ -28,7 +28,7 @@ struct ConsensusArea
             && contig_len == other.contig_len ;
     }
 
-    static int pos2index( int pos )
+    static int pos2index( int pos /*1base*/ )
     {
         return pos -1 ;
     }
@@ -54,43 +54,9 @@ struct ConsensusArea
 
     bool valid_starter( int pos /* in 1 base */ , int kvalue ) const
     {
-        return pos + kvalue < consensus_end_pos_in_contig ;
+        return pos + kvalue < right_most_pos_in_contig;
     }
 };
-/*
-struct ConsensusConfig
-{
-    static int extend_len ;
-    static int prev_extra_len;
-    static int last_extra_len;
-    static int consensus_len ;
-
-    static ConsensusArea  GetConsensusArea( int contiglen )
-    {
-        assert( contiglen > 0 );
-        assert( extend_len > 0 );
-        assert( prev_extra_len > 0 );
-        assert( last_extra_len > 0 );
-        assert( consensus_len > 0 );
-
-        ConsensusArea ret ;
-        int in_contig = consensus_len - extend_len ;
-
-        ret.contig_len = contiglen ;
-        ret.left_most_pos_in_contig = contiglen - ( prev_extra_len + in_contig ) + 1 ;
-        ret.right_most_pos_in_contig = contiglen + extend_len + last_extra_len ;
-        ret.consensus_start_pos_in_contig = contiglen - in_contig + 1 ;
-        ret.consensus_end_pos_in_contig = contiglen + extend_len ;
-
-        if ( ret.left_most_pos_in_contig <= 0 )
-            ret.left_most_pos_in_contig = 1;
-        if ( ret.consensus_start_pos_in_contig <= 0 )
-            ret.consensus_start_pos_in_contig = 1 ;
-
-
-        return ret ;
-    }
-};*/
 
 //             | <-----------reads------>|
 //             |               0 pos     |
@@ -115,15 +81,15 @@ struct NewConsensusConfig
 
         // Calc the reads area.
         ret.left_most_pos_in_contig =
-            contiglen - x1 > 0 ? contiglen - x1 : 0  ;
+            contiglen - x1 > 1 ? contiglen - x1 : 1  ;
         ret.right_most_pos_in_contig =
-            contiglen - y1 > 0 ?  contiglen - y1 : 0 ;
+            contiglen - y1 > 1 ?  contiglen - y1 : 1 ;
         assert( ret.left_most_pos_in_contig < ret.right_most_pos_in_contig );
         // Calc the consensus area.
         ret.consensus_start_pos_in_contig =
-            contiglen - x2 > 0 ? contiglen - x2 : 0  ;
+            contiglen - x2 > 1 ? contiglen - x2 : 1  ;
         ret.consensus_end_pos_in_contig =
-            contiglen - y2 > 0 ?  contiglen - y2 : 0 ;
+            contiglen - y2 > 1 ?  contiglen - y2 : 1 ;
         assert( ret.left_most_pos_in_contig < ret.right_most_pos_in_contig );
         return ret ;
     }

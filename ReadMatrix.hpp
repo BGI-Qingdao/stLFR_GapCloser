@@ -358,7 +358,7 @@ struct ReadMatrix
 {
     private:
         //  position --> reads
-        std::map< int  , PositionInfoKeeper> m_raw_reads;
+        std::map< int  , PositionInfoKeeper> m_raw_reads; /* 1base*/
 
         ConsensusArea m_area;
 
@@ -520,7 +520,7 @@ struct ReadMatrix
 
             for( const auto & pair : m_raw_reads )
             {
-                int pos = pair.first ;
+                int pos = pair.first ; /*1base*/
                 // update all reads's depth
                 for( const auto & k_r_pair : pair.second )
                 {
@@ -541,15 +541,15 @@ struct ReadMatrix
             }
 
             int end = m_area.consensus_end_pos_in_contig ;
-            if( end >= (int) contig.getLength() -1 )
-                end = contig.getLength() -1 ;
+            if( end >= (int) contig.getLength()  )
+                end = contig.getLength() ;
             // update the contig's depth
             for( int i = m_area.consensus_start_pos_in_contig 
-                    ; i <= end ; i ++ )
+                    ; i <= end ; i ++ ) /*1 in 1 base */
             {
                 int matrix_pos = m_area.pos_translate_contig2martix(i);
                 ret.UpdateDepth( matrix_pos
-                        , contig.getTightString()[i]
+                        , contig.getTightString()[i-1]
                         /*, contig.getDepths()[i] */ 
                         /*new logic that contig depth always 1 */
                         );
@@ -733,7 +733,9 @@ struct ReadMatrixFactory
         const TightString & tStrContig = contig.getTightString() ;
         int pos_start = area.left_most_pos_in_contig ;
         int pos_end = (int)contig.getLength() - Threshold::the_k + 1 ;
-        //int pos_end1 = area.consensus_end_pos_in_contig  - the_k + 1 ;
+        int pos_end1 = area.right_most_pos_in_contig - Threshold::the_k+ 1 ;
+        if( pos_end1 < pos_end )
+            pos_end = pos_end1;
         for( int i = pos_start ; i <= pos_end ;i++ ) /* i in 1 base */
         {
             if ( ret.is_reads_too_much() )
