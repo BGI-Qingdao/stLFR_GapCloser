@@ -45,9 +45,9 @@ int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
 int     NewConsensusConfig::x1 = 100  ;
-int     NewConsensusConfig::y1 = -3 ;
+int     NewConsensusConfig::y1 = -20 ;
 int     NewConsensusConfig::x2 = 10  ;
-int     NewConsensusConfig::y2 = -40 ;
+int     NewConsensusConfig::y2 = -20 ;
 // For reads set
 int      Threshold::max_reads_count = 200 ;
 int      Threshold::min_reads_count = 3 ;
