@@ -17,6 +17,7 @@
 #include "readtool/ReadAccessor.hpp"
 #include "Contig.hpp"
 #include "ContigTool.hpp"
+#include "ConsensusLog.h"
 
 enum SubReadSetType
 {
@@ -285,7 +286,7 @@ struct ConsensusMatrix
     private:
         std::vector<std::array<int,4>> depth_matrix;
 
-        std::tuple<char , bool , bool > consensus_pos(const std::array<int,4> &  a , const SubReadSetType type ) const
+        std::tuple<char , bool , bool , int> consensus_pos(const std::array<int,4> &  a , const SubReadSetType type ) const
         {
             int total_depth = 0 ;
             int highest_depeth = 0 ;
@@ -303,7 +304,7 @@ struct ConsensusMatrix
             if( total_depth == highest_depeth ) 
                 is_low_depth = false ;
             if ( total_depth == 0 )
-                return std::make_tuple( 'N' , true , ! is_low_depth ) ;
+                return std::make_tuple( 'N' , true , ! is_low_depth,total_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
             float th = 1.0f ;
             if ( type != SubReadSetType::Basic )
@@ -311,9 +312,9 @@ struct ConsensusMatrix
             else 
                 th = Threshold::basic_NoConflictThreshold ;
             if( highest_depeth >= (float)total_depth * th )
-                return std::make_tuple( ret , true , ! is_low_depth ) ;
+                return std::make_tuple( ret , true , ! is_low_depth , total_depth) ;
             else 
-                return std::make_tuple( ret , false , ! is_low_depth ) ;
+                return std::make_tuple( ret , false , ! is_low_depth, total_depth ) ;
         }
 
     public:
@@ -327,7 +328,8 @@ struct ConsensusMatrix
             }
         }
 
-        ConsensusResult GenConsensusResult( const SubReadSetType type ) const
+        ConsensusResult GenConsensusResult( const SubReadSetType type
+                , std::vector<LOG::PosInfo> & details ) const
         {
             ConsensusResult ret ;
             for ( const auto & m : depth_matrix )
@@ -335,13 +337,23 @@ struct ConsensusMatrix
                 char nucleotide ;
                 bool not_confilict ;
                 bool not_low_depth ;
-                std::tie( nucleotide,not_confilict,not_low_depth) 
+                int total_depth ;
+                std::tie( nucleotide,not_confilict,not_low_depth , total_depth)
                     = consensus_pos( m ,type );
                 if( nucleotide == 'N' )
+                {
+                    details.push_back( { total_depth , 'N' } );
                     break ;
+                }
                 ret.conflict_flags.push_back(not_confilict);
                 ret.depth_flags.push_back(not_low_depth);
                 ret.consensus_str.push_back(nucleotide);
+                if( not_confilict && not_low_depth )
+                    details.push_back( { total_depth , 'M' } );
+                else if ( ! not_confilict )
+                    details.push_back( { total_depth , 'C' } );
+                else 
+                    details.push_back( { total_depth , 'L' } );
             }
             return ret ;
         }
@@ -448,23 +460,27 @@ struct ReadMatrix
             return m_raw_reads.at(pos);
         }
 
-
         ReadMatrix GenSubMatrix(const Contig & prev_contig ,
                 const Contig & next_contig ,
                 /*const GapInfo & gap ,*/
-                SubReadSetType & ret_type )
+                SubReadSetType & ret_type ,
+                LOG::ConsensusLog & log
+                )
         {
             SubReadsLog tmp ;
             tmp.Init();
             tmp.basic_num = ReadsNum() ;
+            log.size_b = tmp.basic_num ;
             // try PE first 
             auto sub1 = GetSubMatrixByPECheck( prev_contig) ;
             int s1 = sub1.ReadsNum() ;
             tmp.pe_num = s1 ;
+            log.size_p  = s1 ;
             if( s1 >= Threshold::min_pe_sub_reads_count )
             {
                 tmp.used_num = s1 ;
                 tmp.type = "PE" ;
+                log.used_id = tmp.type;
                 GlobalAccesser::sub_read_num.Touch(tmp);
                 GlobalAccesser::sub_type.Touch("PE");
                 sub1.m_area = m_area ;
@@ -477,11 +493,14 @@ struct ReadMatrix
             auto sub3 = Merge( sub1 , sub2 );
             int s13 = sub3.ReadsNum() ;
             tmp.barcode_num = s2 ;
+            log.size_bc = s2 ;
             tmp.pe_barcode_num = s13 ;
+            log.size_bp = s13 ;
             if( s13>= Threshold::min_pe_barcode_sub_reads_count )
             {
                 tmp.used_num = s13 ;
                 tmp.type = "PE_BARCODE" ;
+                log.used_id = tmp.type;
                 GlobalAccesser::sub_read_num.Touch(tmp);
                 GlobalAccesser::sub_type.Touch("PE_BARCODE");
                 ret_type = SubReadSetType::PE_Barcode ;
@@ -493,6 +512,7 @@ struct ReadMatrix
             {
                 tmp.used_num = 0 ;
                 tmp.type = "NULL" ;
+                log.used_id = tmp.type;
                 GlobalAccesser::sub_read_num.Touch(tmp);
                 GlobalAccesser::sub_type.Touch("NULL");
                 ReadMatrix tmp ;
@@ -504,6 +524,7 @@ struct ReadMatrix
             {
                 tmp.used_num = tmp.basic_num  ;
                 tmp.type = "BASIC" ;
+                log.used_id = tmp.type;
                 GlobalAccesser::sub_read_num.Touch(tmp);
                 GlobalAccesser::sub_type.Touch("BASIC");
                 ret_type = SubReadSetType::Basic ;

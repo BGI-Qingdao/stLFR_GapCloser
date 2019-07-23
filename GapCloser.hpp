@@ -10,6 +10,7 @@
 #include "ContigTable.hpp"
 #include "ContigAssembler.hpp"
 #include "ReadMatrix.hpp"
+#include "ConsensusLog.h"
 /*
    Fill gaps in scaffolds in parallel, one thread handling one scaffold.
    */
@@ -155,7 +156,8 @@ class GapCloser : public ContigAssembler
 
             Len_t actualGapCountInThread=0;
             Len_t finishGapCountInThread=0;
-
+            LOG::ConsensusLog log;
+            log.Init();
             for (Len_t i=1; i<=contigTable.getContigsSum(); i++) {
 
                 ContigForFill& contig = contigTable.getContigs()[i];
@@ -167,12 +169,12 @@ class GapCloser : public ContigAssembler
                 if (!isUsed) contig.setUsedFlag();
                 pthread_mutex_unlock(&mutexNumberOfContigs);
                 if (isUsed) continue;
-
+                
                 pthread_mutex_lock(&mutexNumberOfContigs);
                 numberOfContigs++;
                 std::cout << "constructing " << numberOfContigs << " scaffold" <<std::endl;
                 pthread_mutex_unlock(&mutexNumberOfContigs);
-
+                log.scaff_name = numberOfContigs ;
 
                 actualGapSumInThread += contig.getGapSum();
                 actualGapCountInThread += contig.getGapCount();
@@ -217,7 +219,10 @@ class GapCloser : public ContigAssembler
                 GapInfo* gapsResult = new GapInfo[gapCount];
 
                 // fill gaps in forward direction
-                fillGaps(contigs, gaps, contigsResult, gapsResult, contigCount, gapCount);
+                log.l2r = true ;
+                fillGaps(contigs, gaps, contigsResult
+                        , gapsResult, contigCount, gapCount
+                        ,log);
 
                 delete [] contigs;
                 delete [] gaps;
@@ -339,7 +344,10 @@ class GapCloser : public ContigAssembler
                 gapsResult = new GapInfo[gapCount];
 
                 //fill gaps in reversed direction
-                fillGaps(contigsReverse, gapsReverse, contigsResult, gapsResult, contigCount, gapCount);
+                log.l2r = false ;
+                fillGaps(contigsReverse, gapsReverse, contigsResult
+                        , gapsResult, contigCount, gapCount
+                        ,log);
 
                 delete [] contigsReverse;
                 delete [] gapsReverse;
@@ -480,12 +488,13 @@ class GapCloser : public ContigAssembler
                 Contig* contigsResult, 
                 GapInfo* gapsResult, 
                 Len_t contigCount, 
-                Len_t gapCount
+                Len_t gapCount,
+                LOG::ConsensusLog log
                 ) {
 
             Len_t i;
             for (i=0; i<gapCount; i++) {
-
+                log.gap_id = i ;
                 Contig const& contig = contigs[i];
                 GapInfo const& gap = gaps[i];
                 Len_t j = (i< contigCount -1) ? i+1: i;
@@ -594,7 +603,8 @@ class GapCloser : public ContigAssembler
                         GapInfo gapResult;
                         ConsensusGap( contigFill ,  notNCtgLen 
                                 ,  nextContig , gap
-                                , gapContig,gapResult );
+                                , gapContig,gapResult
+                                , log);
 
                         Contig contigResult(contig,gapContig);
                         contigsResult[i] = contigResult;
@@ -641,10 +651,10 @@ class GapCloser : public ContigAssembler
                 , const Contig & nextContig
                 , const GapInfo & gap
                 , Contig& gapContig
-                , GapInfo& gapResult ) 
+                , GapInfo& gapResult
+                , LOG::ConsensusLog log
+                )
         {
-
-
             int originalLen = contig.getLength();
             int end_pos  = originalLen ;
             end_pos += ((float)gap.length) * 1.5 ;
@@ -657,21 +667,31 @@ class GapCloser : public ContigAssembler
             // step 1 , loop area consensus .
             ConsensusArea prev_area ;
             int prev_contig_len = contig.getLength() ;
+            log.consensus_id = 0 ;
             while (true) 
             {
+                log.consensus_id ++ ;
+                LOG::ConsensusLog tmp_log = log ;
                 ConsensusArea curr_area = NewConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                 {
+                    tmp_log.Print();
                     GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");
                     break ;
                 }
                 if( (int)contig.getLength() >= end_pos )
+                {
+                    tmp_log.Print();
+                    GlobalAccesser::consensus_failed_reason.Touch("extern_too_long");
                     break ;
+                }
                 // step 1.1 gather reads .
                 ReadMatrix  readMatrix =  ReadMatrixFactory::GenReadMatrix(contig,curr_area);
                 GlobalAccesser::basic_reads_set_freq.Touch(readMatrix.ReadsNum());
                 if( readMatrix.is_reads_too_little() )
                 {
+                    tmp_log.size_b = readMatrix.ReadsNum() ;
+                    tmp_log.Print();
                     GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
                     break ;
                 }
@@ -679,7 +699,8 @@ class GapCloser : public ContigAssembler
                 SubReadSetType sub_type = SubReadSetType::Unknow ;
                 auto subReadMatrix =  readMatrix.GenSubMatrix(contig
                         ,nextContig
-                        ,sub_type);
+                        ,sub_type
+                        , tmp_log);
 
                 if( sub_type == SubReadSetType::Empty
                         ||
@@ -687,16 +708,18 @@ class GapCloser : public ContigAssembler
                   )
                 {
                     GlobalAccesser::consensus_failed_reason.Touch("no_sub_set");
+                    tmp_log.Print();
                     break ;
                 }
-
+                tmp_log.can_consensus = true ;
                 GlobalAccesser::used_reads_set_freq.Touch(subReadMatrix.ReadsNum());
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = subReadMatrix.GenConsensusMatrix(contig);
-                ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult(sub_type);
+                ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult(sub_type,tmp_log.details);
 
                 if( consensusResult.is_consensus_done(sub_type) )
                 {
+                    tmp_log.is_consensus_done = true ;
                     GlobalAccesser::consensus_result_freq.Touch(1);
                     // step 1.5 update contig
                     updateContig(contig , readMatrix,consensusResult);
@@ -706,6 +729,7 @@ class GapCloser : public ContigAssembler
                         = ContigTool::IsGapFinish( contig , nextContig ,gap ,prev_contig_len);
                     if( gapFill )
                     {
+                        tmp_log.is_gap_closer = true ;
                         // step 1.7 deal output for fill
                         if (prev_contig_pos > originalLen )
                         {
@@ -723,11 +747,15 @@ class GapCloser : public ContigAssembler
                                 gapResult.length = -originalLen ;
                         }
                         gapResult.isFilled = true ;
+                        tmp_log.Print();
                         break ;
                     }
+                    tmp_log.Print();
                 }
                 else
                 {
+                    tmp_log.is_consensus_done = false ;
+                    tmp_log.Print();
                     GlobalAccesser::consensus_failed_reason.Touch("consensus_failed");
                     GlobalAccesser::consensus_result_freq.Touch(0);
                     break;
