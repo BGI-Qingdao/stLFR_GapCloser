@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
-
-
+#include <thread>
+#include <mutex>
 namespace LOG{
 
     struct PosInfo
@@ -18,7 +18,7 @@ namespace LOG{
     {
         public:
             static bool toggled;
-
+            static std::mutex the_mutex ;
             //std::string scaff_name ;
             int scaff_name ;
             int gap_id ;
@@ -53,6 +53,7 @@ namespace LOG{
             }
             void Print()
             {
+                the_mutex.lock();
                 std::cerr<<"Consensus_Detail:"<<'\t'
                     <<scaff_name<<'\t'
                     <<gap_id<<'\t'
@@ -76,6 +77,7 @@ namespace LOG{
                 std::cerr<<'\t'
                     <<YN(is_consensus_done)<<'\t'
                     <<YN(is_gap_closer)<<'\n';
+                the_mutex.unlock();
             }
     };
 

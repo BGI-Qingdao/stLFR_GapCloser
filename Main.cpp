@@ -94,7 +94,7 @@ BGIQD::FREQ::Freq<SubReadsLog> GlobalAccesser::sub_read_num ;
 
 //the ReadAccesser will assign this
 Read          * ReadElement::read=NULL;
-
+std::mutex LOG::ConsensusLog::the_mutex ;
 void usage(void)
 {
     std::cout << "Version:" << std::endl;
