@@ -74,8 +74,8 @@ namespace LOG{
                         std::cerr<<':';
                 }
                 std::cerr<<'\t'
-                    <<is_consensus_done<<'\t'
-                    <<is_gap_closer<<'\n';
+                    <<YN(is_consensus_done)<<'\t'
+                    <<YN(is_gap_closer)<<'\n';
             }
     };
 
