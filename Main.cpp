@@ -65,7 +65,7 @@ float    Threshold::NoConflictThreshold = 0.7f ;
 float    Threshold::basic_NoConflictThreshold = 0.9f ;
 int      Threshold::max_allowed_conflict = 2 ;
 int      Threshold::min_nucleotide_depth = 3 ;
-int      Threshold::max_accept_low_depth = 2 ;
+//int      Threshold::max_accept_low_depth = 2 ;
 
 // For gap fill
 int      Threshold::NNumber = 1;
@@ -74,7 +74,7 @@ int      Threshold::maxReadLength = 150;
 int      Threshold::use_subset_only = 0 ;
 
 int      Threshold::basic_set_max_conflict = 2;
-int      Threshold::basic_set_max_low_depth = 1;
+//int      Threshold::basic_set_max_low_depth = 1;
 
 // global accessor class pointer here;
 ReadAccessor *  GlobalAccesser::the_read_accessor = NULL;
@@ -155,8 +155,8 @@ void usage(void)
         << Threshold::max_allowed_conflict<< ".\n";
     std::cout << "	-E	<int>		min depth threshold, default=" 
         << Threshold::min_nucleotide_depth<< ".\n";
-    std::cout << "	-F	<int>		max number of low depth nucleotide, default=" 
-        << Threshold::max_accept_low_depth<< ".\n";
+    //std::cout << "	-F	<int>		max number of low depth nucleotide, default=" 
+    //    << Threshold::max_accept_low_depth<< ".\n";
 
     std::cout << "other:\n";
     std::cout << "	-G	<int>		the max number of reads that a kmer can find . default=" 
@@ -165,8 +165,8 @@ void usage(void)
         << Threshold::use_subset_only<< ".\n";
     std::cout << "	-O	<int>		[ basic set ] max number of conflict can accepted . default=" 
         << Threshold::basic_set_max_conflict<< ".\n";
-    std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . default=" 
-        << Threshold::basic_set_max_low_depth<< ".\n";
+    //std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . default=" 
+    //    << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . default=" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << "	-R	<int>	 	max read-find-read round . default=" 
@@ -231,11 +231,11 @@ int main(int argc, char *argv[])
             case 'C': Threshold::NoConflictThreshold = atof(optarg); break;
             case 'D': Threshold::max_allowed_conflict = atoi(optarg); break;
             case 'E': Threshold::min_nucleotide_depth = atoi(optarg); break;
-            case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
+            //case 'F': Threshold::max_accept_low_depth = atoi(optarg); break;
             case 'G': Threshold::max_kmer_2_read= atoi(optarg); break;
             case 'I': Threshold::use_subset_only = atoi(optarg); break;
             case 'O': Threshold::basic_set_max_conflict = atoi(optarg); break;
-            case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
+            //case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
             case 'Q': Threshold::basic_NoConflictThreshold= atof(optarg); break;
             case 'R': Threshold::max_reads_round= atoi(optarg); break;
 
@@ -352,8 +352,8 @@ int main(int argc, char *argv[])
         << Threshold::max_allowed_conflict<< ".\n";
     std::cout << "	-E	<int>		min depth threshold,  =" 
         << Threshold::min_nucleotide_depth<< ".\n";
-    std::cout << "	-F	<int>		max low depth nucleotide,  =" 
-        << Threshold::max_accept_low_depth<< ".\n";
+    //std::cout << "	-F	<int>		max low depth nucleotide,  =" 
+    //    << Threshold::max_accept_low_depth<< ".\n";
     std::cout << "other:\n";
     std::cout << "	-G	<int>		the max number of reads that a kmer can find . =" 
         << Threshold::max_kmer_2_read<< ".\n";
@@ -361,8 +361,8 @@ int main(int argc, char *argv[])
         << Threshold::use_subset_only<< ".\n";
     std::cout << "	-O	<int>		[ basic set ] max number of conflict can accepted . =" 
         << Threshold::basic_set_max_conflict<< ".\n";
-    std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . =" 
-        << Threshold::basic_set_max_low_depth<< ".\n";
+    //std::cout << "	-P	<int>	 	[ basic set ] max number of low depth nucleotide . =" 
+    //    << Threshold::basic_set_max_low_depth<< ".\n";
     std::cout << "	-Q	<float>	 	[ basic set ] the conflict_threshold of baisc set . =" 
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << "	-R	<int>	 	max read-find-read round .=" 

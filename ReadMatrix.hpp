@@ -256,27 +256,29 @@ struct ConsensusResult
         return i ;
     }
 
-    bool is_consensus_done(const SubReadSetType type ) const 
+    int consensus_length(const SubReadSetType type ) const  /*1base ret*/
     {
-        if( type == SubReadSetType::Empty )
-            return false ;
-        int cn = conflict_num() ;
-        int ln = low_depth() ;
-        GlobalAccesser::conflict_freq.Touch(cn);
-        GlobalAccesser::too_low_freq.Touch(ln);
-
-        if( type != SubReadSetType::Basic )
+        if( type == SubReadSetType::Empty || consensus_str.size() <1 )
+            return -1;
+        int ret = 0 ;
+        int conflict_nums = 0 ;
+        for ( ; ret <(int) consensus_str.size() ; ret ++ )
         {
-            return  (cn <= Threshold::basic_set_max_conflict )
-                &&
-                ( ln <= Threshold::basic_set_max_low_depth ) ;
+            if( ! depth_flags.at(ret) )
+                break ;
+            if( ! conflict_flags.at(ret) )
+                conflict_nums ++ ;
+            if( type == SubReadSetType::Basic )
+                if( conflict_nums > Threshold::basic_set_max_conflict )
+                    break ;
+                else ;
+            else
+                if( conflict_nums > Threshold::max_allowed_conflict )
+                    break ;
+                else ;
         }
-        else
-        {
-            return  (cn <= Threshold::max_allowed_conflict )
-                && (ln <= Threshold::max_accept_low_depth)
-                ;
-        }
+        assert( ret <= (int) consensus_str.size() && ret >= 0 );
+        return ret ;
     }
 };
 

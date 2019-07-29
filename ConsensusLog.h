@@ -51,7 +51,7 @@ namespace LOG{
                 is_consensus_done = false ;
                 is_gap_closer = false ;
             }
-            void Print()
+            void Print(int max_len)
             {
                 the_mutex.lock();
                 std::cerr<<"Consensus_Detail:"<<'\t'
@@ -65,13 +65,19 @@ namespace LOG{
                     <<size_bc<<'\t'
                     <<size_bp<<'\t'
                     <<used_id<<'\t';
-                if( details.empty() )
-                    std::cerr<<'-';
-                for(int i = 0 ; i<(int)details.size() ; i++ )
+                int i = 0 ;
+                for( ; i<(int)details.size() ; i++ )
                 {
                     std::cerr<<details[i].cov<<','
                         <<details[i].type;
                     if( i != (int)details.size() -1 )
+                        std::cerr<<':';
+                }
+                int need_expand = max_len - i ;
+                for( i = 0 ; i< need_expand ; i ++ ) 
+                {
+                    std::cerr<<"-,L";
+                    if( i != (int)need_expand -1 )
                         std::cerr<<':';
                 }
                 std::cerr<<'\t'

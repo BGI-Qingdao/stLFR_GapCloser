@@ -67,7 +67,7 @@ struct Threshold
 
     // the maximun number of low depth nucleotide 
     //   that a consensus can accept.
-    static int      max_accept_low_depth;
+    //static int      max_accept_low_depth;
 
     // the maximum bp of a gap that can define as
     //   a small gap.
@@ -91,11 +91,11 @@ struct Threshold
     static int      basic_set_max_conflict;
 
     // the maximum numer of read that a kmer allowed hooked .
-    static int      basic_set_max_low_depth;
+    //static int      basic_set_max_low_depth;
 
-    // the 
+    // the
     static float    basic_NoConflictThreshold ;
-    // the 
+    // the
     static int      max_reads_round;
 };
 

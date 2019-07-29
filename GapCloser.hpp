@@ -660,9 +660,9 @@ class GapCloser : public ContigAssembler
             end_pos += ((float)gap.length) * 1.5 ;
             if( end_pos < (1000 + originalLen ) )
                 end_pos = 1000 + originalLen ;
-            ConsensusArea the_area = NewConsensusConfig::GetConsensusArea(originalLen);
+            ConsensusArea tmp_area = NewConsensusConfig::GetConsensusArea(originalLen);
             BarcodeInfo & barcode_info = contig.getBarodeInfo() ;
-            barcode_info.Erase(the_area.left_most_pos_in_contig - 1 );
+            barcode_info.Erase(tmp_area.left_most_pos_in_contig - 1 );
 
             // step 1 , loop area consensus .
             ConsensusArea prev_area ;
@@ -675,13 +675,13 @@ class GapCloser : public ContigAssembler
                 ConsensusArea curr_area = NewConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                 {
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                     GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");
                     break ;
                 }
                 if( (int)contig.getLength() >= end_pos )
                 {
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                     GlobalAccesser::consensus_failed_reason.Touch("extern_too_long");
                     break ;
                 }
@@ -691,7 +691,7 @@ class GapCloser : public ContigAssembler
                 if( readMatrix.is_reads_too_little() )
                 {
                     tmp_log.size_b = readMatrix.ReadsNum() ;
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                     GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
                     break ;
                 }
@@ -708,7 +708,7 @@ class GapCloser : public ContigAssembler
                   )
                 {
                     GlobalAccesser::consensus_failed_reason.Touch("no_sub_set");
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                     break ;
                 }
                 tmp_log.can_consensus = true ;
@@ -716,13 +716,14 @@ class GapCloser : public ContigAssembler
                 // step 1.3 do consensus .
                 ConsensusMatrix consensusMatrix = subReadMatrix.GenConsensusMatrix(contig);
                 ConsensusResult consensusResult =  consensusMatrix.GenConsensusResult(sub_type,tmp_log.details);
+                int consensus_len = consensusResult.consensus_length(sub_type);
 
-                if( consensusResult.is_consensus_done(sub_type) )
+                if( consensus_len > curr_area.remained_len() )
                 {
                     tmp_log.is_consensus_done = true ;
                     GlobalAccesser::consensus_result_freq.Touch(1);
                     // step 1.5 update contig
-                    updateContig(contig , readMatrix,consensusResult);
+                    updateContig(contig , readMatrix,consensusResult ,consensus_len );
                     // step 1.6 check gap fill
                     bool gapFill ; int prev_contig_pos ; int next_contig_pos ;
                     std::tie( gapFill , prev_contig_pos , next_contig_pos )
@@ -747,15 +748,15 @@ class GapCloser : public ContigAssembler
                                 gapResult.length = -originalLen ;
                         }
                         gapResult.isFilled = true ;
-                        tmp_log.Print();
+                        tmp_log.Print(curr_area.externed_len());
                         break ;
                     }
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                 }
                 else
                 {
                     tmp_log.is_consensus_done = false ;
-                    tmp_log.Print();
+                    tmp_log.Print(curr_area.externed_len());
                     GlobalAccesser::consensus_failed_reason.Touch("consensus_failed");
                     GlobalAccesser::consensus_result_freq.Touch(0);
                     break;
@@ -796,19 +797,19 @@ class GapCloser : public ContigAssembler
 
         void updateContig( Contig & contig
                 , const ReadMatrix &readMatrix
-                ,const ConsensusResult & consensusResult 
+                , const ConsensusResult & consensusResult 
+                , int consensus_len
                 )
         {
             const auto & the_area = readMatrix.Area() ;
             // how many bp in consensus_seq belong to old contig.
-            int contigRemainLen = contig.getLength()
-                - the_area.consensus_start_pos_in_contig + 1;
+            int contigRemainLen = the_area.remained_len() ;
             // how many bp in consensus_seq belong to extend seq.
-            int extend_len = consensusResult.getLength() - contigRemainLen ;
+            int extend_len = consensus_len - contigRemainLen ;
 
             TightString & contig_seq = contig.getTightString();
             TightString consensus_seq = consensusResult.getTightString() ;
-            if( (int)consensus_seq.getLength() < contigRemainLen )
+            if( consensus_len < contigRemainLen )
                 contigRemainLen = consensus_seq.getLength() ;
 
             // step 1 , Update sequence first 

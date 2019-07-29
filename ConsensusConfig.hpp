@@ -56,6 +56,14 @@ struct ConsensusArea
     {
         return pos + kvalue < right_most_pos_in_contig;
     }
+    int externed_len() const 
+    {
+        return consensus_end_pos_in_contig - contig_len;
+    }
+    int remained_len() const
+    {
+        return contig_len - consensus_start_pos_in_contig + 1 ;
+    }
 };
 
 //             | <-----------reads------>|
