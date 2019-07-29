@@ -53,7 +53,7 @@ namespace LOG{
             }
             void Print(int max_len)
             {
-                the_mutex.lock();
+                std::lock_guard<std::mutex> guard(the_mutex);
                 std::cerr<<"Consensus_Detail:"<<'\t'
                     <<scaff_name<<'\t'
                     <<gap_id<<'\t'
@@ -76,14 +76,11 @@ namespace LOG{
                 int need_expand = max_len - i ;
                 for( i = 0 ; i< need_expand ; i ++ ) 
                 {
-                    std::cerr<<"-,L";
-                    if( i != (int)need_expand -1 )
-                        std::cerr<<':';
+                    std::cerr<<":-,L";
                 }
                 std::cerr<<'\t'
                     <<YN(is_consensus_done)<<'\t'
                     <<YN(is_gap_closer)<<'\n';
-                the_mutex.unlock();
             }
     };
 
