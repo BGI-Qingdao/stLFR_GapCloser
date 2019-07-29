@@ -675,13 +675,13 @@ class GapCloser : public ContigAssembler
                 ConsensusArea curr_area = NewConsensusConfig::GetConsensusArea(contig.getLength());
                 if( curr_area == prev_area )
                 {
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                     GlobalAccesser::consensus_failed_reason.Touch("prev_no_extern");
                     break ;
                 }
                 if( (int)contig.getLength() >= end_pos )
                 {
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                     GlobalAccesser::consensus_failed_reason.Touch("extern_too_long");
                     break ;
                 }
@@ -691,7 +691,7 @@ class GapCloser : public ContigAssembler
                 if( readMatrix.is_reads_too_little() )
                 {
                     tmp_log.size_b = readMatrix.ReadsNum() ;
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                     GlobalAccesser::consensus_failed_reason.Touch("reads_too_few");
                     break ;
                 }
@@ -708,7 +708,7 @@ class GapCloser : public ContigAssembler
                   )
                 {
                     GlobalAccesser::consensus_failed_reason.Touch("no_sub_set");
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                     break ;
                 }
                 tmp_log.can_consensus = true ;
@@ -748,15 +748,15 @@ class GapCloser : public ContigAssembler
                                 gapResult.length = -originalLen ;
                         }
                         gapResult.isFilled = true ;
-                        tmp_log.Print(curr_area.externed_len());
+                        tmp_log.Print(curr_area.total_consensus_len());
                         break ;
                     }
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                 }
                 else
                 {
                     tmp_log.is_consensus_done = false ;
-                    tmp_log.Print(curr_area.externed_len());
+                    tmp_log.Print(curr_area.total_consensus_len());
                     GlobalAccesser::consensus_failed_reason.Touch("consensus_failed");
                     GlobalAccesser::consensus_result_freq.Touch(0);
                     break;

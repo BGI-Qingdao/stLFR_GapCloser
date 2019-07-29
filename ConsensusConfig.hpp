@@ -64,6 +64,11 @@ struct ConsensusArea
     {
         return contig_len - consensus_start_pos_in_contig + 1 ;
     }
+
+    int total_consensus_len() const 
+    {
+        return consensus_end_pos_in_contig - consensus_start_pos_in_contig + 1 ;
+    }
 };
 
 //             | <-----------reads------>|
