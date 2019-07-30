@@ -65,6 +65,7 @@ float    Threshold::NoConflictThreshold = 0.7f ;
 float    Threshold::basic_NoConflictThreshold = 0.9f ;
 int      Threshold::max_allowed_conflict = 2 ;
 int      Threshold::min_nucleotide_depth = 3 ;
+int      Threshold::basic_min_nucleotide_depth = 3 ;
 //int      Threshold::max_accept_low_depth = 2 ;
 
 // For gap fill
@@ -171,6 +172,8 @@ void usage(void)
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << "	-R	<int>	 	max read-find-read round . default=" 
         << Threshold::max_reads_round<< ".\n";
+    std::cout << "	-S	<int>		[ basic set ] min depth threshold, default=" 
+        << Threshold::basic_min_nucleotide_depth<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     std::cout << "	-h	-?		output help information." << std::endl;
@@ -197,7 +200,7 @@ int main(int argc, char *argv[])
     //bool consensus_len_setted_flag = false ;
     int c;
     while((c=getopt(argc, argv, 
-                    "hi:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:F:G:I:O:P:Q:R:"))
+                    "hi:o:e:b:a:l:p:c:t:N:1:2:3:4:5:6:7:8:9:A:B:C:D:E:G:I:O:Q:R:S:"))
             !=-1) 
     {
         switch(c) {
@@ -238,6 +241,7 @@ int main(int argc, char *argv[])
             //case 'P': Threshold::basic_set_max_low_depth = atoi(optarg); break;
             case 'Q': Threshold::basic_NoConflictThreshold= atof(optarg); break;
             case 'R': Threshold::max_reads_round= atoi(optarg); break;
+            case 'S': Threshold::basic_min_nucleotide_depth = atoi(optarg); break;
 
             case 'h': usage(); break;
             case '?': usage(); break;
@@ -367,6 +371,8 @@ int main(int argc, char *argv[])
         << Threshold::basic_NoConflictThreshold<< ".\n";
     std::cout << "	-R	<int>	 	max read-find-read round .=" 
         << Threshold::max_reads_round<< ".\n";
+    std::cout << "	-S	<int>		[ basic set ] min depth threshold,  =" 
+        << Threshold::basic_min_nucleotide_depth<< ".\n";
     std::cout << " ---------- new parameters end     ---------\n";
 
     PairInfo* pairInfo;

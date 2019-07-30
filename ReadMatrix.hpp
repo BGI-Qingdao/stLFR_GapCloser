@@ -302,17 +302,24 @@ struct ConsensusMatrix
                     highest_nucleotide = i ; 
                 }
             }
-            bool is_low_depth = (total_depth < Threshold::min_nucleotide_depth );
-            if( total_depth == highest_depeth ) 
+            int lt = 0 ;
+            float th = 1.0f ;
+            if ( type != SubReadSetType::Basic )
+            {
+                th = Threshold::NoConflictThreshold ;
+                lt = Threshold::min_nucleotide_depth ;
+            }
+            else 
+            {
+                th = Threshold::basic_NoConflictThreshold ;
+                lt = Threshold::basic_min_nucleotide_depth ;
+            }
+            bool is_low_depth = (total_depth < lt );
+            if( total_depth == highest_depeth )
                 is_low_depth = false ;
             if ( total_depth == 0 )
                 return std::make_tuple( 'N' , true , ! is_low_depth,total_depth ) ;
             char ret =  numberToNucleotide(highest_nucleotide);
-            float th = 1.0f ;
-            if ( type != SubReadSetType::Basic )
-                th = Threshold::NoConflictThreshold ;
-            else 
-                th = Threshold::basic_NoConflictThreshold ;
             if( highest_depeth >= (float)total_depth * th )
                 return std::make_tuple( ret , true , ! is_low_depth , total_depth) ;
             else 

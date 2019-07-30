@@ -97,6 +97,11 @@ struct Threshold
     static float    basic_NoConflictThreshold ;
     // the
     static int      max_reads_round;
+
+    // the minimum depth of a nucleotide that 
+    //  make it a NOT to be a low depth nucleotide.
+    //  of basic set
+    static int      basic_min_nucleotide_depth;
 };
 
 #endif //GLOBALACCESSER_HPP__
