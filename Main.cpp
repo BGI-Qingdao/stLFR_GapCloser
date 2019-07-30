@@ -45,9 +45,9 @@ int      Threshold::max_reads_depth = 100 ;
 
 // For consensus area 
 int     NewConsensusConfig::x1 = 100  ;
-int     NewConsensusConfig::y1 = -20 ;
+int     NewConsensusConfig::y1 = -30 ;
 int     NewConsensusConfig::x2 = 10  ;
-int     NewConsensusConfig::y2 = -20 ;
+int     NewConsensusConfig::y2 = -30 ;
 // For reads set
 int      Threshold::max_reads_count = 200 ;
 int      Threshold::min_reads_count = 3 ;
@@ -64,8 +64,8 @@ int      Threshold::min_pe_barcode_sub_reads_count = 5 ;
 float    Threshold::NoConflictThreshold = 0.7f ;
 float    Threshold::basic_NoConflictThreshold = 0.9f ;
 int      Threshold::max_allowed_conflict = 2 ;
-int      Threshold::min_nucleotide_depth = 3 ;
-int      Threshold::basic_min_nucleotide_depth = 3 ;
+int      Threshold::min_nucleotide_depth = 1 ;
+int      Threshold::basic_min_nucleotide_depth = 5 ;
 //int      Threshold::max_accept_low_depth = 2 ;
 
 // For gap fill
@@ -74,7 +74,7 @@ int      Threshold::maxReadLength = 150;
 //int      Threshold::filter_too_small_gap = 1;
 int      Threshold::use_subset_only = 0 ;
 
-int      Threshold::basic_set_max_conflict = 2;
+int      Threshold::basic_set_max_conflict = 1;
 //int      Threshold::basic_set_max_low_depth = 1;
 
 // global accessor class pointer here;
@@ -310,8 +310,8 @@ int main(int argc, char *argv[])
 
     Read::DATA_MAXLEN= (int)Read::DATA_MAXLEN>(int)Threshold::maxReadLength?(int)Threshold::maxReadLength:Read::DATA_MAXLEN;	
 
-    std::cout << "Program: GapCloser" << std::endl;
-    std::cout << "Version: 1.12" << std::endl << std::endl;
+    std::cout << "Program: stLFR_GapCloser" << std::endl;
+    std::cout << "Version: 1.00" << std::endl << std::endl;
     std::cout << "Parameters:" << std::endl;
     std::cout << "    -a (scaffold file): " << infileContig << std::endl;
     std::cout << "    -b (config file):   " << inLibInfo << std::endl;
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
     std::cout << "    -l (max read len):  " << (int)Read::DATA_MAXLEN << std::endl;
     std::cout << "    -p (overlap para):  " << (int)Threshold::the_k<< std::endl;
     std::cout << "    -t (thread num):    " << (int)threadSum << std::endl << std::endl;
-    std::cout << "    -c (map loadFactor):" << (int)loadFactor<< std::endl << std::endl;
+    std::cout << "    -c (map loadFactor):" << (float)loadFactor<< std::endl << std::endl;
 
     std::cout << " ---------- new parameters below : ---------\n";
     std::cout << "mapping read to contig options:\n";
