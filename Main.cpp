@@ -51,7 +51,7 @@ int     NewConsensusConfig::y2 = -30 ;
 // For reads set
 int      Threshold::max_reads_count = 200 ;
 int      Threshold::min_reads_count = 3 ;
-int      Threshold::max_kmer_2_read = 2 ;
+int      Threshold::max_kmer_2_read = 4 ;
 int      Threshold::max_reads_round = 1 ;
 // For sub read set
 //int      Threshold::max_small_gap = 10 ;
