@@ -69,7 +69,7 @@ q2=split_reads.2.fq.gz
 - 2nd. run the program
 
 ```
-YOUR-DOWNLOAD-DIR/Release/GapCloser -a your-scaffold-file -b lib.cfg -o result.scaff
+YOUR-DOWNLOAD-DIR/Release/stLFR_GapCloser -a your-scaffold-file -b lib.cfg -o result.scaff
 ```
 
 ### <a name=usage>General usage</a>
